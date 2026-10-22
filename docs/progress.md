@@ -1,214 +1,245 @@
-# Progress
+# Project roadmap and progress
 
-## First milestone — 2026-10-22
+Updated 2026-10-22. The goal is to turn Melee video into an **approximate playable
+Slippi replay**, with evidence showing how closely it matches the video. Video
+cannot uniquely recover original inputs, RNG or hidden state; reconstructed
+values must remain distinguishable from observations and unknowns.
 
-At this first milestone the Linux development foundation was implemented; real
-simulation, integrated checkpoint branching, recording and official playback
-were unvalidated. Later local validation is recorded below.
-The user has not supplied an accessible game image; no asset was downloaded or
-invented. The next experiment needs that prerequisite, not more package installs.
+**Current position:** the native simulation foundation works, including stepping,
+checkpoint branching and genuine replay export. A bounded generated replay has
+passed independent parsing and actual official Playback Dolphin progression.
+Video ingestion, visual state estimation and input reconstruction are not yet
+implemented. There is no end-to-end video-to-replay command yet.
 
-Completed:
+Checked items below are implemented and validated within their stated scope.
+Unchecked items are remaining work. Proposed later work is a roadmap, not a
+promise that its design or acceptance thresholds have already been settled.
 
-- Preserved the initially empty checkout; used the existing configured Git
-  identity, created an initial ignore-file commit, and made small local commits.
-- Pinned Melee Unlocked, inspected all four requested projects and the actual
-  upstream decompilation reference. See [evaluation](engine-evaluation.md).
-- Created the dependency branch `yt2slp/linux-headless`. Scoped changes add an
-  independent no-graphics/no-USB host target, fix SDK overlay selection in an
-  existing test, and use POSIX UTC conversion outside Windows. No fast-math,
-  global guard removal, or disabling of Slippi game code.
-- Added Python package/CLI, doctor, typed evidence provenance and a backend
-  contract with explicit unsupported operations. The batch adapter preserves
-  logs and exact raw state fields, rejects partial/invalid output, and uses
-  fresh processes and private card directories.
-- Added locked tools, repeatable setup/game build scripts and exact README
-  commands. Generated sources/assets/builds stay ignored.
+## Milestone overview
 
-## Validation record
-
-| Layer | Result | What it establishes / does not establish |
+| Milestone | Status | Completion boundary |
 | --- | --- | --- |
-| Configuration | Passed | Linux x86-64, Python 3.12.14, GCC/G++ 14.2.0, CMake 3.31.6, Ninja 1.11.1; no graphics dependencies required for selected target |
-| Host compilation | Passed | `build/headless/melee_headless` from existing native Linux services |
-| Native game compilation | Passed | `build/game/melee_game.so`, all registered native test executables, retained `MU_NO_SLIPPI=OFF` |
-| Image/ABI layout | Passed | Post-link image check reports `0x82800000..0x8340cef8`; generated 21 audio-exclusion ranges covering 122634 bytes. ELF load test resolves expected symbols below `0x84000000`. Not a game boot. |
-| Headless/component tests | 9 passed | Version, fixed memory mapping, card/host services, input scripts, savestates, replay stream, state-region layout, practice model, animation. Final suite rerun through `scripts/setup.sh`. |
-| Game-library tests | 23 passed | SDK/console layout, overlay/image/audio checks, command/match/content, credits, recording-start fixture, setjmp/alarm, preload, AX/synth/card, disc offsets, character-kind and real ELF loading |
-| Python tests | 28 passed | Failure propagation, capabilities, provenance, digest decoding, private run paths, timeout and missing/short output. CSV transport fixtures are synthetic, not game output. |
-| Game startup / fixed offline match | Unrun | No retail NTSC 1.02 ISO configured |
-| Same-input/different-input checkpoint experiment | Unrun | No game startup; minimal host has no safe pause/restore integration |
-| Snapshot component restore | Passed | Existing incremental snapshot tests, repeated `load_keep`, differential buffer checks. Not complete game/host-state equality. |
-| Recording component rewind | Passed | Rejected events and character metadata removed; selected branch encodes identically to a clean selected stream. No game recorded. |
-| `.slp` parsing | Unrun | No genuine simulation recording produced; slippi-js remains a research reference |
-| Official Slippi Dolphin playback | Unrun | No configured official playback executable or recorded game |
-| Windows build | Unrun | Windows branches retained; no Windows compiler/runtime tested |
+| 1. Reproducible native development environment | Complete for Linux/GCC 14 | Build and test the host/game without committing game assets |
+| 2. Controllable simulation and checkpoint branching | Complete for the initial supported scope | Boot a fixed match, apply inputs, pause, observe, capture and repeatedly restore |
+| 3. Genuine recording and official playback | Bounded runs validated; complete-match validation remains | Export only the selected branch, parse it independently, and play it in official Dolphin |
+| 4. Reference comparison and controlled benchmarks | Not implemented | Measure agreement between native simulation, official playback and rendered observations |
+| 5. Video ingestion and observation extraction | Not implemented | Produce a timestamped, uncertainty-aware observation timeline from a supported clip |
+| 6. Input and hidden-state reconstruction | Not implemented | Search simulation branches for a playable sequence that matches observations |
+| 7. End-to-end reconstruction and review | Not implemented | Video in; selected `.slp`, comparison evidence and limitations out |
+| 8. Broader evaluation and practical usability | Development tooling exists; reconstruction evaluation remains | Reproduce results on held-out clips and document supported cases and failure modes |
 
-Initial failures were diagnosed and fixed: uv's default home cache was read-only
-(use a workspace cache); the AX fixture selected the wrong source tree; the
-standalone stream needed `gmtime_r`; the newly added test initially used a short
-Game End fixture rather than the declared six-byte payload. No test assertion
-was disabled. Final results supersede those failed attempts.
+## 1. Reproducible native development environment
 
-Local logs (ignored): `build/game-build.log`, `build/game-tests.log`,
-`build/setup-validation.log`, `build/game-setup-validation.log`, and CTest
-`Testing/Temporary/LastTest.log` within each build directory. These are runtime
-artifacts, not committed benchmarks or guarantees for another machine.
+- [x] Audit engine alternatives and select Melee Unlocked's existing native Linux
+  source game, isolated in a child process. Pin the engine and nested game source.
+- [x] Build an independent headless host without display, GPU or USB dependencies.
+- [x] Build the real native game library with Slippi game code enabled. Preserve
+  game math flags, ABI, console timing and low-address memory requirements.
+- [x] Provide locked Python tools, setup/build scripts, diagnostics and tests.
+- [x] Provide a Debian 13 / GCC 14 Docker environment and separate its build/cache
+  output from Arch host output. Use Docker for native builds and tests.
+- [x] Keep ISOs, extracted/generated game material, recordings and experiment
+  artifacts ignored. Mount the user's ISO read-only.
+- [x] Publish dependency changes before updating the parent submodule gitlink.
 
-## Local commits and reproducibility
+GCC 16 previously failed a native layout test. GCC 14 is the validated route;
+the GCC 16 problem has not been fixed. Windows and restoration into a fresh cloud
+task have not been validated. See [README setup](../README.md) and
+[engine evaluation](engine-evaluation.md).
 
-Main repository logical commits:
+## 2. Controllable simulation and checkpoint branching
 
-- `679ca57`: initial ignores.
-- `63c92c1`: pin inspected upstream MU.
-- `505cd56`: pin local tested headless engine changes.
-- `1367198`: Python package, CLI, backend, tests, scripts and README.
+- [x] Boot the user's retail NTSC 1.02 ISO and run bounded scripted experiments.
+- [x] Configure two players, characters, costumes, human/CPU settings and
+  Battlefield/Final Destination. Other rules retain fresh-game defaults.
+- [x] Retain a live game stack while paused; advance one **VI retrace** per step.
+  Keep the separate match-frame counter explicit and preserve ordinary PAD polling.
+- [x] Observe selected state fields without resuming; retain raw float bits.
+- [x] Validate pause stability, repeat-run agreement and observable input effects.
+- [x] Capture one reusable, session-local Linux process checkpoint and restore
+  game/host private memory, native stack, input state, clocks and callbacks.
+- [x] Keep control-session memory cards in memory so discarded branches cannot
+  change future saves. Retain private disk-backed cards for batch runs.
+- [x] Validate identical continuations, divergent inputs, and return to the
+  original continuation after the divergent branch across three restores.
+- [x] Handle invalid/stale checkpoint handles, timeouts, process failures and cleanup.
 
-Dependency commits on `yt2slp/linux-headless`:
+Local evidence: 600 steps advanced match frames 1..601. The checkpoint experiment
+captured at frame 241 and ran four 180-step continuations to 421. The user reported
+all three restores passing, and the retained traces agree. Artifacts:
+`.docker-state/local/runs/step-2o7rj74b/`.
 
-- `6c3254c`: use the configured SDK overlay in the AX test.
-- `f65be376bd486e74ec1d64a9601d40c2437994d2`: headless target, POSIX replay
-  timestamp conversion and branch-rewind regression.
+These comparisons cover selected observations, not a complete memory hash or
+retail parity. Portable checkpoint files and multiple retained checkpoints are
+not implemented; add them only if the reconstruction strategy requires them.
+See [stepping semantics](native-stepping.md) and
+[checkpoint lifecycle](process-checkpoints.md).
 
-Following the user's push request, the dependency commits were published to
-`houndsolo/melee-unlocked`, branch `yt2slp/linux-headless`, and `.gitmodules`
-was updated to that fork. No history was rewritten. The parent commits are
-being published to `houndsolo/yt2slp` on `main`. New-cloud-task restoration
-has not been verified. See `git log` for subsequent documentation/fix commits.
+## 3. Genuine recording and official playback
 
-Reusable cloud configuration was saved as a draft: `install_script` runs the
-two tested setup/build scripts, and `start_skill` records activation, readiness
-checks, the existing-checkout policy, unsupported capabilities and local-commit
-limitations. No network or secret requirements were changed. Saving did not
-publish the environment; review/save in environment settings and publication
-remain user actions. No new-task restoration is claimed.
+- [x] Inspect the game's replay-event hooks and existing native stream encoder.
+- [x] Record genuine game-generated events in private process memory from match
+  start. Export the selected branch and its pre-checkpoint prefix while paused.
+- [x] Discard trial-branch recording events and metadata when restoring process
+  memory. Validate matching encoded bytes after identical/restored continuations
+  and different bytes for different-input continuations.
+- [x] Publish exports exclusively and atomically; reject unsupported operations
+  and malformed transport. Never synthesize Game End, winners or replay events.
+- [x] Locate official Playback Dolphin separately from Netplay and the launcher;
+  verify installed version 3.5.2, actual CLI and JSON replay-request interface.
+- [x] Configure/document `YT2SLP_DOLPHIN` and host versus Docker paths. Run official
+  playback on the Arch host with an isolated profile and virtual display.
+- [x] Validate a bounded generated `.slp` independently with pinned
+  `@slippi/slippi-js@9.1.3`, including settings and contiguous player events.
+- [x] Validate actual official playback through the bounded replay's recorded
+  interval with resync disabled. Keep parser acceptance and playback evidence separate.
+- [ ] Validate a complete match's genuine Game End, final frame, end method and
+  placements through recording, independent parsing and official playback.
+- [ ] Exercise longer recordings and more supported match/input cases before
+  treating one successful bounded example as general playback compatibility.
 
-## Subsequent environment work
+The selected bounded replay is 181,236 bytes, with 545 contiguous frames
+-123..421. Original, identical and selected continuations encode identically;
+the divergent branch differs. Official Playback reports contiguous frames
+-123..422. The replay has **no Game End** because it was exported mid-match;
+closing the harness does not complete it. Batch recording, non-vanilla/modded
+recording and recording across multiple matches remain unsupported.
 
-Docker environment: added `docker/Dockerfile` and `scripts/docker.sh` for
-Debian 13 / GCC 14.2.0 / Python 3.13.5, with uv 0.12.23. A fresh isolated
-container build passed all 9 host, 36 Python and 23 game-library tests,
-including `native_disc_layout`. Container outputs and the venv live under
-ignored `.docker-state/`, separate from the Arch builds. Verified host UID/GID
-ownership and a read-only ISO bind mount using an empty non-game fixture.
-No real game boot was performed. The user's GCC 16 exit-4 collision-box failure
-also persists with SLP vectorization disabled; its underlying cause remains
-unresolved. The container supplies a validated alternative toolchain, not proof
-that the GCC 16 issue has been fixed.
+See [recording and playback](slippi-recording.md) for commands, configuration,
+transport details and artifact locations.
 
-Arch setup follow-up: setup previously exited silently when `uv` or Debian's
-`gcc-14`/`g++-14` names were missing. Running the game build afterward inside an
-uninitialized engine directory made Git discover the parent repository and
-report a nested-submodule pathspec error. Both scripts now report missing
-prerequisites, accept GNU 14+ compilers under versioned or unversioned names,
-and respect `CC`/`CXX`. The game build initializes the outer submodule first.
-Validation after this fix: 36 Python tests, 9 headless tests and 23 game-library
-tests passed through the scripts on the cloud GCC 14 machine. Unversioned
-compiler discovery was also exercised; an actual Arch/GCC 15+ build is not yet
-verified. Use `bash scripts/setup.sh && bash scripts/build_game.sh`.
+## 4. Reference comparison and controlled benchmarks
 
-## Fixed matches and resumable stepping — 2026-10-22
+This is the next foundation for evaluating reconstruction quality. Playback frame
+progression establishes that a file plays; it does not establish that native and
+Dolphin states or rendered images agree.
 
-Native dependency commit: `c697e5b` on `yt2slp/linux-headless`.
+- [ ] Define an initial supported reconstruction case: short continuous footage,
+  known stage/characters, explicit start conditions and a limited input space.
+  Set measurable acceptance thresholds before claiming a successful reconstruction.
+- [ ] Automate official Playback frame capture and align replay frames with
+  native observations. Account for preroll, pauses and VI versus match-frame timing.
+- [ ] Compare native selected states with independent replay/playback evidence;
+  compare rendered observations where available. Identify and document divergence
+  rather than changing physics or enabling resync to conceal it.
+- [ ] Create controlled reference clips from known inputs and retain their input
+  sequences, replay events, observations, frame mapping and tool/build identities.
+- [ ] Establish repeatable comparison metrics for positions, actions, stocks,
+  damage, event timing and visual agreement, including tolerances and exclusions.
 
-The user reported that the Docker batch experiment completed 3000 retraces,
-including 974 match observations, twice with matching selected fields. This
-supersedes the initial local-startup uncertainty; it is user-reported evidence,
-not a game run in the cloud workspace.
+Acceptance: a reproducible benchmark can report where agreement holds, where it
+fails, and what remains unmeasured. Full retail parity is not assumed or a reason
+to postpone measuring a narrower supported case.
 
-Implemented the existing match override in the minimal Linux CLI and added
-validated Python settings for two players, characters/costumes/CPU settings,
-and Battlefield/Final Destination. Other rules retain fresh-game defaults.
-A private socket protocol blocks inside the existing retrace observer, retains
-the live game stack, and advances one VI retrace per step. Ordinary PAD polling,
-game timing constants, game source, math flags and ABI are unchanged. Observations
-preserve raw bits and keep retrace/match-frame counters separate.
+## 5. Video ingestion and observation extraction
 
-Added pause/step/observe lifecycle, bounded boot, timeouts, process cleanup,
-retained logs/config/input/state traces, and a three-run local validation command.
-Checkpoint capture/restore and recording remain explicit unsupported operations.
-No checkpoint or replay is fabricated. Native protocol tests use synthetic
-states, and Python integration tests drive the same compiled control implementation.
-See [native stepping](native-stepping.md) for exact semantics and the local ISO
-command. Validation: `bash scripts/docker.sh setup` rebuilt the modified host and passed
-10 host/component tests, 76 Python tests and 23 game-library tests in the GCC 14
-container. The host Python suite also passed all 76 tests. The new command was
-exercised end to end against the compiled synthetic protocol fixture, including
-same-input and neutral-input comparisons. No ISO-backed stepping or official
-playback validation was performed here. Existing reusable environment setup
-commands remain sufficient; no environment draft changes were needed.
+- [ ] Decode a local clip while preserving timestamps and recording its frame
+  rate, resolution, duplicate/dropped frames, cuts and unsupported segments.
+- [ ] Identify the gameplay region, stage, characters and player identities;
+  separate overlays, HUD, camera motion and screen coordinates from world position.
+- [ ] Align the clip timeline to candidate game frames, accounting for capture
+  rate, pauses, speed changes and gaps instead of assuming one video frame per step.
+- [ ] Extract and track visible evidence: stocks, damage, fighter locations,
+  actions and useful events. Represent occlusion and ambiguous observations explicitly.
+- [ ] Extend the existing `Evidence` provenance types into a timeline schema with
+  source frame/time references, uncertainty and candidate values where needed.
+- [ ] Support manual observations/corrections so a short reconstruction can be
+  tested before automatic recognition is reliable.
+- [ ] Measure observation accuracy against annotated controlled clips, including
+  cases where the system should leave a value unknown.
 
-Next: run that command locally with the ISO, then investigate any observed
-input/timing differences before building checkpoint/recording integration.
+Acceptance: a supported clip produces a reviewable observation timeline. The
+existing observed/inferred/unknown types are completed groundwork, not an
+implemented video recognition system.
 
+## 6. Input and hidden-state reconstruction
 
-## Linux process checkpoints — 2026-10-22
+- [ ] Establish candidate initial states/settings and unknowns, including RNG,
+  rather than silently substituting convenient defaults for missing evidence.
+- [ ] Define an objective that compares simulated outcomes with observations
+  using their uncertainty, timing and provenance.
+- [ ] Implement bounded candidate-input search over short windows using the
+  existing step/capture/restore operations. Retain alternatives when evidence
+  cannot distinguish them; do not claim to recover unique original inputs.
+- [ ] Join windows into a consistent trajectory and handle drift, failed searches
+  and conflicting observations. Add more checkpoint capacity only if needed.
+- [ ] Persist search inputs, configuration, costs and progress so reconstruction
+  can be inspected, reproduced and resumed with clearly defined session limits.
+- [ ] Export only the selected continuation and test that rejected candidates
+  never leak into its events or metadata.
+- [ ] Recover an acceptable playable trajectory for a controlled short clip,
+  initially using manual observations, then the video observation pipeline.
 
-User-reported local validation of the preceding stepping milestone passed:
-600 VI steps advanced match frames 1..601; paused state stayed stable; repeated
-runs matched selected fields; neutral prefixes matched and changed inputs
-changed fighter fields. All 23 local game-library tests also passed.
+Acceptance: a known reference clip can be reconstructed within the predefined
+error bounds, with uncertainty and failures reported. Exact original inputs and
+hidden state are not required or claimed.
 
-Implemented one reusable session-local checkpoint using a frozen Linux process
-and forked continuations. This preserves the native stack plus game and host
-private memory without restarting the game or replaying inputs. A native thread
-count guard rejects unsafe threaded captures. Control-mode memory cards are
-volatile, so discarded branches cannot contaminate disk saves. Normal batch
-card persistence remains available. Recording stays explicitly unsupported.
+## 7. End-to-end reconstruction and review
 
-Protocol version 2 adds capture/restore responses, and Python validates handles,
-restored observations and child lifecycle. The new `checkpoint-experiment`
-compares four continuations across three restores, including a different-input
-branch and a return to the original inputs afterwards. Traces, capture/restore
-markers and comparison results are retained. See [checkpoint documentation](process-checkpoints.md).
+- [ ] Provide a command/workflow connecting video ingestion, observations,
+  reconstruction, selected-branch export and validation.
+- [ ] Parse every exported replay and run official playback; report each result
+  independently and retain evidence for failed as well as successful runs.
+- [ ] Produce aligned source/reconstruction comparisons and a report of match
+  quality, inferred settings, unknowns and unsupported portions of the clip.
+- [ ] Allow corrections and reruns without replacing the original observations
+  or claiming that an incomplete reconstruction covers the whole video.
+- [ ] Distinguish clip-only partial recordings from complete games with real
+  Game End events. Preserve that distinction in outputs and user documentation.
 
-Host tests verify repeated restoration of fixed RAM, ARAM, host ticks, next VI,
-audio pointers, controller state, callbacks targeting the saved native stack,
-and volatile card data. Python tests cover real process forks with synthetic
-state, stable restores, branch divergence, stale handles, invalid replies,
-trace buffering, normal cleanup, owner death and a stopped child. No ISO-backed
-checkpoint validation or official replay playback was performed in cloud.
+Acceptance: one supported short video can be processed into a playable `.slp`
+and an honest comparison report using a documented reproducible workflow.
 
-Validation for this change: `bash scripts/docker.sh setup` passed all 84 Python,
-10 host/component and 23 game-library tests in the GCC 14 container. The host
-Python suite also passed all 84 tests. The native dependency implementation is
-commit `862191c` on `yt2slp/linux-headless`. Existing setup commands remain
-sufficient; no package, math-flag, game-source or ABI changes were required.
+## 8. Broader evaluation and practical usability
 
+- [x] Supply development diagnostics, bounded experiment commands, retained logs
+  and native/Python component tests.
+- [ ] Evaluate end-to-end reconstruction on held-out clips, including camera
+  changes, occlusion, compression artifacts and timing irregularities.
+- [ ] Publish supported cases, accuracy/error distributions, failure rates,
+  runtime/resource costs and reproducibility instructions. Keep private game
+  material and generated artifacts out of Git.
+- [ ] Improve search performance and support more stages, characters, rules or
+  video conditions only after measuring the initial case.
+- [ ] Add regression coverage for established reconstruction behavior and verify
+  the documented setup from a fresh checkout/environment.
 
-## Local checkpoint validation and native recording — 2026-10-22
+Windows, online play, mods, a graphical application, portable checkpoints and
+arbitrary full-match video support are possible extensions, not implemented
+features or prerequisites for the first short-clip reconstruction.
 
-The user reported successful ISO-backed checkpoint validation for milestone
-`97005ca` / engine `862191c`: capture at match frame 241, four 180-step
-continuations to 421 and three restores. Restored observations stayed stable;
-identical inputs matched selected fields; changed inputs diverged; returning
-from the divergent branch reproduced the original continuation. Artifacts:
-`.docker-state/local/runs/step-2o7rj74b/`. The retained branch traces agree with
-this report. These are selected-field comparisons, not full-state equality or
-retail parity.
+## Latest validation and retained evidence
 
-The minimal host now records the game's genuine native replay events in private
-memory. Explicit `record()` export includes the selected branch and its captured
-prefix; restoring discards trial-branch events through process-memory restoration.
-There is no spectator publication, fabricated replay, or invented Game End.
-Export is for live vanilla control sessions; batch recording stays unsupported.
+The last implementation validation used Docker GCC 14 and passed **96 Python,
+10 host/component and 23 game-library tests**. Synthetic protocol/component tests
+establish their tested behavior; the following local ISO runs provide separate
+gameplay, recording and playback evidence.
 
-Located the installed official Playback Dolphin separately from Netplay and the
-launcher. Playback reports version 3.5.2. Its actual CLI and the official JSON
-request format were checked before running it. Host configuration is documented;
-Docker native paths are translated explicitly to host playback paths.
+| Evidence | Result / retained location |
+| --- | --- |
+| Batch and stepping | User-reported matching 3000-retrace runs; 600-step check advanced match frames 1..601 with stable pauses and input effects |
+| Checkpoint experiment | Capture 241, four continuations to 421, three successful restores; `.docker-state/local/runs/step-2o7rj74b/` |
+| Recording and independent parser | Branch-byte comparisons and parser report; `.docker-state/local/runs/step-qa9h0_nl/` |
+| Reusable recording experiment | Same selected replay bytes and matching selected states; `.docker-state/local/runs/step-jrevwdnh/recording-result.json` |
+| Official Playback 3.5.2 | Contiguous -123..422 frame reports, resync disabled; `.local/playback-full/result.json` and `stdout.log` |
 
-Local ISO recording passed byte-for-byte branch comparisons (181,236-byte
-selected replay), independent pinned slippi-js parsing (-123..421), and actual
-official Playback frame progression (-123..422) with resync disabled. The bounded
-replay has no Game End. Full-state equality, complete-game endings and retail
-parity remain unestablished. See [recording and playback](slippi-recording.md)
-for commands, exact artifact locations, scope and limitations.
+The selected replay in both recording runs has SHA-256
+`46b196b913b9a81bc501ddfcdd6f28c2710aabf665b0597d9059c9511e7e5dd2`.
+Artifacts are ignored local evidence, not files guaranteed to exist in another
+checkout. Full-state equality, rendered-image agreement, complete-match endings
+and retail parity remain unestablished.
 
-Recording engine commit: `b87fb67`, published on `yt2slp/linux-headless` before
-updating the parent gitlink. Docker validation passed 96 Python tests, 10 native
-host/component tests and 23 game-library tests. The reusable recording command
-was also run successfully at `.docker-state/local/runs/step-jrevwdnh/`; its
-selected replay SHA-256 is
-`46b196b913b9a81bc501ddfcdd6f28c2710aabf665b0597d9059c9511e7e5dd2`,
-matching the earlier parser/playback-validated recording.
+## Completed implementation milestones
+
+| Parent commit | Engine commit | Delivered |
+| --- | --- | --- |
+| `1367198` and subsequent setup fixes | `f65be37` | Initial native host, Python backend, component checks and setup documentation |
+| `2d30a15` | Existing engine pin | Validated GCC 14 Docker environment |
+| `ad88399` | `c697e5b` | Fixed matches and resumable VI stepping |
+| `97005ca` | `862191c` | One reusable process checkpoint and branch validation |
+| `657c3db` | `b87fb67` | Genuine selected-branch recording, independent parsing and bounded official playback |
+
+Changes are published to `houndsolo/yt2slp` on `main` and
+`houndsolo/melee-unlocked` on `yt2slp/linux-headless`. See Git history for the
+smaller setup and documentation commits. Earlier milestone test counts and
+"unrun" results have been superseded by the current validation record above.
