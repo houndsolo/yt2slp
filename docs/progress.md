@@ -11,8 +11,9 @@ passed independent parsing and actual official Playback Dolphin progression.
 A first controlled nine-field comparison and timer-labelled reference clip now
 exist. Local video decoding, manual visual cues and a bounded input-search
 prototype are implemented for a supplied controlled start. Five input hypotheses
-fit the sparse cues, while source/reconstruction review still shows position and
-camera differences. Automatic gameplay recognition, general reconstruction and
+fit the sparse cues; rendered fighter/stage regions then select a closer
+continuation. A separate post-selection check matches the known source's nine
+state fields exactly. Automatic gameplay recognition, general reconstruction and
 a single end-to-end video-to-replay command remain unimplemented.
 
 Checked items below are implemented and validated within their stated scope.
@@ -28,7 +29,7 @@ promise that its design or acceptance thresholds have already been settled.
 | 3. Genuine recording and official playback | Bounded and complete timed matches validated; broader cases remain | Export only the selected branch, parse it independently, and play it in official Dolphin |
 | 4. Reference comparison and controlled benchmarks | First controlled case validated; broader/visual comparison remains | Measure agreement between native simulation, official playback and rendered observations |
 | 5. Video ingestion and observation extraction | Local decoding/manual cues validated; automatic recognition remains | Produce a timestamped, uncertainty-aware observation timeline from a supported clip |
-| 6. Input and hidden-state reconstruction | One-window coarse cue search validated; hidden-state/trajectory recovery remains | Search simulation branches for a playable sequence that matches observations |
+| 6. Input and hidden-state reconstruction | One-window cue search/rendered refinement validated; broader recovery remains | Search simulation branches for a playable sequence that matches observations |
 | 7. End-to-end reconstruction and review | Manual staged workflow exists; visual acceptance and unified workflow remain | Video in; selected `.slp`, comparison evidence and limitations out |
 | 8. Broader evaluation and practical usability | Development tooling exists; reconstruction evaluation remains | Reproduce results on held-out clips and document supported cases and failure modes |
 
@@ -187,6 +188,8 @@ to postpone measuring a narrower supported case.
   video frames/PTS, explicit game-frame alternatives, cue alternatives and unknowns.
 - [x] Support manually reviewed action groups, facing, relative horizontal order
   and damage; retain individual manual timer readings and failed automatic labels.
+- [x] Bind manually chosen fighter/stage image regions to source frames/hashes
+  for direct rendered comparison. These are not detected roots or world positions.
 - [ ] Measure observation accuracy against annotated controlled clips, including
   cases where the system should leave a value unknown.
 
@@ -201,7 +204,9 @@ recognition and a general video observation system remain unimplemented.
 - [ ] Infer or search genuinely unknown starting conditions, hidden state and RNG.
 - [x] Compare coarse visual cues with simulated outcomes using explicit frame/value
   alternatives and unknowns. All cues at one sample must fit the same frame.
-- [ ] Add measured position/camera/trajectory errors and broader objectives.
+- [x] Refine all coarse-accepted candidates with a declared unshifted image-region
+  objective; retain exact ties and separate patch-translation diagnostics.
+- [ ] Add calibrated root/world-position/camera errors and broader objectives.
 - [x] Search a declared finite grid over one short window using capture/restore.
   Retain every accepted alternative and do not claim unique original inputs.
 - [ ] Join windows into a consistent trajectory and handle drift, failed searches
@@ -211,13 +216,19 @@ recognition and a general video observation system remain unimplemented.
 - [ ] Resume search across sessions and join multiple windows.
 - [x] Export only the selected continuation; compare its observations/replay bytes
   against a fresh boot with only the chosen inputs and validate parsing/playback.
-- [ ] Recover an acceptable playable trajectory for a controlled short clip,
-  initially using manual observations, then the video observation pipeline.
+- [x] Select a closer controlled trajectory from supplied initial conditions and
+  manual image evidence; verify the known source's nine state fields after selection.
+- [ ] Define broader reconstruction/visual acceptance and recover trajectories
+  from other clips, then automate observation extraction.
 
 Local prototype: 21 schedules, five accepted alternatives and 27 known manual
 cues satisfied. The selected inputs differ from the source; source/reconstruction
-pixels and positions still differ. An intentionally contradictory negative control
-rejects every schedule and writes no replay. See [manual reconstruction](manual-reconstruction.md).
+pixels and positions still differ for that coarse default. Rendered refinement
+then ranks all five schedules using six source-only regions, reducing whole-clip
+RGB RMSE from 24.22 to 5.29. Its selected continuation matches the source's nine
+fields across 122 player-frames in a separate post-selection check. An intentionally
+contradictory negative control rejects every schedule and writes no replay. See
+[manual reconstruction](manual-reconstruction.md) and [rendered refinement](rendered-refinement.md).
 
 Acceptance: a known reference clip can be reconstructed within the predefined
 error bounds, with uncertainty and failures reported. Exact original inputs and
@@ -262,7 +273,7 @@ features or prerequisites for the first short-clip reconstruction.
 
 ## Latest validation and retained evidence
 
-The last implementation validation used Docker GCC 14 and passed **165 Python,
+The last implementation validation used Docker GCC 14 and passed **186 Python,
 10 host/component, 23 game-library and 9 independent parser tests**. Synthetic protocol/component tests
 establish their tested behavior; the following local ISO runs provide separate
 gameplay, recording and playback evidence.
@@ -283,6 +294,9 @@ gameplay, recording and playback evidence.
 | Selected replay and official review | Fresh selected observations/replay bytes match; independent parsing and official progression pass; nine native/official fields match across 122 player-frames; `review/review-result.json` in that run |
 | Source/reconstruction comparison | 61-frame `review/comparison.mkv`, source left/reconstruction right; 12 manually read source timers, pixel RMSE about 24.22/255 with no visual pass threshold |
 | Failed-search negative control | Synthetic contradictory damage hypothesis rejects all 21 candidates; no replay exported; `.docker-state/local/runs/step-bx8m_rsb/search-result.json` |
+| Rendered candidate refinement | All five genuine candidates parsed/captured; source-only regions select candidate 8; `.docker-state/local/render-refinement-v1/ranking/ranking.json` |
+| Refined trajectory and verification | Fresh recording bytes/observations reproduce; known source's nine fields match after selection; `verification.json` in that ranking directory; fresh run `.docker-state/local/runs/step-rf5r43y0/` |
+| Refined image review | 61-frame `review/comparison.mkv` in the fresh run; whole-clip RGB RMSE 5.29, also 5.29 on 58 unused clip frames; no visual acceptance threshold |
 
 The selected replay in both recording runs has SHA-256
 `46b196b913b9a81bc501ddfcdd6f28c2710aabf665b0597d9059c9511e7e5dd2`.
@@ -294,6 +308,9 @@ Manual search source/annotations are in `.docker-state/local/manual-case-v1/`,
 with final PTS-preserving decode in `ingested-v2/`. Its coarse cue objective
 passes, while `visual_reconstruction_accepted` remains false. The automatic
 source timer coverage failure and individual manual readings are both retained.
+The refined continuation passes the same checks and improves the image evidence;
+its optional controlled-source state comparison is post-selection only. An
+intentionally wrong reference fails verification without changing the ranking.
 Full-state equality, rendered-image agreement, Dolphin/native result-state
 agreement, stock/LRAS endings and retail parity remain unestablished.
 

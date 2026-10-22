@@ -184,7 +184,10 @@ Final run and review paths are recorded in [progress](progress.md). Results:
 - An explicitly synthetic contradictory damage hypothesis rejects all candidates,
   saves its failed search and exports no `.slp`.
 
-Next: add manually calibrated position/camera evidence and a measured trajectory
-objective, then automate observation extraction where it improves measured
-accuracy. General YouTube recognition, hidden-state recovery, attacks/combat,
-long trajectories and trained models remain future work.
+Follow-up: [rendered refinement](rendered-refinement.md) now uses manually chosen
+fighter/stage image regions to rank all five candidates. It selects a closer
+continuation and verifies the controlled source's nine state fields after
+selection. The coarse results above remain retained evidence. World-coordinate
+camera calibration, automatic observation extraction, general YouTube recognition,
+hidden-state recovery, attacks/combat, long trajectories and trained models
+remain future work.

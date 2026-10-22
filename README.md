@@ -248,6 +248,12 @@ automatic video reconstruction. No trained model is required. See
 [manual reconstruction](docs/manual-reconstruction.md) for the schema, commands,
 manual timer corrections, evidence and limits.
 
+Rendered refinement now compares all five candidates using six manually chosen
+fighter/stage image regions. It selects a closer continuation: whole-clip RGB
+error falls from 24.22 to 5.29, and a separate post-selection check matches the
+known source's nine state fields exactly. This remains one controlled case with
+supplied initial conditions. See [rendered refinement](docs/rendered-refinement.md).
+
 ```bash
 bash scripts/docker.sh run python scripts/ingest_video.py path/to/short.mp4 \
   --output .local/video-NEW
