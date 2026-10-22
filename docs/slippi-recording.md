@@ -149,6 +149,87 @@ used to mask divergence. No frame/state parity comparison is implemented.
   were actually run locally; this is separate evidence from parser acceptance.
 
 These results do not establish full-state equality, rendered-image agreement,
-retail parity, complete-match ending behavior, mods, online play, or recording
-across multiple matches. Physics, game math flags, ABI and console tick/retrace
-constants were not changed.
+retail parity, mods, online play, or recording across multiple matches. Complete
+timed-match validation was added subsequently, as recorded below. Physics, game
+math flags, ABI and console tick/retrace constants were not changed.
+
+
+## Complete timed-match follow-up — 2026-10-22
+
+The host now installs `replay_finished`, previously left null even though the
+game calls it after Game End and on match exit. It has no output side effects:
+the existing event stream owns the ending and explicit export owns publication.
+`recording_status()` queries the last recorded post-frame and whether an actual
+Game End event has arrived, without resuming. Protocol version 2 adds
+`record-status` / `RECORDING <signed-frame> <0|1>`, or explicit `UNSUPPORTED`.
+The status, including the ended flag, belongs to private process memory and is
+restored with the checkpoint. It does not infer completion from elapsed steps.
+
+Use the unchanged fresh-game timed rules and ordinary controller input:
+
+```bash
+export YT2SLP_ISO=/home/houndsolo/Documents/vanilla.iso
+bash scripts/docker.sh run python scripts/record_complete_match.py
+# Replace the run folder with the printed path:
+bash scripts/docker.sh run bash -c 'node tools/slippi-parser/validate.cjs .local/runs/step-REPLACE/selected.slp --require-complete --last-frame 7200 --end-method 1 --placements 1,0 > .local/runs/step-REPLACE/parser-result.json'
+xvfb-run -a python scripts/validate_playback.py \
+  --dolphin .local/playback-inspect/squashfs-root/AppRun \
+  --iso /home/houndsolo/Documents/vanilla.iso \
+  --replay .docker-state/local/runs/step-REPLACE/selected.slp \
+  --parser-report .docker-state/local/runs/step-REPLACE/parser-result.json \
+  --last-frame 7200 --output .local/playback-complete-NEW --timeout 240
+```
+
+The default recipe captures after 6900 retraces, at match frame 6901. It completes
+four continuations across three restores, including a changed-input branch and
+a return to the original inputs after it. Each restore must clear the ended
+flag and recover the captured observation/status. Each continuation must reach
+a genuine Game End within a finite step budget. Six additional neutral steps
+after the ending must not change the encoded recording. The script fails and
+retains an unfinished recording if no real ending arrives within its budget.
+The stage and step budgets are configurable; expectations below describe the
+tested default recipe, not every possible combination.
+
+The independent parser's `--require-complete` checks a recognized Game End,
+active-player placements and metadata/event final-frame consistency. Optional
+expectations check the native status frame, end method and placements. Partial
+files remain valid inputs without this flag and fail when completeness is required.
+Parser output includes the replay SHA-256 and always keeps `playbackValidated`
+false: independent parsing cannot establish official playback.
+
+With `--parser-report`, the host harness first verifies that complete-match
+parser evidence matches the exact replay SHA-256 and requested final frame.
+It omits the request's `endFrame` cutoff so official Playback follows the
+recording's ending. It requires the reported file path, declared game-end frame
+and contiguous current-frame reports to match, then allows two seconds after
+reaching the final frame before stopping its own process group. That stop still
+is not an assertion about the game's winner/result screen. Method and placements
+in the combined report come from independent parsing; the harness explicitly
+reports `endingOutcomeComparedWithDolphin: false` and `stateEqualityMeasured: false`.
+
+Measured local results:
+
+- Native artifacts: `.docker-state/local/runs/step-cwrg_5u4/`. All four branches
+  reach genuine timeout method 1 at frame 7200. Original/identical/selected
+  recordings match at 2,952,212 bytes; the divergent branch differs. Status
+  restoration and post-ending byte stability pass.
+- Independent reports: `parser-result.json` and `divergent-parser-result.json`
+  in that run. Both have 7,324 contiguous frames -123..7200, metadata final frame
+  7200, no quit initiator (-1), and placements [1, 0, -1, -1]. Position 0 wins;
+  inactive players have -1. The original bounded replay is rejected by
+  `--require-complete` because it has no Game End.
+- Official Playback 3.5.2: `.local/playback-complete/result.json` and `stdout.log`.
+  Exact file path, SHA-bound parser evidence, declared end frame 7200 and
+  contiguous -123..7200 progression all pass with resync disabled.
+- Selected replay SHA-256:
+  `5605bab19d66b2fdaaf0148ba924c5867fd9b17e3dd7b52f94c217856af1144b`.
+- Docker checks: 122 Python tests, 10 host/component tests, 23 game-library tests
+  and 9 parser tests pass. Regression checks cover the completion callback,
+  non-advancing status, malformed replies, partial/mismatched completion evidence,
+  event/metadata inconsistencies and discontinuous/mismatched official reports.
+
+This establishes the tested timed-match recording/playback path, including
+checkpoint restoration after completion. Stock endings, LRAS, further match
+configurations, visual/result-state comparisons and full retail parity remain
+open. Generated recordings and validation reports stay ignored; the separately
+curated `recordings/examples/` collection contains only user-supplied references.

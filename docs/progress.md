@@ -6,7 +6,7 @@ cannot uniquely recover original inputs, RNG or hidden state; reconstructed
 values must remain distinguishable from observations and unknowns.
 
 **Current position:** the native simulation foundation works, including stepping,
-checkpoint branching and genuine replay export. A bounded generated replay has
+checkpoint branching and genuine replay export. Bounded and complete timed-match recordings have
 passed independent parsing and actual official Playback Dolphin progression.
 Video ingestion, visual state estimation and input reconstruction are not yet
 implemented. There is no end-to-end video-to-replay command yet.
@@ -21,7 +21,7 @@ promise that its design or acceptance thresholds have already been settled.
 | --- | --- | --- |
 | 1. Reproducible native development environment | Complete for Linux/GCC 14 | Build and test the host/game without committing game assets |
 | 2. Controllable simulation and checkpoint branching | Complete for the initial supported scope | Boot a fixed match, apply inputs, pause, observe, capture and repeatedly restore |
-| 3. Genuine recording and official playback | Bounded runs validated; complete-match validation remains | Export only the selected branch, parse it independently, and play it in official Dolphin |
+| 3. Genuine recording and official playback | Bounded and complete timed matches validated; broader cases remain | Export only the selected branch, parse it independently, and play it in official Dolphin |
 | 4. Reference comparison and controlled benchmarks | Not implemented | Measure agreement between native simulation, official playback and rendered observations |
 | 5. Video ingestion and observation extraction | Not implemented | Produce a timestamped, uncertainty-aware observation timeline from a supported clip |
 | 6. Input and hidden-state reconstruction | Not implemented | Search simulation branches for a playable sequence that matches observations |
@@ -38,7 +38,7 @@ promise that its design or acceptance thresholds have already been settled.
 - [x] Provide locked Python tools, setup/build scripts, diagnostics and tests.
 - [x] Provide a Debian 13 / GCC 14 Docker environment and separate its build/cache
   output from Arch host output. Use Docker for native builds and tests.
-- [x] Keep ISOs, extracted/generated game material, recordings and experiment
+- [x] Keep ISOs, extracted/generated game material, generated recordings and experiment
   artifacts ignored. Mount the user's ISO read-only.
 - [x] Publish dependency changes before updating the parent submodule gitlink.
 
@@ -93,8 +93,12 @@ See [stepping semantics](native-stepping.md) and
   `@slippi/slippi-js@9.1.3`, including settings and contiguous player events.
 - [x] Validate actual official playback through the bounded replay's recorded
   interval with resync disabled. Keep parser acceptance and playback evidence separate.
-- [ ] Validate a complete match's genuine Game End, final frame, end method and
-  placements through recording, independent parsing and official playback.
+- [x] Validate a complete timed match's genuine Game End, final frame, end method
+  and placements in the recording and independent parser, and validate official
+  playback through that final frame. Dolphin result-state equality remains unmeasured.
+- [x] Restore from completed branches to a pre-ending checkpoint; verify that
+  ended status clears, identical endings encode identically and post-ending
+  callbacks are safe without changing replay bytes.
 - [ ] Exercise longer recordings and more supported match/input cases before
   treating one successful bounded example as general playback compatibility.
 
@@ -105,8 +109,22 @@ the divergent branch differs. Official Playback reports contiguous frames
 closing the harness does not complete it. Batch recording, non-vanilla/modded
 recording and recording across multiple matches remain unsupported.
 
+The complete timed-match follow-up runs to a genuine timeout at frame 7200:
+7,324 contiguous frames -123..7200, end method 1, no quit initiator, and placements
+[1, 0, -1, -1]. Capture at 6901 supports three restores across four completed
+continuations; original/identical/selected files match at 2,952,212 bytes, while
+the divergent file differs. Extra post-ending steps leave each replay unchanged.
+Official Playback reports the same file path and final frame, with contiguous
+-123..7200 progression and resync disabled. Its report is bound to the independent
+parser report by replay SHA-256. The request does not force an `endFrame` cutoff.
+
+Implemented `recording_status()` without advancing simulation and installed the
+previously missing `replay_finished` host callback, which the real game calls
+at completion/scene exit. No game source, physics, ABI or timing constants changed.
+
 See [recording and playback](slippi-recording.md) for commands, configuration,
-transport details and artifact locations.
+transport details and artifact locations. Next: reference comparison/frame capture
+in milestone 4; expand ending/match coverage before claiming general compatibility.
 
 ## 4. Reference comparison and controlled benchmarks
 
@@ -210,8 +228,8 @@ features or prerequisites for the first short-clip reconstruction.
 
 ## Latest validation and retained evidence
 
-The last implementation validation used Docker GCC 14 and passed **96 Python,
-10 host/component and 23 game-library tests**. Synthetic protocol/component tests
+The last implementation validation used Docker GCC 14 and passed **122 Python,
+10 host/component, 23 game-library and 9 independent parser tests**. Synthetic protocol/component tests
 establish their tested behavior; the following local ISO runs provide separate
 gameplay, recording and playback evidence.
 
@@ -221,13 +239,18 @@ gameplay, recording and playback evidence.
 | Checkpoint experiment | Capture 241, four continuations to 421, three successful restores; `.docker-state/local/runs/step-2o7rj74b/` |
 | Recording and independent parser | Branch-byte comparisons and parser report; `.docker-state/local/runs/step-qa9h0_nl/` |
 | Reusable recording experiment | Same selected replay bytes and matching selected states; `.docker-state/local/runs/step-jrevwdnh/recording-result.json` |
-| Official Playback 3.5.2 | Contiguous -123..422 frame reports, resync disabled; `.local/playback-full/result.json` and `stdout.log` |
+| Bounded official Playback 3.5.2 | Contiguous -123..422 frame reports, resync disabled; `.local/playback-full/result.json` and `stdout.log` |
+| Complete timed match and restoration | Capture 6901, three restores, genuine timeout at 7200; `.docker-state/local/runs/step-cwrg_5u4/complete-result.json` |
+| Complete-match independent parser | Final frame 7200, timeout method 1, placements [1, 0, -1, -1]; `parser-result.json` and `divergent-parser-result.json` in that run |
+| Complete official Playback 3.5.2 | Exact replay path/final-frame checks, contiguous -123..7200 progression, resync disabled; `.local/playback-complete/result.json` and `stdout.log` |
 
 The selected replay in both recording runs has SHA-256
 `46b196b913b9a81bc501ddfcdd6f28c2710aabf665b0597d9059c9511e7e5dd2`.
 Artifacts are ignored local evidence, not files guaranteed to exist in another
-checkout. Full-state equality, rendered-image agreement, complete-match endings
-and retail parity remain unestablished.
+checkout. The complete selected recording has SHA-256
+`5605bab19d66b2fdaaf0148ba924c5867fd9b17e3dd7b52f94c217856af1144b`.
+Full-state equality, rendered-image agreement, Dolphin/native result-state
+agreement, stock/LRAS endings and retail parity remain unestablished.
 
 ## Completed implementation milestones
 
@@ -238,6 +261,11 @@ and retail parity remain unestablished.
 | `ad88399` | `c697e5b` | Fixed matches and resumable VI stepping |
 | `97005ca` | `862191c` | One reusable process checkpoint and branch validation |
 | `657c3db` | `b87fb67` | Genuine selected-branch recording, independent parsing and bounded official playback |
+
+The complete timed-match follow-up pins engine `18ded4f`, published before its
+parent gitlink update. It adds the missing completion callback and recording
+status; the parent adds the complete-match experiment and stricter independent
+parser/official frame-report checks.
 
 Changes are published to `houndsolo/yt2slp` on `main` and
 `houndsolo/melee-unlocked` on `yt2slp/linux-headless`. See Git history for the

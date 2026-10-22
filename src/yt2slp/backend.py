@@ -39,6 +39,14 @@ class RunConfig:
 
 
 @dataclass(frozen=True)
+class RecordingStatus:
+    """Last recorded post-frame and presence of a game-generated Game End event."""
+
+    last_frame: int
+    ended: bool
+
+
+@dataclass(frozen=True)
 class Observation:
     """Selected MuStatePod fields at a retrace, not a complete savestate.
 
@@ -120,6 +128,10 @@ class Backend(Protocol):
 
     def restore(self, checkpoint: bytes) -> None:
         """Restore a backend checkpoint or raise UnsupportedOperation."""
+        ...
+
+    def recording_status(self) -> RecordingStatus:
+        """Return event-stream progress and genuine ending status, or fail explicitly."""
         ...
 
     def record(self, output: Path) -> None:
@@ -382,6 +394,25 @@ class NativeLinuxBackend:
     def _checkpoint_event(self, operation: str) -> None:
         with (self.last_run_dir / "inputs.txt").open("a") as log:
             log.write(f"{self.observations[-1].retrace}: {operation}\n")
+
+    def recording_status(self) -> RecordingStatus:
+        """Query the current branch without resuming, exporting, or inventing Game End."""
+        if self._session is None:
+            raise UnsupportedOperation("recording status requires a live control session")
+        try:
+            self._session.send("record-status")
+            reply = self._session.receive()
+            if reply.startswith("UNSUPPORTED "):
+                raise UnsupportedOperation(reply[12:])
+            match = re.fullmatch(r"RECORDING (-?[0-9]+) ([01])", reply)
+            if match is None:
+                raise ValueError("invalid recording status response")
+            last_frame = int(match[1])
+            if not -123 <= last_frame <= 0x7FFFFFFF:
+                raise ValueError("invalid recording frame range")
+            return RecordingStatus(last_frame, match[2] == "1")
+        except (OSError, ValueError) as exc:
+            self._control_failure(exc)
 
     def record(self, output: Path) -> None:
         """Export the current branch's real events, including its pre-checkpoint prefix.

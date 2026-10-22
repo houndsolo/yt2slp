@@ -3,7 +3,7 @@
 An experimental foundation for reconstructing **approximate** playable Melee
 replays from video. Video cannot recover every original input, RNG value or
 hidden state. Observed, inferred and unknown values are separate types. Video recognition is not implemented. The native backend now exports genuine
-selected-branch recordings, with bounded official Slippi playback validated
+selected-branch recordings, with bounded and complete timed-match Slippi playback validated
 locally; this does not establish retail parity.
 
 The selected engine is the existing native Linux Melee Unlocked source host,
@@ -201,14 +201,18 @@ An unfinished match exports a partial replay with no invented Game End.
 ```bash
 export YT2SLP_ISO=/home/houndsolo/Documents/vanilla.iso
 bash scripts/docker.sh run python scripts/record_checkpoint_experiment.py
+# Complete timed match, real Game End, and repeated restores across completed branches:
+bash scripts/docker.sh run python scripts/record_complete_match.py
 # Host playback configuration; do not use this path inside Docker:
 export YT2SLP_DOLPHIN='/home/houndsolo/.config/Slippi Launcher/playback/Slippi_Playback-x86_64.AppImage'
 ```
 
 The installed Playback Dolphin reports version 3.5.2 and is separate from Netplay
 and the launcher. Real recording passed checkpoint-branch byte comparisons,
-independent slippi-js parsing, and official playback through the bounded replay's
-recorded frames with resync disabled. These are separate checks, not proof of
+independent slippi-js parsing, and official playback through bounded and complete
+timed-match recordings with resync disabled. The complete case has a genuine
+timeout at frame 7200; its parser end method and placements are validated.
+Dolphin result-state equality remains unmeasured. These are separate checks, not proof of
 full-state equality or retail parity. See [recording and playback](docs/slippi-recording.md)
 for exact evidence, parser installation, host/Docker path mapping and the verified
 JSON playback interface.

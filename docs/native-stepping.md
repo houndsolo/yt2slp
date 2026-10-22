@@ -108,3 +108,10 @@ simulate Melee or establish gameplay correctness. Real ISO validation remains a
 local check; no retail ISO is available in the cloud workspace. The user has
 reported passing the prior 600-step ISO experiment locally (match frames 1..601,
 stable pauses, repeated-run agreement, matching neutral prefix and input effects).
+
+
+`recording_status()` reads the selected branch's last recorded frame and genuine
+Game End flag without advancing. Protocol command `record-status` returns
+`RECORDING <signed-frame> <0|1>` or `UNSUPPORTED`. Complete timed-match recording
+and restoration after completion are now validated locally; see
+[recording and playback](slippi-recording.md).

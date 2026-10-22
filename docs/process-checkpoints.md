@@ -95,3 +95,11 @@ returning from the divergent branch across three restores. Artifacts are retaine
 at `.docker-state/local/runs/step-2o7rj74b/`. This remains selected-field evidence.
 Recording and official playback have now also been exercised locally; see
 [the separate validation record](slippi-recording.md).
+
+
+Complete-match follow-up: a pre-ending checkpoint at match frame 6901 was restored
+three times after completed continuations. Each restore cleared recording's
+ended flag; original/identical/selected full recordings ending at frame 7200
+matched byte-for-byte, and the changed-input recording differed. Post-ending
+callbacks were safe and extra steps did not change recorded bytes. See
+[the complete timed-match evidence](slippi-recording.md#complete-timed-match-follow-up--2026-10-22).

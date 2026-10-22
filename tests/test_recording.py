@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from yt2slp.backend import BackendError, NativeLinuxBackend, UnsupportedOperation
+from yt2slp.backend import BackendError, NativeLinuxBackend, RecordingStatus, UnsupportedOperation
 
 
 class Peer:
@@ -74,3 +74,40 @@ def test_publish_failure_removes_temporary_file_and_keeps_session(tmp_path, monk
     with pytest.raises(BackendError, match='cannot write replay'):
         backend.record(tmp_path / 'never.bin')
     assert not peer.closed and not list(tmp_path.iterdir())
+
+
+@pytest.mark.parametrize('reply, expected', [
+    ('RECORDING -123 0', RecordingStatus(-123, False)),
+    ('RECORDING 7200 1', RecordingStatus(7200, True)),
+])
+def test_recording_status_does_not_resume_or_export(reply, expected):
+    backend = NativeLinuxBackend()
+    peer = Peer([reply])
+    backend._session = peer
+    assert backend.recording_status() == expected
+    assert peer.sent == ['record-status'] and not peer.closed
+
+
+@pytest.mark.parametrize('reply', [
+    'wrong', 'RECORDING 7200 2', 'RECORDING -124 0',
+    'RECORDING 2147483648 1', 'RECORDING 1 0 extra',
+])
+def test_invalid_status_closes_session(reply, tmp_path):
+    backend = NativeLinuxBackend()
+    peer = Peer([reply])
+    backend._session = peer
+    backend.last_run_dir = tmp_path
+    with pytest.raises(BackendError, match='native control failed'):
+        backend.recording_status()
+    assert peer.closed and not list(tmp_path.iterdir())
+
+
+def test_unavailable_recording_status_is_explicit():
+    backend = NativeLinuxBackend()
+    with pytest.raises(UnsupportedOperation, match='live control session'):
+        backend.recording_status()
+    peer = Peer(['UNSUPPORTED no recording status provider'])
+    backend._session = peer
+    with pytest.raises(UnsupportedOperation, match='no recording status provider'):
+        backend.recording_status()
+    assert not peer.closed
