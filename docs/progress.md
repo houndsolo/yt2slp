@@ -8,12 +8,13 @@ values must remain distinguishable from observations and unknowns.
 **Current position:** the native simulation foundation works, including stepping,
 checkpoint branching and genuine replay export. Bounded and complete timed-match recordings have
 passed independent parsing and actual official Playback Dolphin progression.
-A first controlled nine-field comparison and timer-labelled reference clip now
-exist. Local video decoding, manual visual cues and a bounded input-search
-prototype are implemented for a supplied controlled start. Five input hypotheses
-fit the sparse cues; rendered fighter/stage regions then select a closer
-continuation. A separate post-selection check matches the known source's nine
-state fields exactly. Automatic gameplay recognition, general reconstruction and
+A controlled nine-field comparison, timer-labelled reference capture, local video
+decoding and bounded input search now work for two horizontal-motion clips: right
+and delayed left. Manual fighter/stage regions select a closer continuation from
+the coarse cue matches, using the same search grid, image objective and timer
+calibration in both cases. Separate post-selection checks match each known
+source's nine state fields exactly. Both cases use supplied starting conditions
+and manual annotations. Automatic gameplay recognition, general reconstruction and
 a single end-to-end video-to-replay command remain unimplemented.
 
 Checked items below are implemented and validated within their stated scope.
@@ -27,11 +28,11 @@ promise that its design or acceptance thresholds have already been settled.
 | 1. Reproducible native development environment | Complete for Linux/GCC 14 | Build and test the host/game without committing game assets |
 | 2. Controllable simulation and checkpoint branching | Complete for the initial supported scope | Boot a fixed match, apply inputs, pause, observe, capture and repeatedly restore |
 | 3. Genuine recording and official playback | Bounded and complete timed matches validated; broader cases remain | Export only the selected branch, parse it independently, and play it in official Dolphin |
-| 4. Reference comparison and controlled benchmarks | First controlled case validated; broader/visual comparison remains | Measure agreement between native simulation, official playback and rendered observations |
+| 4. Reference comparison and controlled benchmarks | Two horizontal cases validated; broader cases remain | Measure agreement between native simulation, official playback and rendered observations |
 | 5. Video ingestion and observation extraction | Local decoding/manual cues validated; automatic recognition remains | Produce a timestamped, uncertainty-aware observation timeline from a supported clip |
-| 6. Input and hidden-state reconstruction | One-window cue search/rendered refinement validated; broader recovery remains | Search simulation branches for a playable sequence that matches observations |
+| 6. Input and hidden-state reconstruction | Single-window search/refinement validated on two cases; broader recovery remains | Search simulation branches for a playable sequence that matches observations |
 | 7. End-to-end reconstruction and review | Manual staged workflow exists; visual acceptance and unified workflow remain | Video in; selected `.slp`, comparison evidence and limitations out |
-| 8. Broader evaluation and practical usability | Development tooling exists; reconstruction evaluation remains | Reproduce results on held-out clips and document supported cases and failure modes |
+| 8. Broader evaluation and practical usability | Two controlled motions evaluated; broader evaluation remains | Reproduce results on held-out clips and document supported cases and failure modes |
 
 ## 1. Reproducible native development environment
 
@@ -149,6 +150,12 @@ Dolphin states or rendered images agree.
   once; preserve unknowns and reject ambiguous, missing or reordered labels.
 - [x] Retain a 61-frame lossless clip, frame/timer/image mapping, exact mismatch
   counts, maximum absolute errors, RMSE and first-difference diagnostics.
+- [x] Validate a second source with delayed leftward movement, preserving the
+  original source generator's replay bytes. Both sources pass the same nine-field,
+  native-observation and timer-coverage checks over 240..300.
+- [x] Prepare a compressed source video only after validating reference identities,
+  geometry, timing and independent replay parsing. Keep source controls/state
+  outside the ingested video supplied to reconstruction.
 - [ ] Establish native/rendered image agreement and the rendering/post-update
   phase relationship. The headless backend does not supply comparison pixels.
 - [ ] Expand controlled cases beyond horizontal movement, this stage/character
@@ -164,6 +171,8 @@ selected-field equality for a controlled case, not complete-state/image parity.
 Calibration uses ignored local game-derived images/templates and is explicitly
 manual at bootstrap; it is not a general video-recognition system. See
 [reference benchmark](reference-benchmark.md) for commands, policies and evidence.
+The second source is in `.docker-state/local/runs/step-yanojpfn/analysis/`;
+see [two-case evaluation](controlled-evaluation.md).
 
 Acceptance: a reproducible benchmark can report where agreement holds, where it
 fails, and what remains unmeasured. Full retail parity is not assumed or a reason
@@ -230,6 +239,14 @@ fields across 122 player-frames in a separate post-selection check. An intention
 contradictory negative control rejects every schedule and writes no replay. See
 [manual reconstruction](manual-reconstruction.md) and [rendered refinement](rendered-refinement.md).
 
+The delayed-left follow-up uses the unchanged 21-schedule grid, image objective,
+timer calibration and cue-alignment policy. Four schedules satisfy its 28 known
+cues. Image evidence selects eight neutral steps after frame 239 followed by
+stick X=-80; whole-clip RGB RMSE falls from 31.13 to 5.28. Its fresh recording
+reproduces and plays in official Dolphin, and all nine known-source fields match
+across 122 player-frames after selection. The new source-only annotations and
+remaining limits are documented in [controlled evaluation](controlled-evaluation.md).
+
 Acceptance: a known reference clip can be reconstructed within the predefined
 error bounds, with uncertainty and failures reported. Exact original inputs and
 hidden state are not required or claimed.
@@ -257,6 +274,9 @@ and an honest comparison report using a documented reproducible workflow.
 
 - [x] Supply development diagnostics, bounded experiment commands, retained logs
   and native/Python component tests.
+- [x] Evaluate a second controlled horizontal motion without changing the search
+  grid, scorer or timer calibration. Validate fresh selected recording, parsing,
+  actual official rendering and a separate post-selection source-state comparison.
 - [ ] Evaluate end-to-end reconstruction on held-out clips, including camera
   changes, occlusion, compression artifacts and timing irregularities.
 - [ ] Publish supported cases, accuracy/error distributions, failure rates,
@@ -273,7 +293,7 @@ features or prerequisites for the first short-clip reconstruction.
 
 ## Latest validation and retained evidence
 
-The last implementation validation used Docker GCC 14 and passed **186 Python,
+The last implementation validation used Docker GCC 14 and passed **196 Python,
 10 host/component, 23 game-library and 9 independent parser tests**. Synthetic protocol/component tests
 establish their tested behavior; the following local ISO runs provide separate
 gameplay, recording and playback evidence.
@@ -297,6 +317,11 @@ gameplay, recording and playback evidence.
 | Rendered candidate refinement | All five genuine candidates parsed/captured; source-only regions select candidate 8; `.docker-state/local/render-refinement-v1/ranking/ranking.json` |
 | Refined trajectory and verification | Fresh recording bytes/observations reproduce; known source's nine fields match after selection; `verification.json` in that ranking directory; fresh run `.docker-state/local/runs/step-rf5r43y0/` |
 | Refined image review | 61-frame `review/comparison.mkv` in the fresh run; whole-clip RGB RMSE 5.29, also 5.29 on 58 unused clip frames; no visual acceptance threshold |
+| Second source/reference | Genuine delayed-left recording, nine-field and timer checks pass; `.docker-state/local/runs/step-yanojpfn/analysis/result.json` |
+| Second rendered refinement | Four accepted candidates actually rendered; candidate 13 selected; `.docker-state/local/render-refinement-v2/ranking/ranking.json` and `verification.json` |
+| Second fresh selected replay/review | Reproduced replay, parser and official checks pass; whole-clip RGB RMSE 31.13 to 5.28; `.docker-state/local/runs/step-3b6dfqse/review/comparison.mkv` |
+| Source preparation/default regression | Validated source MP4 preparation reproduces; original default replay remains byte-identical; `.docker-state/local/manual-case-v2/preparation-regression.json` and `legacy-recording-regression.json` |
+| Two-case comparison | Nine source fields exact across 244 player-frames after selection; `.docker-state/local/manual-case-v2/evaluation-summary.json` |
 
 The selected replay in both recording runs has SHA-256
 `46b196b913b9a81bc501ddfcdd6f28c2710aabf665b0597d9059c9511e7e5dd2`.
@@ -311,6 +336,12 @@ source timer coverage failure and individual manual readings are both retained.
 The refined continuation passes the same checks and improves the image evidence;
 its optional controlled-source state comparison is post-selection only. An
 intentionally wrong reference fails verification without changing the ranking.
+The second case retains its source-only annotations, frozen protocol identities,
+five individual manual timer readings and automatic label failures in
+`.docker-state/local/manual-case-v2/`. Neither case establishes an absolute visual
+acceptance threshold. The 58 frames excluded from each region objective are
+neighboring frames, and endpoints also have coarse cues; these are not independent
+matches or a holdout from every pipeline stage.
 Full-state equality, rendered-image agreement, Dolphin/native result-state
 agreement, stock/LRAS endings and retail parity remain unestablished.
 
@@ -323,6 +354,9 @@ agreement, stock/LRAS endings and retail parity remain unestablished.
 | `ad88399` | `c697e5b` | Fixed matches and resumable VI stepping |
 | `97005ca` | `862191c` | One reusable process checkpoint and branch validation |
 | `657c3db` | `b87fb67` | Genuine selected-branch recording, independent parsing and bounded official playback |
+| `bd47d3e` | `18ded4f` | Official reference capture, timer-labelled clip and nine-field state comparison |
+| `a9b3014` | `18ded4f` | MP4 ingestion, manual visual cues and bounded checkpoint search |
+| `75333f4` | `18ded4f` | Rendered candidate refinement and post-selection source-state verification |
 
 The complete timed-match follow-up pins engine `18ded4f`, published before its
 parent gitlink update. It adds the missing completion callback and recording

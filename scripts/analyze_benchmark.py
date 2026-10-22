@@ -12,6 +12,7 @@ import subprocess
 import tempfile
 
 from yt2slp.benchmark import compare_posts, observation_rows
+from yt2slp.reference_cases import REFERENCE_CASES
 from yt2slp.timer_labels import label_images
 
 
@@ -33,7 +34,7 @@ def main():
     a=p.parse_args();root=a.run.resolve()
     native_manifest=json.loads((root/'benchmark.json').read_text())
     capture=json.loads((root/'official/capture.json').read_text())
-    if native_manifest['case']!='fox-falco-battlefield-horizontal-v1' or not capture['capture_passed']:
+    if native_manifest['case'] not in REFERENCE_CASES or not capture['capture_passed']:
         raise ValueError('missing successful supported native/official case')
     first,last=native_manifest['clip']['first'],native_manifest['clip']['last']
     if [first,last]!=capture['wanted_interval'] or capture['should_resync'] is not False:
@@ -84,7 +85,7 @@ def main():
         'frame_alignment':{k:v for k,v in labels.items() if k not in ('records','selected')},
         'reference_clip':clip_info,'calibration_sha256':sha256(a.calibration),
         'native_replay_sha256':reference['replay_sha256'],'official_replay_sha256':official['replay_sha256'],
-        'identities':{str(path):sha256(path) for path in [Path(__file__),Path('src/yt2slp/benchmark.py'),
+        'identities':{str(path):sha256(path) for path in [Path(__file__),Path('src/yt2slp/benchmark.py'),Path('src/yt2slp/reference_cases.py'),
             Path('src/yt2slp/timer_labels.py'),Path('tools/slippi-parser/export-state.cjs'),
             Path('docker/Dockerfile'),Path('uv.lock'),Path('tools/slippi-parser/package-lock.json'),a.calibration,
             root/'benchmark.json',root/'observations.json',root/'inputs.txt',root/'official/capture.json',

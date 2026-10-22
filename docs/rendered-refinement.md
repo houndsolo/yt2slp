@@ -170,5 +170,7 @@ Its source-left/reconstruction-right clip is `review/comparison.mkv`.
 There is no absolute visual acceptance threshold, trained model, automatic fighter
 detector, camera calibration or unknown-state recovery yet. The chosen schedule
 matches the controlled generator's schedule, but other unsearched inputs may be
-visually equivalent. The next useful evaluation is another controlled clip with
-different inputs, followed by more informative/automatic observations.
+visually equivalent. A second controlled clip with delayed leftward movement now
+passes with the same grid, objective and timer calibration; see
+[controlled evaluation](controlled-evaluation.md). Multi-phase movement, jumps,
+combat and more informative/automatic observations remain future work.

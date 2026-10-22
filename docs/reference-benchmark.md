@@ -193,3 +193,19 @@ Dolphin **pixel/visual equality is unmeasured**, as are full-state equality,
 render/post-update phase equality, reconstruction accuracy and retail parity
 outside these selected fields and this interval. Wider inputs/stages/characters
 and cases with nonzero damage, combat or stock changes still need benchmarks.
+
+## Second source and video preparation
+
+`record_benchmark.py --case fox-falco-battlefield-left-delayed-v1` records a
+second genuine source: 246 neutral steps followed by 74 steps with P1 stick
+X=-80, through match frame 321. The default remains the original right-moving
+case; a fresh default run produces byte-identical replay output. Both cases
+are declared in `src/yt2slp/reference_cases.py` for source preparation, outside
+the reconstruction/ranking path.
+
+The second source passes the same state and image-label criteria. The helper
+`scripts/prepare_reference_video.py` checks source replay/clip identities and
+reference gates, independently parses the genuine replay, encodes an H.264 MP4,
+and ingests its original timestamps. Source controls and post-frame state are
+kept outside the ingested video. See [controlled evaluation](controlled-evaluation.md)
+for commands and the unchanged-grid reconstruction results.

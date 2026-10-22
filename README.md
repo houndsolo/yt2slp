@@ -2,8 +2,9 @@
 
 An experimental foundation for reconstructing **approximate** playable Melee
 replays from video. Video cannot recover every original input, RNG value or
-hidden state. Observed, inferred and unknown values are separate types. Automatic gameplay recognition is not implemented. Local video ingestion and a first
-manual-cue input search are available for one controlled case. The native backend now exports genuine
+hidden state. Observed, inferred and unknown values are separate types. Automatic gameplay recognition is not implemented. Local video ingestion,
+manual-cue input search and rendered refinement are validated on two controlled
+horizontal-motion cases. The native backend now exports genuine
 selected-branch recordings, with bounded and complete timed-match Slippi playback validated
 locally; this does not establish retail parity.
 
@@ -251,8 +252,15 @@ manual timer corrections, evidence and limits.
 Rendered refinement now compares all five candidates using six manually chosen
 fighter/stage image regions. It selects a closer continuation: whole-clip RGB
 error falls from 24.22 to 5.29, and a separate post-selection check matches the
-known source's nine state fields exactly. This remains one controlled case with
-supplied initial conditions. See [rendered refinement](docs/rendered-refinement.md).
+known source's nine state fields exactly. This first case uses supplied initial
+conditions. See [rendered refinement](docs/rendered-refinement.md).
+
+A second clip with delayed leftward movement passes the same search grid,
+image objective and timer calibration: whole-clip RGB error falls from 31.13 to
+5.28, with all nine source fields matching across 122 player-frames after
+selection. Both cases still use supplied starting conditions and manual visual
+annotations. See [controlled evaluation](docs/controlled-evaluation.md) for
+the comparison, reproduction commands and remaining limits.
 
 ```bash
 bash scripts/docker.sh run python scripts/ingest_video.py path/to/short.mp4 \
