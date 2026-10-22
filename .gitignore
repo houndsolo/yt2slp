@@ -1,0 +1,48 @@
+# Python and local development
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+.env
+.env.*
+!.env.example
+
+# Private game material and large experiment outputs
+assets/
+data/
+datasets/
+models/
+weights/
+checkpoints/
+recordings/
+*.iso
+*.gcm
+*.rvz
+*.wbfs
+*.dol
+*.slp
+*.mp4
+*.mkv
+*.pt
+*.pth
+*.onnx
+*.safetensors
+
+# Generated native code and build products
+build/
+dist/
+generated/
+extracted/
+*.o
+*.a
+*.so
+*.dll
+*.exe
+*.dylib
+
+# Local tools and state
+.local/
+.cache/
+.DS_Store
