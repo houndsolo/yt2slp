@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools==80.9.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yt2slp"
+version = "0.1.0"
+description = "Experimental, explicitly approximate video-to-Melee replay reconstruction foundation"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+yt2slp = "yt2slp.cli:main"
+
+[dependency-groups]
+dev = ["pytest==8.4.2", "cmake==3.31.6", "ninja==1.11.1.4"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
