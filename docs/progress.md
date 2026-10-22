@@ -75,6 +75,13 @@ updated to that fork, before a new remote clone can fetch the parent's gitlink.
 The current workspace is usable; fresh-clone and new-cloud-task restoration
 have not been verified. See `git log` for subsequent documentation/fix commits.
 
+Reusable cloud configuration was saved as a draft: `install_script` runs the
+two tested setup/build scripts, and `start_skill` records activation, readiness
+checks, the existing-checkout policy, unsupported capabilities and local-commit
+limitations. No network or secret requirements were changed. Saving did not
+publish the environment; review/save in environment settings and publication
+remain user actions. No new-task restoration is claimed.
+
 ## Next concrete task
 
 Once an ISO path is available, execute the README's bounded script with fixed
