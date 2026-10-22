@@ -69,11 +69,11 @@ Dependency commits on `yt2slp/linux-headless`:
 - `f65be376bd486e74ec1d64a9601d40c2437994d2`: headless target, POSIX replay
   timestamp conversion and branch-rewind regression.
 
-These commits are local only. No push or history rewriting was performed.
-The dependency commits **must be published to a fork**, and `.gitmodules`
-updated to that fork, before a new remote clone can fetch the parent's gitlink.
-The current workspace is usable; fresh-clone and new-cloud-task restoration
-have not been verified. See `git log` for subsequent documentation/fix commits.
+Following the user's push request, the dependency commits were published to
+`houndsolo/melee-unlocked`, branch `yt2slp/linux-headless`, and `.gitmodules`
+was updated to that fork. No history was rewritten. The parent commits are
+being published to `houndsolo/yt2slp` on `main`. New-cloud-task restoration
+has not been verified. See `git log` for subsequent documentation/fix commits.
 
 Reusable cloud configuration was saved as a draft: `install_script` runs the
 two tested setup/build scripts, and `start_skill` records activation, readiness

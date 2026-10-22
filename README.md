@@ -104,11 +104,10 @@ rewind. Their scope is described in the evaluation.
 
 Melee Unlocked is pinned by the Git submodule gitlink; the inspected upstream
 base is `6177fd31acf250fe733089cd4471ce9c87969cf3`. Our small dependency changes
-are committed on its local `yt2slp/linux-headless` branch. **Those commits are not
-published. A fresh remote clone cannot fetch our updated gitlink until a fork
-containing those commits is published and `.gitmodules` points to it.** Nothing
-was pushed. The current checkout and local commits remain usable; a cloud
-snapshot is not a verified fresh-clone restoration. Other reference repositories
+are committed on `yt2slp/linux-headless` and published to
+[our fork](https://github.com/houndsolo/melee-unlocked/tree/yt2slp/linux-headless).
+`.gitmodules` points to that fork so new clones can fetch the pinned commit.
+A cloud snapshot is not a verified new-task restoration. Other reference repositories
 are source research only, not runtime dependencies. Their pinned inspection
 revisions are documented in `docs/engine-evaluation.md`.
 
