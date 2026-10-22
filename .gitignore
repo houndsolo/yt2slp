@@ -16,7 +16,7 @@ datasets/
 models/
 weights/
 checkpoints/
-recordings/
+/recordings/*
 *.iso
 *.gcm
 *.rvz
@@ -50,3 +50,8 @@ extracted/
 
 # Independent replay parser tooling
 node_modules/
+
+# Curated, user-supplied reference replays; generated recordings stay ignored.
+!/recordings/examples/
+!/recordings/examples/*.slp
+!/recordings/examples/README.md
