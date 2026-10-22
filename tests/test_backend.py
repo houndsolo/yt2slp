@@ -63,7 +63,7 @@ def test_evidence_source_required():
 def test_unsupported_operations_create_no_replay(tmp_path):
     backend = NativeLinuxBackend()
     output = tmp_path / "result.slp"
-    for operation in (backend.capture, lambda: backend.restore(b""), lambda: backend.record(output)):
+    for operation in (lambda: backend.record(output),):
         with pytest.raises(UnsupportedOperation):
             operation()
     with pytest.raises(BackendError, match="no successful"):

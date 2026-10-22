@@ -139,3 +139,37 @@ commands remain sufficient; no environment draft changes were needed.
 
 Next: run that command locally with the ISO, then investigate any observed
 input/timing differences before building checkpoint/recording integration.
+
+
+## Linux process checkpoints — 2026-10-22
+
+User-reported local validation of the preceding stepping milestone passed:
+600 VI steps advanced match frames 1..601; paused state stayed stable; repeated
+runs matched selected fields; neutral prefixes matched and changed inputs
+changed fighter fields. All 23 local game-library tests also passed.
+
+Implemented one reusable session-local checkpoint using a frozen Linux process
+and forked continuations. This preserves the native stack plus game and host
+private memory without restarting the game or replaying inputs. A native thread
+count guard rejects unsafe threaded captures. Control-mode memory cards are
+volatile, so discarded branches cannot contaminate disk saves. Normal batch
+card persistence remains available. Recording stays explicitly unsupported.
+
+Protocol version 2 adds capture/restore responses, and Python validates handles,
+restored observations and child lifecycle. The new `checkpoint-experiment`
+compares four continuations across three restores, including a different-input
+branch and a return to the original inputs afterwards. Traces, capture/restore
+markers and comparison results are retained. See [checkpoint documentation](process-checkpoints.md).
+
+Host tests verify repeated restoration of fixed RAM, ARAM, host ticks, next VI,
+audio pointers, controller state, callbacks targeting the saved native stack,
+and volatile card data. Python tests cover real process forks with synthetic
+state, stable restores, branch divergence, stale handles, invalid replies,
+trace buffering, normal cleanup, owner death and a stopped child. No ISO-backed
+checkpoint validation or official replay playback was performed in cloud.
+
+Validation for this change: `bash scripts/docker.sh setup` passed all 84 Python,
+10 host/component and 23 game-library tests in the GCC 14 container. The host
+Python suite also passed all 84 tests. The native dependency implementation is
+commit `862191c` on `yt2slp/linux-headless`. Existing setup commands remain
+sufficient; no package, math-flag, game-source or ABI changes were required.

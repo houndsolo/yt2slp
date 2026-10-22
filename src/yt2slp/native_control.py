@@ -1,5 +1,7 @@
 """Private socket transport; game stdout/stderr can never become protocol data."""
 from pathlib import Path
+import os
+import signal
 import socket
 import subprocess
 import time
@@ -16,7 +18,7 @@ class ControlSession:
             with (run_dir / "host.log").open("wb") as log:
                 self.process = subprocess.Popen(
                     command + ["--control-fd", str(child.fileno())], cwd=run_dir,
-                    pass_fds=(child.fileno(),), stdin=subprocess.DEVNULL,
+                    pass_fds=(child.fileno(),), start_new_session=True, stdin=subprocess.DEVNULL,
                     stdout=log, stderr=subprocess.STDOUT)
         except BaseException:
             self.socket.close()
@@ -50,6 +52,9 @@ class ControlSession:
             try:
                 self.process.wait(timeout=2)
             except subprocess.TimeoutExpired:
-                self.process.kill()
+                try:
+                    os.killpg(self.process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
                 self.process.wait()
             self.process = None

@@ -9,6 +9,7 @@ import os
 import struct
 import subprocess
 import tempfile
+import secrets
 
 from .evidence import Evidence, Provenance
 from .match import MatchConfig, PadInput
@@ -113,7 +114,7 @@ class Backend(Protocol):
         ...
 
     def capture(self) -> bytes:
-        """Capture a restorable checkpoint or raise UnsupportedOperation."""
+        """Capture an opaque session-local checkpoint handle or fail explicitly."""
         ...
 
     def restore(self, checkpoint: bytes) -> None:
@@ -131,14 +132,16 @@ class NativeLinuxBackend:
     start() boots with a script and pauses at the first live VS observation.
     step() supplies all four ports and advances one VI retrace, retaining the
     game stack. A retrace is not necessarily a completed match simulation frame.
-    Use close() or a context manager to reap the process. No checkpoints/replays.
+    One reusable process checkpoint per session; no portable state or replays.
+    Use close() or a context manager to reap the process and frozen parent.
     """
 
     capabilities = {"run_script": True, "observe": True, "step": True, "fixed_match": True,
-                    "capture": False, "restore": False, "record": False}
+                    "capture": True, "restore": True, "record": False}
 
     def __init__(self) -> None:
         self._session: ControlSession | None = None
+        self._checkpoint: tuple[bytes, tuple[Observation, ...]] | None = None
         self.config: RunConfig | None = None
         self.observations: tuple[Observation, ...] = ()
         self.last_run_dir: Path | None = None
@@ -248,7 +251,7 @@ class NativeLinuxBackend:
         (run_dir / "config.json").write_text(json.dumps(asdict(c), default=str, indent=2) + "\n")
         try:
             self._session = ControlSession(command, run_dir, timeout)
-            if self._session.receive() != "MUCONTROL 1":
+            if self._session.receive() != "MUCONTROL 2":
                 raise ValueError("unsupported native control protocol")
             state = self._receive_state()
             if not (state.scene_major == 2 and state.scene == 2 and state.match_frame > 0
@@ -314,7 +317,8 @@ class NativeLinuxBackend:
             self._control_failure(exc)
 
     def close(self) -> None:
-        """Disconnect and reap the live process; retained observations are historical."""
+        """Reap all branches and invalidate checkpoints; observations are historical."""
+        self._checkpoint = None
         if self._session is not None:
             self._session.close()
             self._session = None
@@ -326,12 +330,57 @@ class NativeLinuxBackend:
         self.close()
 
     def capture(self) -> bytes:
-        """Fail: MuStatePod is an observation, not a complete checkpoint."""
-        raise UnsupportedOperation("capture: Linux host does not integrate game and host checkpoint state")
+        """Keep one frozen Linux process; return an opaque session-local handle.
+
+        This is not serialized state. The handle cannot be used after close/start,
+        with another backend instance, or in another Python process. The native
+        guard requires a single-threaded live VS process. Memory cards are held
+        in memory for the entire control session, including before capture.
+        """
+        if self._session is None:
+            raise BackendError("start a native session before capture")
+        if self._checkpoint is not None:
+            raise UnsupportedOperation("one checkpoint per session; close/start to capture another")
+        try:
+            self._session.send("capture")
+            response = self._session.receive()
+            if response.startswith("UNSUPPORTED "):
+                raise UnsupportedOperation(response[12:])
+            if response != "CAPTURED" or self._receive_state() != self.observations[-1]:
+                raise ValueError("capture did not preserve the paused state")
+            handle = secrets.token_bytes(32)
+            self._checkpoint = (handle, self.observations)
+            self._checkpoint_event("capture")
+            return handle
+        except (OSError, ValueError) as exc:
+            self._control_failure(exc)
 
     def restore(self, checkpoint: bytes) -> None:
-        """Fail until stack, host timing, memory and recording transactions exist."""
-        raise UnsupportedOperation("restore: no safe game checkpoint boundary is exposed")
+        """Discard the running branch and fork again from the retained checkpoint.
+
+        Restores process memory, native stack, host clocks/callbacks, inputs and
+        in-memory card state. Diagnostic output is append-only and not rolled back.
+        """
+        if self._session is None:
+            raise BackendError("start a native session before restore")
+        if self._checkpoint is None or type(checkpoint) is not bytes or checkpoint != self._checkpoint[0]:
+            raise BackendError("unknown or expired checkpoint handle for this session")
+        try:
+            self._session.send("restore")
+            response = self._session.receive()
+            if response != "RESTORED":
+                raise ValueError(f"expected RESTORED, received {response}")
+            state = self._receive_state()
+            if state != self._checkpoint[1][-1]:
+                raise ValueError("restored observation differs from captured state")
+            self.observations = self._checkpoint[1]
+            self._checkpoint_event("restore")
+        except (OSError, ValueError) as exc:
+            self._control_failure(exc)
+
+    def _checkpoint_event(self, operation: str) -> None:
+        with (self.last_run_dir / "inputs.txt").open("a") as log:
+            log.write(f"{self.observations[-1].retrace}: {operation}\n")
 
     def record(self, output: Path) -> None:
         """Fail: this host has no replay_event sink; never create a dummy .slp."""

@@ -65,7 +65,7 @@ def test_validation_does_not_advance_live_session(configured):
         with pytest.raises(BackendError, match="four PadInput"):
             backend.step(pads)
         assert backend.observe() == first
-    for op in (backend.capture, lambda: backend.restore(b""), lambda: backend.record(script.parent / "never.slp")):
+    for op in (lambda: backend.record(script.parent / "never.slp"),):
         with pytest.raises(UnsupportedOperation):
             op()
     assert not (script.parent / "never.slp").exists()
@@ -125,7 +125,7 @@ print('fixture diagnostic', flush=True)
 if mode == 'exit': sys.exit(9)
 if mode == 'timeout': time.sleep(10)
 if mode == 'truncated': s.sendall(b'MUCONTROL'); sys.exit(0)
-send('WRONG 1' if mode == 'version' else 'MUCONTROL 1')
+send('WRONG 1' if mode == 'version' else 'MUCONTROL 2')
 send('STATE 1,2' if mode == 'bad_state' else state().replace('1,2,2,1,0', '1,0,0,0,0') if mode == 'menu' else state())
 s.recv(4096)
 send(state(3) if mode == 'gap' else state(2))
@@ -149,3 +149,126 @@ time.sleep(10)
     assert backend._session is None and not backend.observations
     assert processes and processes[0].poll() is not None
     assert "fixture diagnostic" in (backend.last_run_dir / "host.log").read_text()
+
+
+def child_of(pid):
+    # Some managed kernels omit /proc/PID/task/PID/children.
+    found = []
+    for entry in Path("/proc").iterdir():
+        if entry.name.isdecimal():
+            try:
+                status = (entry / "status").read_text()
+            except (FileNotFoundError, PermissionError, ProcessLookupError):
+                continue
+            if any(line.split() == ["PPid:", str(pid)] for line in status.splitlines()):
+                found.append(int(entry.name))
+    assert len(found) == 1
+    return found[0]
+
+
+def test_checkpoint_repeated_restore_branches_and_cleanup(configured):
+    backend, script = configured
+    backend.start(script, timeout=2)
+    backend.step((PadInput(button=7), *NEUTRAL_PADS[1:]))
+    captured = backend.observe()
+    checkpoint = backend.capture()
+    owner = backend._session.process
+    child = child_of(owner.pid)
+    assert child != owner.pid and Path(f"/proc/{child}").exists()
+    assert backend.observe() == captured
+    with pytest.raises(UnsupportedOperation, match="one checkpoint"):
+        backend.capture()
+    with pytest.raises(BackendError, match="handle"):
+        backend.restore(b"wrong")
+    assert backend.observe() == captured
+    inputs = [(PadInput(button=b), *NEUTRAL_PADS[1:]) for b in (256, 1024, 0, 13)]
+    first = tuple(backend.step(pads) for pads in inputs)
+    backend.restore(checkpoint)
+    assert backend.observe() == captured
+    assert not Path(f"/proc/{child}").exists()  # discarded branch was reaped
+    assert tuple(backend.step(pads) for pads in inputs) == first
+    backend.restore(checkpoint)
+    neutral = tuple(backend.step(NEUTRAL_PADS) for _ in inputs)
+    assert neutral != first
+    backend.restore(checkpoint)
+    assert tuple(backend.step(pads) for pads in inputs) == first
+    child = child_of(owner.pid)
+    directory = backend.last_run_dir
+    backend.close()
+    assert owner.poll() == 0 and not Path(f"/proc/{child}").exists()
+    retraces = [int(line.split(",")[0]) for line in (directory / "state.csv").read_text().splitlines()]
+    assert retraces == [1, 2] + [3, 4, 5, 6] * 4  # no duplicated pre-fork buffers
+    assert (directory / "inputs.txt").read_text().count(": restore") == 3
+    backend.start(script, timeout=2)
+    with pytest.raises(BackendError, match="handle"):
+        backend.restore(checkpoint)
+
+
+def test_checkpoint_requires_live_session(configured):
+    backend, _ = configured
+    for op in (backend.capture, lambda: backend.restore(b"")):
+        with pytest.raises(BackendError, match="start"):
+            op()
+
+
+def test_checkpoint_owner_death_ends_session(configured):
+    backend, script = configured
+    backend.start(script, timeout=2)
+    backend.capture()
+    owner = backend._session.process
+    owner.kill()
+    owner.wait()
+    with pytest.raises(BackendError, match="native control failed"):
+        backend.observe()
+    assert backend._checkpoint is None and not backend.observations
+
+
+@pytest.mark.parametrize("operation", ["capture", "restore"])
+def test_checkpoint_malformed_reply_invalidates_session(configured, tmp_path, operation):
+    backend, script = configured
+    peer = tmp_path / "bad_checkpoint_peer"
+    peer.write_text(f'''#!{sys.executable}
+import socket, sys
+s = socket.socket(fileno=int(sys.argv[sys.argv.index('--control-fd') + 1]))
+f = s.makefile('r')
+def send(line): s.sendall((line + '\\n').encode())
+state = 'STATE ' + ','.join(map(str, [1, 2, 2, 1, 0] + [1] * 72))
+send('MUCONTROL 2'); send(state)
+f.readline(); send('CAPTURED'); send('STATE broken' if {operation!r} == 'capture' else state)
+if {operation!r} == 'restore':
+    f.readline(); send('RESTORED'); send(state.replace('STATE 1,', 'STATE 2,'))
+f.readline()
+''')
+    peer.chmod(0o700)
+    backend.initialize(replace(backend.config, host=peer))
+    backend.start(script, timeout=2)
+    process = backend._session.process
+    with pytest.raises(BackendError, match="native control failed"):
+        handle = backend.capture()
+        backend.restore(handle)
+    assert process.poll() is not None and backend._checkpoint is None and not backend.observations
+
+
+def test_stuck_branch_is_terminated_on_close(configured):
+    import os
+    import signal
+    backend, script = configured
+    backend.start(script, timeout=2)
+    backend.capture()
+    owner = backend._session.process
+    child = child_of(owner.pid)
+    os.kill(child, signal.SIGSTOP)
+    backend.close()
+    assert owner.poll() is not None
+    # A killed orphan can briefly remain a zombie until the container init reaps
+    # it; it must never retain a running game or a stopped branch.
+    status = Path(f"/proc/{child}/status")
+    deadline = time.monotonic() + 2
+    while status.exists():
+        try:
+            if any(line.startswith("State:") and "Z" in line for line in status.read_text().splitlines()):
+                break
+        except FileNotFoundError:
+            break
+        assert time.monotonic() < deadline
+        time.sleep(0.01)

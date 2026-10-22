@@ -131,7 +131,7 @@ was not available and is not claimed as validated.
 | Observe | `MuGameApi.state_snapshot`, `set_frame_observer`, `main.cpp::observe` | Strict 77-column CSV parser; six fighters, raw IEEE-754 bits retained. Output is inferred relative to video. No selected-field digest is a full state hash. |
 | Fixed match | Existing `match_override` callback / game preload and VS entry hooks | Validated `MatchConfig` and Linux `--match`; two players, external character IDs, Battlefield/Final Destination. Rules retain fresh-game defaults. |
 | VI-retrace step | Blocking `game.run`, cooperative socket pause in the existing VI observer | `start`/`step`/`observe` retain the live stack and advance one retrace per step. Native protocol and Python lifecycle tests pass with synthetic states; ISO-backed stepping unrun here. See [semantics](native-stepping.md). |
-| Capture / restore | `snapshot_ranges`, `state_exclusions`; `native_savestate::Engine` | Components tested, including repeated `load_keep` and differential byte comparisons. Minimal host does not integrate them. Unsupported through Python. |
+| Capture / restore | Linux `ProcessCheckpoint` at the paused VI observer | One reusable process checkpoint, retaining the native stack and private game/host memory. Synthetic protocol and actual host-service restoration tested; ISO-backed restore unrun here. No portable savestate bytes. |
 | Record | `shim/mu_replay.c`, `shim/mu_record_start.inc`; full host `h_replay_event`, `write_replay_recording` | Game recording code compiled. Minimal host leaves replay callbacks null and returns -1 for `slippi_command`; no `.slp` recording adapter yet. Unsupported through Python. |
 
 `MuStateRegion` explicitly excludes live native stack, host timing, ARAM and
@@ -140,7 +140,10 @@ is not a safe checkpoint. Snapshot exclusions and the matching build's
 `melee_game.snapexcl` must be understood, and the pause point must coordinate
 pending disc callbacks, input-script phase, host ticks/alarms and recording.
 MU's full host `begin_native_savestates` is the implementation reference, not an
-already exported Python API.
+already exported Python API. The current Linux checkpoint instead retains the
+whole single-threaded process with `fork`, avoiding partial memory restoration.
+It uses a volatile card and explicit branch cleanup; see
+[process checkpoints](process-checkpoints.md).
 
 `MU_NO_SLIPPI` is a **game-library** option: it removes replay playback/recording,
 Slippi menus, practice and online-rule sources. It remains **OFF**. The separate

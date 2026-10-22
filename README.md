@@ -132,7 +132,8 @@ does not establish parity with retail Melee.
 `--repeat` compares selected state fields across two fresh boots. It does not
 restore a checkpoint and cannot prove complete game-state equality. No ISO-backed game run
 has been performed in this cloud workspace. The backend raises
-`UnsupportedOperation` for `capture`, `restore` and `record`. `initialize`
+`UnsupportedOperation` for `record`. Process checkpoints are available in a
+live control session, as described below. `initialize`
 validates/binds paths, `run_script` initializes the game inside the native child,
 and `observe` reads the last successful run's selected state. It never writes a
 dummy `.slp`.
@@ -143,8 +144,8 @@ The native backend now supports fixed stage/player settings and a live,
 cooperative pause protocol. `start()` navigates to a match; `step()` advances
 one **VI retrace**, preserving the game's stack and ordinary input/timing path.
 The separate match-frame counter may advance differently. `observe()` does not
-resume a paused session. Checkpoint capture/restore and recording remain
-explicitly unsupported.
+resume a paused session. Session-local process capture/restore is now available;
+recording remains explicitly unsupported.
 
 Validate locally with your ISO after pulling and rebuilding the host:
 
@@ -163,7 +164,31 @@ steps, matching repeated runs, and a different fighter trace from neutral input.
 Logs and traces are retained under `.docker-state/local/runs/step-*`.
 See [native stepping](docs/native-stepping.md) for the Python API, supported
 configuration, timing semantics, protocol and test scope. Stock/time/item/team
-rules retain fresh-game defaults. No ISO-backed stepping test was run in cloud.
+rules retain fresh-game defaults. The user reported all stepping checks passing
+with their ISO: 600 retraces advanced match frames 1 to 601. This was a local
+validation, not a game run in the cloud workspace.
+
+## Checkpoint capture and restore
+
+The Linux backend retains one frozen process and resumes child branches from it,
+preserving the stack, game memory and host state. Checkpoint handles are valid
+only within the current session. Control sessions use an empty in-memory card;
+batch runs retain disk-backed private cards. Recording is still unsupported.
+
+After pulling and running `bash scripts/docker.sh setup`, validate with:
+
+```bash
+export YT2SLP_ISO=/home/houndsolo/Documents/vanilla.iso
+bash scripts/docker.sh run yt2slp checkpoint-experiment \
+  --script third_party/melee-unlocked/port/scripts/native_vs.txt \
+  --stage 31 --p1 2 --p2 20 --warmup 240 --steps 180 \
+  --seed 1 --time-base 0 --timeout 180
+```
+
+This compares identical and different-input continuations across three restores
+of one checkpoint. See [process checkpoints](docs/process-checkpoints.md) for
+API usage, lifecycle, retained traces and limitations. The ISO-backed checkpoint
+experiment has not been run in cloud.
 
 For later playback validation, set `YT2SLP_DOLPHIN` to your official Slippi
 Playback executable. The current doctor checks executable presence only;

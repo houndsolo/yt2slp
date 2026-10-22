@@ -79,18 +79,21 @@ or checkpoint determinism. It does not need Dolphin.
 
 Artifacts are in `.docker-state/local/runs/step-*` on the host: `config.json`,
 `host.log`, full `state.csv` (including boot), and `inputs.txt` (input requested
-after each recorded retrace). Each run uses a fresh private memory-card folder.
+after each recorded retrace). Control sessions use a fresh in-memory memory card. Batch runs use private
+memory-card folders.
 On errors, logs/partial traces remain but the Python observation history is
 cleared. Boot has a retrace budget (default 6000) and each response has a finite
 wall-clock timeout. Close/EOF stops the runner; a stuck process is killed/reaped.
-Capture, restore and recording still raise `UnsupportedOperation`; no dummy
-checkpoint or `.slp` file is created.
+Capture/restore now support one session-local Linux process checkpoint; see
+[process checkpoints](process-checkpoints.md). Recording remains unsupported.
 
 ## Protocol and test scope
 
-A private inherited Unix socket carries ASCII protocol version `MUCONTROL 1`,
+A private inherited Unix socket carries ASCII protocol version `MUCONTROL 2`,
 followed by `STATE ` and the existing 77-column state row. Stdout/stderr go to the
-log and cannot masquerade as responses. Commands are `observe`, `quit`, or
+log and cannot masquerade as responses. Commands include `capture` and `restore`
+(`CAPTURED`/`RESTORED` followed by the paused snapshot, or `UNSUPPORTED` without
+advancing). The other commands are `observe`, `quit`, or
 `step` plus 40 decimal integers: button, stick X/Y, substick X/Y, L/R triggers,
 analog A/B, error for each of four ports. The native side validates all inputs
 before applying any; malformed commands fail closed. Every accepted step returns
@@ -102,4 +105,6 @@ pause protocol, signed inputs, invalid/oversized/truncated commands, EOF and boo
 limits. Python tests drive that same compiled protocol fixture and deliberately
 broken peers to test lifecycle, cleanup and error reporting. These tests do not
 simulate Melee or establish gameplay correctness. Real ISO validation remains a
-local check; no retail ISO is available in the cloud workspace.
+local check; no retail ISO is available in the cloud workspace. The user has
+reported passing the prior 600-step ISO experiment locally (match frames 1..601,
+stable pauses, repeated-run agreement, matching neutral prefix and input effects).

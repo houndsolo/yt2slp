@@ -8,7 +8,7 @@ from yt2slp.doctor import inspect_environment
 def test_capabilities(capsys):
     assert main(["capabilities"]) == 0
     report = json.loads(capsys.readouterr().out)
-    assert report["run_script"] and not report["restore"] and not report["record"]
+    assert report["run_script"] and report["capture"] and report["restore"] and not report["record"]
 
 
 def test_missing_iso_is_actionable(monkeypatch, capsys):
@@ -60,3 +60,28 @@ def test_step_experiment_requires_iso(monkeypatch, capsys):
 def test_step_experiment_rejects_short_input_check(capsys):
     assert main(["step-experiment", "--iso", "disc.iso", "--script", "boot.txt", "--steps", "10", "--check-input"]) == 1
     assert "at least 400" in capsys.readouterr().err
+
+
+def test_checkpoint_experiment_with_native_process_fixture(tmp_path, capsys):
+    from pathlib import Path
+    host = Path(__file__).resolve().parents[1] / "build/headless/headless_control_fixture"
+    (tmp_path / "build/headless").mkdir(parents=True)
+    (tmp_path / "build/game").mkdir(parents=True)
+    (tmp_path / "build/headless/melee_headless").symlink_to(host)
+    (tmp_path / "build/game/melee_game.so").touch()
+    (tmp_path / "disc.iso").touch()
+    (tmp_path / "boot.txt").touch()
+    assert main(["--repo", str(tmp_path), "checkpoint-experiment", "--iso", str(tmp_path / "disc.iso"),
+                 "--script", str(tmp_path / "boot.txt"), "--warmup", "5", "--steps", "60"]) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["checkpoint_restoration_tested"] and report["restores"] == 3
+    assert report["same_input_selected_fields_match"] and report["restore_after_divergence_matches"]
+    assert report["different_input_changes_fighter_fields"] and report["restored_pause_stable"]
+    assert not report["recording_tested"] and not report["full_state_equality_measured"]
+    traces = json.loads((Path(report["run_directory"]) / "branches.json").read_text())
+    assert len(traces) == 4 and traces["original"] == traces["restored_after_divergence"]
+
+
+def test_checkpoint_experiment_rejects_limits(capsys):
+    assert main(["checkpoint-experiment", "--iso", "disc.iso", "--script", "boot.txt", "--steps", "1"]) == 1
+    assert "60..10000" in capsys.readouterr().err

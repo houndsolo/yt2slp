@@ -50,6 +50,18 @@ def main(argv: list[str] | None = None) -> int:
     stepping.add_argument("--p2", type=int, choices=range(26), default=20, help="external CharacterKind (20 Falco)")
     stepping.add_argument("--repeat", action="store_true")
     stepping.add_argument("--check-input", action="store_true", help="also compare against a fresh neutral-input run (requires at least 400 steps)")
+    checkpoint = commands.add_parser("checkpoint-experiment", help="capture and repeatedly restore a Linux process checkpoint; requires your ISO")
+    checkpoint.add_argument("--iso", type=_path, default=_path(os.environ["YT2SLP_ISO"]) if os.environ.get("YT2SLP_ISO") else None)
+    checkpoint.add_argument("--script", type=_path, required=True)
+    checkpoint.add_argument("--warmup", type=int, default=240)
+    checkpoint.add_argument("--steps", type=int, default=180)
+    checkpoint.add_argument("--boot-limit", type=int, default=6000)
+    checkpoint.add_argument("--timeout", type=float, default=180)
+    checkpoint.add_argument("--seed", type=int, default=1)
+    checkpoint.add_argument("--time-base", type=int, default=0)
+    checkpoint.add_argument("--stage", type=int, choices=(31, 32), default=31)
+    checkpoint.add_argument("--p1", type=int, choices=range(26), default=2)
+    checkpoint.add_argument("--p2", type=int, choices=range(26), default=20)
     args = parser.parse_args(argv)
     try:
         if args.command == "doctor":
@@ -66,6 +78,8 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.iso is None:
             raise BackendError("Melee ISO is not configured; set YT2SLP_ISO or --iso. No game run attempted.")
+        if args.command == "checkpoint-experiment":
+            return checkpoint_experiment(args)
         if args.command == "step-experiment":
             return step_experiment(args)
         backend = NativeLinuxBackend()
@@ -137,3 +151,56 @@ def step_experiment(args: argparse.Namespace) -> int:
               "checkpoint_restoration_tested": False, "recording_tested": False, "playback_tested": False}
     print(json.dumps(report, indent=2))
     return 1 if not advanced or matched is False or input_changed is False else 0
+
+
+def checkpoint_experiment(args: argparse.Namespace) -> int:
+    """One boot, one frozen checkpoint, four continuations and three restores."""
+    if not 0 <= args.warmup <= 10000 or not 60 <= args.steps <= 10000:
+        raise BackendError("warmup must be 0..10000 and steps must be 60..10000")
+    match = MatchConfig(args.stage, (PlayerConfig(args.p1), PlayerConfig(args.p2)))
+    with NativeLinuxBackend() as backend:
+        backend.initialize(RunConfig(args.repo / "build/headless/melee_headless", args.repo / "build/game/melee_game.so",
+                                     args.iso, args.repo / ".local/runs", args.seed, args.time_base, match))
+        backend.start(args.script, args.timeout, args.boot_limit)
+        for _ in range(args.warmup):
+            backend.step(NEUTRAL_PADS)
+        captured = backend.observe()
+        handle = backend.capture()
+
+        def continuation(neutral: bool = False):
+            trace = []
+            for i in range(args.steps):
+                p1 = (PadInput(stick_x=80) if i < 30 else PadInput(button=0x400) if i < 34 else
+                      PadInput(button=0x100) if 50 <= i < 54 else PadInput())
+                trace.append(backend.step(NEUTRAL_PADS if neutral else (p1, *NEUTRAL_PADS[1:])))
+            return tuple(trace)
+
+        first = continuation()
+        backend.restore(handle)
+        time.sleep(0.05)
+        stable = backend.observe() == captured
+        repeated = continuation()
+        backend.restore(handle)
+        neutral = continuation(neutral=True)
+        backend.restore(handle)
+        after_divergence = continuation()
+        # Preserve selected branch observations separately; state.csv is a native
+        # diagnostic chronology containing rewinds, not a contiguous batch digest.
+        traces = {"original": first, "restored_same_input": repeated,
+                  "restored_neutral": neutral, "restored_after_divergence": after_divergence}
+        with (backend.last_run_dir / "branches.json").open("w") as output:
+            json.dump({name: [asdict(o) for o in trace] for name, trace in traces.items()}, output)
+        report = {"run_directory": str(backend.last_run_dir), "requested_match": asdict(match),
+                  "checkpoint_kind": "session-local Linux process fork", "step_unit": "VI retrace",
+                  "warmup_steps": args.warmup, "continuation_steps": args.steps,
+                  "captured_match_frame": captured.match_frame, "final_match_frame": first[-1].match_frame,
+                  "restores": 3, "restored_pause_stable": stable,
+                  "same_input_selected_fields_match": first == repeated,
+                  "different_input_changes_fighter_fields": any(a.fighters != b.fighters for a, b in zip(first, neutral)),
+                  "restore_after_divergence_matches": first == after_divergence,
+                  "match_frame_advanced": first[-1].match_frame > captured.match_frame,
+                  "checkpoint_restoration_tested": True, "full_state_equality_measured": False,
+                  "recording_tested": False, "playback_tested": False}
+        print(json.dumps(report, indent=2))
+        return 0 if all(report[key] for key in ("restored_pause_stable", "same_input_selected_fields_match",
+                        "different_input_changes_fighter_fields", "restore_after_divergence_matches", "match_frame_advanced")) else 1
