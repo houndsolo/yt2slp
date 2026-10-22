@@ -8,7 +8,8 @@ values must remain distinguishable from observations and unknowns.
 **Current position:** the native simulation foundation works, including stepping,
 checkpoint branching and genuine replay export. Bounded and complete timed-match recordings have
 passed independent parsing and actual official Playback Dolphin progression.
-Video ingestion, visual state estimation and input reconstruction are not yet
+A first controlled nine-field comparison and timer-labelled reference clip now
+exist. General video ingestion, visual state estimation and input reconstruction are not yet
 implemented. There is no end-to-end video-to-replay command yet.
 
 Checked items below are implemented and validated within their stated scope.
@@ -22,7 +23,7 @@ promise that its design or acceptance thresholds have already been settled.
 | 1. Reproducible native development environment | Complete for Linux/GCC 14 | Build and test the host/game without committing game assets |
 | 2. Controllable simulation and checkpoint branching | Complete for the initial supported scope | Boot a fixed match, apply inputs, pause, observe, capture and repeatedly restore |
 | 3. Genuine recording and official playback | Bounded and complete timed matches validated; broader cases remain | Export only the selected branch, parse it independently, and play it in official Dolphin |
-| 4. Reference comparison and controlled benchmarks | Not implemented | Measure agreement between native simulation, official playback and rendered observations |
+| 4. Reference comparison and controlled benchmarks | First controlled case validated; broader/visual comparison remains | Measure agreement between native simulation, official playback and rendered observations |
 | 5. Video ingestion and observation extraction | Not implemented | Produce a timestamped, uncertainty-aware observation timeline from a supported clip |
 | 6. Input and hidden-state reconstruction | Not implemented | Search simulation branches for a playable sequence that matches observations |
 | 7. End-to-end reconstruction and review | Not implemented | Video in; selected `.slp`, comparison evidence and limitations out |
@@ -132,18 +133,33 @@ This is the next foundation for evaluating reconstruction quality. Playback fram
 progression establishes that a file plays; it does not establish that native and
 Dolphin states or rendered images agree.
 
-- [ ] Define an initial supported reconstruction case: short continuous footage,
-  known stage/characters, explicit start conditions and a limited input space.
-  Set measurable acceptance thresholds before claiming a successful reconstruction.
-- [ ] Automate official Playback frame capture and align replay frames with
-  native observations. Account for preroll, pauses and VI versus match-frame timing.
-- [ ] Compare native selected states with independent replay/playback evidence;
-  compare rendered observations where available. Identify and document divergence
-  rather than changing physics or enabling resync to conceal it.
-- [ ] Create controlled reference clips from known inputs and retain their input
-  sequences, replay events, observations, frame mapping and tool/build identities.
-- [ ] Establish repeatable comparison metrics for positions, actions, stocks,
-  damage, event timing and visual agreement, including tolerances and exclusions.
+- [x] Define a first controlled reference case: unpaused vanilla Fox/Falco on
+  Battlefield, fixed requested boot inputs, a neutral/right input sequence, and
+  game frames 240..300. Require exact selected scalar words and complete coverage.
+- [x] Capture actual official Playback images and regenerated game events with
+  resync disabled; retain private profiles, requests, inputs and tool/build identities.
+- [x] Compare nine post-frame fields at exact frame/player keys and independently
+  check the seven common native observation fields without fitting a time shift.
+- [x] Label a controlled reference clip from its rendered countdown HUD using
+  local manually verified glyph calibration. Require every requested label exactly
+  once; preserve unknowns and reject ambiguous, missing or reordered labels.
+- [x] Retain a 61-frame lossless clip, frame/timer/image mapping, exact mismatch
+  counts, maximum absolute errors, RMSE and first-difference diagnostics.
+- [ ] Establish native/rendered image agreement and the rendering/post-update
+  phase relationship. The headless backend does not supply comparison pixels.
+- [ ] Expand controlled cases beyond horizontal movement, this stage/character
+  pair and the 240..300 interval, including combat, damage and stock changes.
+- [ ] Define video-reconstruction accuracy thresholds and broader visual metrics
+  before claiming a successful reconstruction. Current criteria are benchmark gates.
+
+Local benchmark: `.docker-state/local/runs/step-f4lpqe4n/analysis-final-v1/`.
+All nine native/official scalar fields match bit-for-bit across 122 player-frames;
+all seven common native observation fields match their recorded frames. The clip
+has 61 timer-labelled frames at 60 FPS, without duplicate/missing labels. This is
+selected-field equality for a controlled case, not complete-state/image parity.
+Calibration uses ignored local game-derived images/templates and is explicitly
+manual at bootstrap; it is not a general video-recognition system. See
+[reference benchmark](reference-benchmark.md) for commands, policies and evidence.
 
 Acceptance: a reproducible benchmark can report where agreement holds, where it
 fails, and what remains unmeasured. Full retail parity is not assumed or a reason
@@ -228,7 +244,7 @@ features or prerequisites for the first short-clip reconstruction.
 
 ## Latest validation and retained evidence
 
-The last implementation validation used Docker GCC 14 and passed **122 Python,
+The last implementation validation used Docker GCC 14 and passed **137 Python,
 10 host/component, 23 game-library and 9 independent parser tests**. Synthetic protocol/component tests
 establish their tested behavior; the following local ISO runs provide separate
 gameplay, recording and playback evidence.
@@ -243,12 +259,15 @@ gameplay, recording and playback evidence.
 | Complete timed match and restoration | Capture 6901, three restores, genuine timeout at 7200; `.docker-state/local/runs/step-cwrg_5u4/complete-result.json` |
 | Complete-match independent parser | Final frame 7200, timeout method 1, placements [1, 0, -1, -1]; `parser-result.json` and `divergent-parser-result.json` in that run |
 | Complete official Playback 3.5.2 | Exact replay path/final-frame checks, contiguous -123..7200 progression, resync disabled; `.local/playback-complete/result.json` and `stdout.log` |
+| Controlled native/official benchmark | Nine fields bit-exact across 122 player-frames; seven-field native observation check passes; `.docker-state/local/runs/step-f4lpqe4n/analysis-final-v1/result.json` |
+| Labelled reference clip | 61 lossless frames at 60 FPS, game frames 240..300; `reference.mkv`, `frame-index.csv`, `frame-labels.json` in that analysis directory |
 
 The selected replay in both recording runs has SHA-256
 `46b196b913b9a81bc501ddfcdd6f28c2710aabf665b0597d9059c9511e7e5dd2`.
 Artifacts are ignored local evidence, not files guaranteed to exist in another
 checkout. The complete selected recording has SHA-256
 `5605bab19d66b2fdaaf0148ba924c5867fd9b17e3dd7b52f94c217856af1144b`.
+The controlled benchmark establishes selected-field agreement only.
 Full-state equality, rendered-image agreement, Dolphin/native result-state
 agreement, stock/LRAS endings and retail parity remain unestablished.
 

@@ -1,0 +1,56 @@
+"""Create the first controlled reference case in Docker: Fox/Falco, Battlefield.
+
+Fresh vanilla match, seed 1, time base 0; neutral through frame 241 followed by
+180 right-stick retraces. No checkpoints/pauses in gameplay time, no Start inputs.
+"""
+from dataclasses import asdict
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+
+from yt2slp.backend import NativeLinuxBackend, RunConfig
+from yt2slp.match import MatchConfig, NEUTRAL_PADS, PadInput
+
+
+def sha256(path):
+    with path.open('rb') as handle:
+        return hashlib.file_digest(handle, 'sha256').hexdigest()
+
+
+def main():
+    iso = Path(os.environ.get('YT2SLP_ISO', '/assets/melee.iso'))
+    with NativeLinuxBackend() as b:
+        b.initialize(RunConfig(Path('build/headless/melee_headless'), Path('build/game/melee_game.so'),
+                               iso, Path('.local/runs'), match=MatchConfig()))
+        observations = [b.start(Path('third_party/melee-unlocked/port/scripts/native_vs.txt'), timeout=180)]
+        for i in range(420):
+            pads = NEUTRAL_PADS if i < 240 else (PadInput(stick_x=80), *NEUTRAL_PADS[1:])
+            observations.append(b.step(pads))
+            if b.recording_status().last_frame != observations[-1].match_frame:
+                raise RuntimeError('native observation and replay counters disagree; no frame offset will be guessed')
+        directory = b.last_run_dir
+        replay = directory / 'native.slp'
+        b.record(replay)
+        (directory / 'observations.json').write_text(json.dumps([asdict(o) for o in observations])+'\n')
+        config = b.config
+        manifest = {'schema': 1, 'case': 'fox-falco-battlefield-horizontal-v1',
+            'clip': {'first':240,'last':300,'fps':60,'timer_pauses_allowed':False},
+            'native_observation_frames':[o.match_frame for o in observations],
+            'input_policy':'240 neutral steps; 180 steps P1 stick_x=80; other ports neutral/disconnected',
+            'seed':config.rng_seed,'time_base':config.time_base,'requested_match':asdict(config.match),
+            'identities':{str(p):sha256(p) for p in [config.host,config.game_library,iso,Path('uv.lock'),Path(__file__)]},
+            'replay_sha256':sha256(replay),
+            'git_head':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
+            'engine_head':subprocess.check_output(['git','-C','third_party/melee-unlocked','rev-parse','HEAD'],text=True).strip(),
+            'native_recording_status':asdict(b.recording_status()),
+            'alignment':'native match counter equals recording last post-frame at every step; no fitted shift',
+            'state_policy':'bit-exact integers and float32 words for declared fields; no ULP exceptions',
+            'reconstruction_quality_thresholds_established':False}
+        (directory / 'benchmark.json').write_text(json.dumps(manifest,indent=2)+'\n')
+        print(directory)
+
+
+if __name__ == '__main__':
+    main()

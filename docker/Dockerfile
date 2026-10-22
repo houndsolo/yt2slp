@@ -10,7 +10,7 @@ RUN --mount=type=secret,id=proxy_ca \
     fi; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-      ca-certificates git gcc-14 g++-14 binutils make python3 python3-venv nodejs npm; \
+      ca-certificates git gcc-14 g++-14 binutils make python3 python3-venv nodejs npm ffmpeg; \
     python3 -m venv /opt/tools; \
     /opt/tools/bin/pip install --no-cache-dir uv==0.12.23; \
     rm -f /etc/apt/apt.conf.d/99-build-ca; \

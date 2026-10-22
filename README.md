@@ -220,6 +220,21 @@ JSON playback interface.
 Set `YT2SLP_DOLPHIN` to the official Playback executable on the host. The current doctor checks executable presence only;
 neither parser acceptance nor executable presence establishes replay playback.
 
+## Controlled reference benchmark
+
+A first benchmark now records a known input sequence, captures official Playback
+images and regenerated events, and compares nine native/official scalar fields
+at exact frame keys. The 240..300 case passes across 122 player-frames and yields
+a 61-frame lossless clip with rendered-timer labels. It uses local manually verified
+glyph calibration; general video recognition and native/official image equality
+remain unimplemented/unmeasured. See [reference benchmark](docs/reference-benchmark.md)
+for capture, calibration, comparison commands and retained evidence.
+
+```bash
+export YT2SLP_ISO=/home/houndsolo/Documents/vanilla.iso
+bash scripts/docker.sh run python scripts/record_benchmark.py
+```
+
 ## Development checks
 
 ```bash
