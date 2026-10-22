@@ -10,6 +10,7 @@ import struct
 import subprocess
 import tempfile
 import secrets
+import re
 
 from .evidence import Evidence, Provenance
 from .match import MatchConfig, PadInput
@@ -132,12 +133,12 @@ class NativeLinuxBackend:
     start() boots with a script and pauses at the first live VS observation.
     step() supplies all four ports and advances one VI retrace, retaining the
     game stack. A retrace is not necessarily a completed match simulation frame.
-    One reusable process checkpoint per session; no portable state or replays.
+    One reusable process checkpoint per session; in-memory recording follows restores.
     Use close() or a context manager to reap the process and frozen parent.
     """
 
     capabilities = {"run_script": True, "observe": True, "step": True, "fixed_match": True,
-                    "capture": True, "restore": True, "record": False}
+                    "capture": True, "restore": True, "record": True}
 
     def __init__(self) -> None:
         self._session: ControlSession | None = None
@@ -383,5 +384,47 @@ class NativeLinuxBackend:
             log.write(f"{self.observations[-1].retrace}: {operation}\n")
 
     def record(self, output: Path) -> None:
-        """Fail: this host has no replay_event sink; never create a dummy .slp."""
-        raise UnsupportedOperation("record: minimal Linux host has no replay event sink; full source host integration is required")
+        """Export the current branch's real events, including its pre-checkpoint prefix.
+
+        Does not advance or invent Game End. An unfinished match exports a partial
+        replay. Explicit exports survive future restores and are never overwritten.
+        """
+        if self._session is None:
+            raise UnsupportedOperation("record requires a live control session")
+        if output.exists():
+            raise BackendError(f"replay output already exists: {output}")
+        try:
+            self._session.send("record")
+            reply = self._session.receive()
+            if reply.startswith("UNSUPPORTED "):
+                raise UnsupportedOperation(reply[12:])
+            if not re.fullmatch(r"REPLAY [0-9]+", reply):
+                raise ValueError("expected REPLAY size")
+            size = int(reply[7:])
+            if not 1 <= size <= 257 * 1024 * 1024:
+                raise ValueError("invalid replay size")
+            data = bytearray()
+            while len(data) < size:
+                chunk = self._session.receive()
+                if not re.fullmatch(r"[0-9a-f]{2,2048}", chunk) or len(chunk) % 2:
+                    raise ValueError("invalid replay chunk")
+                data.extend(bytes.fromhex(chunk))
+                if len(data) > size:
+                    raise ValueError("replay exceeds declared size")
+            if self._session.receive() != "RECORDED":
+                raise ValueError("missing recording terminator")
+        except (OSError, ValueError) as exc:
+            self._control_failure(exc)
+        # Publish only after the complete transport succeeds; exclusive creation.
+        try:
+            with tempfile.NamedTemporaryFile(dir=output.parent, delete=False) as handle:
+                temporary = Path(handle.name)
+                try:
+                    handle.write(data)
+                    handle.flush()
+                    os.fsync(handle.fileno())
+                    os.link(temporary, output)  # atomic, refuses existing destinations
+                finally:
+                    temporary.unlink()
+        except OSError as exc:
+            raise BackendError(f"cannot write replay: {exc}") from exc

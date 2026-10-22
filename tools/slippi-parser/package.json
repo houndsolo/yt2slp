@@ -1,0 +1,6 @@
+{
+  "name": "yt2slp-replay-validation",
+  "private": true,
+  "version": "0.1.0",
+  "dependencies": {"@slippi/slippi-js": "9.1.3"}
+}

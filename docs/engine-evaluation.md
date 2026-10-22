@@ -132,7 +132,7 @@ was not available and is not claimed as validated.
 | Fixed match | Existing `match_override` callback / game preload and VS entry hooks | Validated `MatchConfig` and Linux `--match`; two players, external character IDs, Battlefield/Final Destination. Rules retain fresh-game defaults. |
 | VI-retrace step | Blocking `game.run`, cooperative socket pause in the existing VI observer | `start`/`step`/`observe` retain the live stack and advance one retrace per step. Native protocol and Python lifecycle tests pass with synthetic states; ISO-backed stepping unrun here. See [semantics](native-stepping.md). |
 | Capture / restore | Linux `ProcessCheckpoint` at the paused VI observer | One reusable process checkpoint, retaining the native stack and private game/host memory. Synthetic protocol and actual host-service restoration tested; ISO-backed restore unrun here. No portable savestate bytes. |
-| Record | `shim/mu_replay.c`, `shim/mu_record_start.inc`; full host `h_replay_event`, `write_replay_recording` | Game recording code compiled. Minimal host leaves replay callbacks null and returns -1 for `slippi_command`; no `.slp` recording adapter yet. Unsupported through Python. |
+| Record | `shim/mu_replay.c`, `shim/mu_record_start.inc`; full host `h_replay_event`, `write_replay_recording` | Game recording code compiled. Minimal host now consumes real replay events for vanilla control sessions and exports the selected branch; `slippi_command` remains offline/unsupported. See [validation](slippi-recording.md). |
 
 `MuStateRegion` explicitly excludes live native stack, host timing, ARAM and
 process allocations. Copying the declared regions at an arbitrary Python call
@@ -215,3 +215,15 @@ protocol. It was inspected, not installed or tested here.
 
 Neither a successful build, passing synthetic event tests, matching selected
 fields nor parser acceptance substitutes for this final gameplay/playback check.
+
+
+## Recording milestone update
+
+The source audit above describes the original selection work. The minimal host's
+replay callback is now connected, using the existing stream encoder and the
+full host's vanilla Gecko terminator. All stream data remains in private process
+memory, so Linux capture/restore also restores the exact event prefix without
+publishing discarded branches. Selected-branch replay bytes, independent parser
+acceptance and actual official Playback progression were tested separately with
+the user's ISO. See [recording and playback](slippi-recording.md). No game math,
+timing constants or ABI changed; complete-state and retail parity remain open.

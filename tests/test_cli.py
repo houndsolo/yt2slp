@@ -8,7 +8,7 @@ from yt2slp.doctor import inspect_environment
 def test_capabilities(capsys):
     assert main(["capabilities"]) == 0
     report = json.loads(capsys.readouterr().out)
-    assert report["run_script"] and report["capture"] and report["restore"] and not report["record"]
+    assert report["run_script"] and report["capture"] and report["restore"] and report["record"]
 
 
 def test_missing_iso_is_actionable(monkeypatch, capsys):

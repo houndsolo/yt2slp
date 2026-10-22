@@ -2,8 +2,9 @@
 
 ## First milestone — 2026-10-22
 
-The Linux development foundation is implemented. Real simulation, integrated
-checkpoint branching, recording and official playback remain unvalidated.
+At this first milestone the Linux development foundation was implemented; real
+simulation, integrated checkpoint branching, recording and official playback
+were unvalidated. Later local validation is recorded below.
 The user has not supplied an accessible game image; no asset was downloaded or
 invented. The next experiment needs that prerequisite, not more package installs.
 
@@ -173,3 +174,41 @@ Validation for this change: `bash scripts/docker.sh setup` passed all 84 Python,
 Python suite also passed all 84 tests. The native dependency implementation is
 commit `862191c` on `yt2slp/linux-headless`. Existing setup commands remain
 sufficient; no package, math-flag, game-source or ABI changes were required.
+
+
+## Local checkpoint validation and native recording — 2026-10-22
+
+The user reported successful ISO-backed checkpoint validation for milestone
+`97005ca` / engine `862191c`: capture at match frame 241, four 180-step
+continuations to 421 and three restores. Restored observations stayed stable;
+identical inputs matched selected fields; changed inputs diverged; returning
+from the divergent branch reproduced the original continuation. Artifacts:
+`.docker-state/local/runs/step-2o7rj74b/`. The retained branch traces agree with
+this report. These are selected-field comparisons, not full-state equality or
+retail parity.
+
+The minimal host now records the game's genuine native replay events in private
+memory. Explicit `record()` export includes the selected branch and its captured
+prefix; restoring discards trial-branch events through process-memory restoration.
+There is no spectator publication, fabricated replay, or invented Game End.
+Export is for live vanilla control sessions; batch recording stays unsupported.
+
+Located the installed official Playback Dolphin separately from Netplay and the
+launcher. Playback reports version 3.5.2. Its actual CLI and the official JSON
+request format were checked before running it. Host configuration is documented;
+Docker native paths are translated explicitly to host playback paths.
+
+Local ISO recording passed byte-for-byte branch comparisons (181,236-byte
+selected replay), independent pinned slippi-js parsing (-123..421), and actual
+official Playback frame progression (-123..422) with resync disabled. The bounded
+replay has no Game End. Full-state equality, complete-game endings and retail
+parity remain unestablished. See [recording and playback](slippi-recording.md)
+for commands, exact artifact locations, scope and limitations.
+
+Recording engine commit: `b87fb67`, published on `yt2slp/linux-headless` before
+updating the parent gitlink. Docker validation passed 96 Python tests, 10 native
+host/component tests and 23 game-library tests. The reusable recording command
+was also run successfully at `.docker-state/local/runs/step-jrevwdnh/`; its
+selected replay SHA-256 is
+`46b196b913b9a81bc501ddfcdd6f28c2710aabf665b0597d9059c9511e7e5dd2`,
+matching the earlier parser/playback-validated recording.

@@ -2,9 +2,9 @@
 
 An experimental foundation for reconstructing **approximate** playable Melee
 replays from video. Video cannot recover every original input, RNG value or
-hidden state. Observed, inferred and unknown values are separate types. This
-milestone does not implement video recognition or claim to generate playable
-replays yet.
+hidden state. Observed, inferred and unknown values are separate types. Video recognition is not implemented. The native backend now exports genuine
+selected-branch recordings, with bounded official Slippi playback validated
+locally; this does not establish retail parity.
 
 The selected engine is the existing native Linux Melee Unlocked source host,
 isolated in a child process. See [engine evaluation](docs/engine-evaluation.md)
@@ -103,8 +103,7 @@ bash scripts/docker.sh run yt2slp experiment \
 The helper mounts that file read-only at `/assets/melee.iso` and sets the
 container's `YT2SLP_ISO` accordingly. Slippi Dolphin is not needed for this
 native experiment. The user has reported a successful 3000-retrace batch run (974 match
-observations) with matching selected fields across two fresh Docker runs. The
-new stepping path still needs validation with an ISO; see the command below.
+observations) with matching selected fields across two fresh Docker runs. The user subsequently validated the stepping path with their ISO; see below.
 
 ## Run a bounded experiment without Docker
 
@@ -130,9 +129,9 @@ simulation ticks. `--vanilla-game` requests the engine's vanilla options; it
 does not establish parity with retail Melee.
 
 `--repeat` compares selected state fields across two fresh boots. It does not
-restore a checkpoint and cannot prove complete game-state equality. No ISO-backed game run
-has been performed in this cloud workspace. The backend raises
-`UnsupportedOperation` for `record`. Process checkpoints are available in a
+restore a checkpoint and cannot prove complete game-state equality. The original cloud milestone had no ISO-backed game run; subsequent local
+recording and playback validation is documented below. Batch recording is unsupported; live control sessions support explicit
+selected-branch `record()` export. Process checkpoints are available in a
 live control session, as described below. `initialize`
 validates/binds paths, `run_script` initializes the game inside the native child,
 and `observe` reads the last successful run's selected state. It never writes a
@@ -145,7 +144,7 @@ cooperative pause protocol. `start()` navigates to a match; `step()` advances
 one **VI retrace**, preserving the game's stack and ordinary input/timing path.
 The separate match-frame counter may advance differently. `observe()` does not
 resume a paused session. Session-local process capture/restore is now available;
-recording remains explicitly unsupported.
+selected-branch recording is available.
 
 Validate locally with your ISO after pulling and rebuilding the host:
 
@@ -173,7 +172,7 @@ validation, not a game run in the cloud workspace.
 The Linux backend retains one frozen process and resumes child branches from it,
 preserving the stack, game memory and host state. Checkpoint handles are valid
 only within the current session. Control sessions use an empty in-memory card;
-batch runs retain disk-backed private cards. Recording is still unsupported.
+batch runs retain disk-backed private cards. Recording follows process restores.
 
 After pulling and running `bash scripts/docker.sh setup`, validate with:
 
@@ -187,11 +186,34 @@ bash scripts/docker.sh run yt2slp checkpoint-experiment \
 
 This compares identical and different-input continuations across three restores
 of one checkpoint. See [process checkpoints](docs/process-checkpoints.md) for
-API usage, lifecycle, retained traces and limitations. The ISO-backed checkpoint
-experiment has not been run in cloud.
+API usage, lifecycle, retained traces and limitations. The user validated all three restores locally: capture at match frame 241 and
+180-step continuations to 421, including divergence and return to original inputs.
+Artifacts: `.docker-state/local/runs/step-2o7rj74b/`. Full-state equality and retail
+parity are not established.
 
-For later playback validation, set `YT2SLP_DOLPHIN` to your official Slippi
-Playback executable. The current doctor checks executable presence only;
+## Native recording and official playback
+
+Live vanilla control sessions record game-generated events in memory. Call
+`backend.record(Path("selected.slp"))` while paused to export the current branch;
+restoring a checkpoint discards trial-branch events. Destinations must be new.
+An unfinished match exports a partial replay with no invented Game End.
+
+```bash
+export YT2SLP_ISO=/home/houndsolo/Documents/vanilla.iso
+bash scripts/docker.sh run python scripts/record_checkpoint_experiment.py
+# Host playback configuration; do not use this path inside Docker:
+export YT2SLP_DOLPHIN='/home/houndsolo/.config/Slippi Launcher/playback/Slippi_Playback-x86_64.AppImage'
+```
+
+The installed Playback Dolphin reports version 3.5.2 and is separate from Netplay
+and the launcher. Real recording passed checkpoint-branch byte comparisons,
+independent slippi-js parsing, and official playback through the bounded replay's
+recorded frames with resync disabled. These are separate checks, not proof of
+full-state equality or retail parity. See [recording and playback](docs/slippi-recording.md)
+for exact evidence, parser installation, host/Docker path mapping and the verified
+JSON playback interface.
+
+Set `YT2SLP_DOLPHIN` to the official Playback executable on the host. The current doctor checks executable presence only;
 neither parser acceptance nor executable presence establishes replay playback.
 
 ## Development checks

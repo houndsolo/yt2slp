@@ -47,3 +47,6 @@ extracted/
 .cache/
 .docker-state/
 .DS_Store
+
+# Independent replay parser tooling
+node_modules/

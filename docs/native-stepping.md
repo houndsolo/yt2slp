@@ -85,7 +85,7 @@ On errors, logs/partial traces remain but the Python observation history is
 cleared. Boot has a retrace budget (default 6000) and each response has a finite
 wall-clock timeout. Close/EOF stops the runner; a stuck process is killed/reaped.
 Capture/restore now support one session-local Linux process checkpoint; see
-[process checkpoints](process-checkpoints.md). Recording remains unsupported.
+[process checkpoints](process-checkpoints.md). Genuine selected-branch recording is now available; see [recording](slippi-recording.md).
 
 ## Protocol and test scope
 

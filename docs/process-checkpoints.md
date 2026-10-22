@@ -31,8 +31,9 @@ They work only with the originating live backend session. Close, reinitialize,
 restart, or a protocol failure invalidates them. Unknown/expired handles are
 rejected before touching the native process. A second capture is explicitly
 unsupported; start a new session to choose another checkpoint. Portable exports,
-multiple retained checkpoints, renderer/device state and recording are not
-implemented. `record()` still raises `UnsupportedOperation` without making a file.
+multiple retained checkpoints and renderer/device state are not implemented.
+`record()` now exports genuine events from the selected live branch; see
+[recording](slippi-recording.md).
 
 ## Side effects and cleanup
 
@@ -87,4 +88,10 @@ and volatile card data. Protocol tests cover invalid handles/replies, thread
 rejection, trace buffering, owner death and forced cleanup of a stopped branch.
 These tests establish component behavior; no ISO is available in this workspace.
 The CLI compares selected observations, not a full memory hash or retail parity.
-Official Slippi playback and replay recording remain untested.
+The user subsequently validated the ISO experiment: capture at match frame 241,
+180-step continuations to 421, stable restored state, matching identical-input
+continuations, divergent changed inputs, and matching original continuation after
+returning from the divergent branch across three restores. Artifacts are retained
+at `.docker-state/local/runs/step-2o7rj74b/`. This remains selected-field evidence.
+Recording and official playback have now also been exercised locally; see
+[the separate validation record](slippi-recording.md).
