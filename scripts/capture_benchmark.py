@@ -39,7 +39,7 @@ def main():
     p.add_argument('--padding',type=int,default=20)
     p.add_argument('--timeout',type=float,default=120)
     args=p.parse_args()
-    if args.first <= args.padding or args.padding < 1 or args.last < args.first or not 0 < args.timeout < 3600:
+    if args.first <= args.padding or args.padding < 0 or args.last < args.first or not 0 < args.timeout < 3600:
         p.error('invalid supported capture interval/budget')
     for path in (args.dolphin,args.iso,args.replay):
         if path is None or not path.is_file(): p.error(f'missing input: {path}')

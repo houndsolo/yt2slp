@@ -2,7 +2,8 @@
 
 An experimental foundation for reconstructing **approximate** playable Melee
 replays from video. Video cannot recover every original input, RNG value or
-hidden state. Observed, inferred and unknown values are separate types. Video recognition is not implemented. The native backend now exports genuine
+hidden state. Observed, inferred and unknown values are separate types. Automatic gameplay recognition is not implemented. Local video ingestion and a first
+manual-cue input search are available for one controlled case. The native backend now exports genuine
 selected-branch recordings, with bounded and complete timed-match Slippi playback validated
 locally; this does not establish retail parity.
 
@@ -233,6 +234,23 @@ for capture, calibration, comparison commands and retained evidence.
 ```bash
 export YT2SLP_ISO=/home/houndsolo/Documents/vanilla.iso
 bash scripts/docker.sh run python scripts/record_benchmark.py
+```
+
+## Manual video cues and first input search
+
+Local MP4 ingestion now preserves source PTS and decoded frames. A first bounded
+checkpoint search uses manually reviewed action/facing/order/damage cues and an
+explicit known start recipe. Five of 21 input schedules fit the controlled clip's
+sparse cues; the chosen genuine replay passes parsing and official Playback.
+A timer-aligned side-by-side review still shows position/camera differences.
+This is a coarse input-search prototype with supplied initial conditions, not
+automatic video reconstruction. No trained model is required. See
+[manual reconstruction](docs/manual-reconstruction.md) for the schema, commands,
+manual timer corrections, evidence and limits.
+
+```bash
+bash scripts/docker.sh run python scripts/ingest_video.py path/to/short.mp4 \
+  --output .local/video-NEW
 ```
 
 ## Development checks
