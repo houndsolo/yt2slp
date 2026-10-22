@@ -1,7 +1,7 @@
 """Create a declared controlled source case in Docker: Fox/Falco, Battlefield.
 
-The default preserves the original right-moving case. The second source moves
-left later. Source controllers are never read by reconstruction/refinement.
+The default preserves the original right-moving case. Additional sources move
+left later or move/release/reverse. Source controls are not reconstruction inputs.
 No checkpoints/pauses in gameplay time, no Start inputs.
 """
 import argparse

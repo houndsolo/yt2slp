@@ -27,7 +27,50 @@ class HorizontalSchedule:
         return (PadInput(stick_x=self.stick_x), *NEUTRAL_PADS[1:]) if step >= self.start_after else NEUTRAL_PADS
 
 
-def run_schedule(backend: Backend, schedule: HorizontalSchedule, steps: int) -> tuple[Observation, ...]:
+@dataclass(frozen=True)
+class HorizontalSequence:
+    """Ordered P1 axis changes at zero-based VI request indices; neutral before the first."""
+    phases: tuple[HorizontalSchedule, ...]
+
+    def __post_init__(self):
+        if (type(self.phases) is not tuple or not 1 <= len(self.phases) <= 16
+                or any(not isinstance(p, HorizontalSchedule) for p in self.phases)):
+            raise ValueError("supply a tuple of 1..16 horizontal phases")
+        for previous, current in zip(self.phases, self.phases[1:]):
+            if current.start_after <= previous.start_after or current.stick_x == previous.stick_x:
+                raise ValueError("phases must advance strictly and change the held axis")
+
+    def pads(self, step: int):
+        for phase in reversed(self.phases):
+            if step >= phase.start_after:
+                return phase.pads(step)
+        return NEUTRAL_PADS
+
+
+ControllerSchedule = HorizontalSchedule | HorizontalSequence
+
+
+def schedule_from_dict(document: dict) -> ControllerSchedule:
+    """Read either the original single-change format or explicit ordered phases."""
+    if not isinstance(document, dict):
+        raise ValueError("candidate schedule must be an object")
+    if set(document) == {"start_after", "stick_x"}:
+        return HorizontalSchedule(**document)
+    if set(document) == {"phases"} and type(document["phases"]) is list:
+        phases = document["phases"]
+        if any(not isinstance(p, dict) or set(p) != {"start_after", "stick_x"} for p in phases):
+            raise ValueError("each phase requires start_after and stick_x only")
+        return HorizontalSequence(tuple(HorizontalSchedule(**p) for p in phases))
+    raise ValueError("unsupported candidate schedule format")
+
+
+def schedule_document(schedule: ControllerSchedule) -> dict:
+    if isinstance(schedule, HorizontalSequence):
+        return {"phases": [asdict(p) for p in schedule.phases]}
+    return asdict(schedule)
+
+
+def run_schedule(backend: Backend, schedule: ControllerSchedule, steps: int) -> tuple[Observation, ...]:
     initial = backend.observe()
     result = [initial]
     for step in range(steps):
@@ -38,12 +81,14 @@ def run_schedule(backend: Backend, schedule: HorizontalSchedule, steps: int) -> 
     return tuple(result)
 
 
-def bounded_search(backend: Backend, samples: tuple[Sample, ...], candidates: tuple[HorizontalSchedule, ...],
+def bounded_search(backend: Backend, samples: tuple[Sample, ...], candidates: tuple[ControllerSchedule, ...],
                    steps: int, trials: Path) -> dict:
     if type(steps) is not int or not 1 <= steps <= 600:
         raise ValueError("one search window must contain 1..600 VI steps")
     if not candidates or len(candidates) > 128 or len(set(candidates)) != len(candidates):
         raise ValueError("supply 1..128 distinct candidate schedules")
+    if any(isinstance(c, HorizontalSequence) and c.phases[-1].start_after >= steps for c in candidates):
+        raise ValueError("every declared phase must occur inside the search window")
     initial = backend.observe()
     if any(f < initial.match_frame or f > initial.match_frame + steps for s in samples for f in s.game_frames):
         raise ValueError("timeline lies outside this search window")
@@ -56,7 +101,7 @@ def bounded_search(backend: Backend, samples: tuple[Sample, ...], candidates: tu
         backend.restore(checkpoint)
         trace = run_schedule(backend, candidate, steps)
         score = score_timeline(samples, trace)
-        result = {"index": index, "schedule": asdict(candidate), "score": score}
+        result = {"index": index, "schedule": schedule_document(candidate), "score": score}
         results.append(result)
         (trials / f"{index:03d}.json").write_text(json.dumps({**result, "states": [asdict(s) for s in trace]}, indent=2) + "\n")
         if score["accepted"] and selected_index is None:
@@ -75,7 +120,7 @@ def bounded_search(backend: Backend, samples: tuple[Sample, ...], candidates: tu
         replayed = run_schedule(backend, candidates[selected_index], steps)
         if replayed != selected_trace:
             raise ValueError("selected continuation did not repeat after restore")
-        report["selected_schedule"] = asdict(candidates[selected_index])
+        report["selected_schedule"] = schedule_document(candidates[selected_index])
         report["selected_branch_rerun_matches"] = True
         report["selected_score"] = score_timeline(samples, replayed)
         report["passed"] = report["selected_score"]["accepted"]

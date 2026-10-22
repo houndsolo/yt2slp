@@ -23,6 +23,11 @@ neutral; other ports stay disconnected. This is one bounded window, using one
 checkpoint. Unknown initial states, RNG inference, arbitrary inputs, joined
 windows and cross-session search resumption remain unimplemented.
 
+That recipe describes the original experiment. The same scripts now also accept
+ordered horizontal phases for movement, release and reversal; see
+[phase search](phased-reconstruction.md) for the format and third controlled case.
+This still uses one checkpoint window and supplied starting conditions.
+
 The solver reads the manual timeline, start recipe and ingested video identities.
 It does **not** read the source replay, original controller trace, source replay
 post-frame states or pixel-comparison result to score/select candidates.

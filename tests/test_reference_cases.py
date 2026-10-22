@@ -45,6 +45,15 @@ def test_source_preparation_requires_the_exact_validated_replay_and_clip():
         with pytest.raises(ValueError,match='identity'):validate_reference_report(report,replay,clip)
 
 
+def test_multiphase_source_includes_real_release_and_reversal_boundaries():
+    case=REFERENCE_CASES['fox-falco-battlefield-right-release-left-v1']
+    assert case.total_steps==320
+    assert [case.pads(i)[0].stick_x for i in (0,239,240,255,256,263,264,319)] == [0,0,80,80,0,0,-80,-80]
+    assert all(case.pads(i)[1:]==NEUTRAL_PADS[1:] for i in range(320))
+    for invalid in (-1,320,True):
+        with pytest.raises(ValueError):case.pads(invalid)
+
+
 @pytest.mark.parametrize('component',['passed','native_vs_official_postframes','native_observation_phase_check','frame_alignment','geometry','rate'])
 def test_incomplete_reference_is_not_prepared_as_a_valid_source(component):
     report=deepcopy(validated_report())

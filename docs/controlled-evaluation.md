@@ -155,7 +155,8 @@ wrong replay/clip identities and incomplete validation gates. Real ISO runs
 separately exercise source preparation, unchanged default replay generation,
 checkpoint search, independent parsing and official rendering.
 
-The next useful extension is multi-phase movement, release/reversal and jump
-cases before broader combat or unknown-start footage. Automatic observations,
+The [third controlled case](phased-reconstruction.md) extends the controller grid
+to movement, release and reversal. Jump cases, broader combat and unknown-start
+footage remain future work. Automatic observations,
 camera/world-position recovery, multi-window search and arbitrary YouTube
 reconstruction remain open. Neither successful case requires training a model.

@@ -8,7 +8,7 @@ import subprocess
 
 from yt2slp.backend import NativeLinuxBackend, RunConfig
 from yt2slp.match import MatchConfig
-from yt2slp.search import HorizontalSchedule, run_schedule
+from yt2slp.search import run_schedule, schedule_from_dict
 from yt2slp.timeline import load_timeline, score_timeline
 from yt2slp.video import sha256
 from reconstruct_manual import advance_to
@@ -63,7 +63,7 @@ def main():
                 if prior["candidates"][index]["schedule"] != schedule:
                     raise ValueError("candidate schedule differs from declared grid")
                 backend.restore(checkpoint)
-                trace = run_schedule(backend, HorizontalSchedule(**schedule), spec["end_frame"] - spec["checkpoint_frame"])
+                trace = run_schedule(backend, schedule_from_dict(schedule), spec["end_frame"] - spec["checkpoint_frame"])
                 original = json.loads((root / "trials" / f"{index:03d}.json").read_text())
                 if json.loads(json.dumps([asdict(s) for s in trace])) != original["states"]:
                     raise ValueError("freshly simulated candidate differs from original trial")

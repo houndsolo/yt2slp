@@ -10,7 +10,8 @@ import pytest
 
 from yt2slp.backend import Observation
 from yt2slp.evidence import Evidence, Provenance
-from yt2slp.search import HorizontalSchedule, bounded_search, run_schedule
+from yt2slp.search import (HorizontalSchedule, HorizontalSequence, bounded_search, run_schedule,
+                           schedule_document, schedule_from_dict)
 from yt2slp.timeline import (Cue, Sample, apply_manual_timer_labels, check_rendered_clock_timing,
                              load_timeline, score_timeline)
 from yt2slp.video import ingest_video, timestamp_rows
@@ -204,6 +205,64 @@ def test_search_rejects_stalled_match_time_instead_of_assuming_vi_alignment():
     backend.step = lambda pads: backend.current
     with pytest.raises(ValueError, match="no offset guessed"):
         run_schedule(backend, HorizontalSchedule(0, 80), 1)
+
+
+def test_phase_boundaries_release_reverse_and_preserve_other_ports():
+    schedule = schedule_from_dict({"phases": [
+        {"start_after": 1, "stick_x": 80}, {"start_after": 3, "stick_x": 0},
+        {"start_after": 5, "stick_x": -80}]})
+    assert isinstance(schedule, HorizontalSequence)
+    pads = [schedule.pads(i) for i in range(7)]
+    assert [p[0].stick_x for p in pads] == [0, 80, 80, 0, 0, -80, -80]
+    from yt2slp.match import NEUTRAL_PADS
+    assert all(p[1:] == NEUTRAL_PADS[1:] for p in pads)
+    assert schedule_from_dict(json.loads(json.dumps(schedule_document(schedule)))) == schedule
+
+
+@pytest.mark.parametrize("document", [
+    {"phases": []}, {"phases": [{"start_after": 1, "stick_x": 80}] * 17},
+    {"phases": [{"start_after": 2, "stick_x": 80}, {"start_after": 1, "stick_x": 0}]},
+    {"phases": [{"start_after": 1, "stick_x": 80}, {"start_after": 1, "stick_x": 0}]},
+    {"phases": [{"start_after": 1, "stick_x": 80}, {"start_after": 2, "stick_x": 80}]},
+    {"phases": [{"start_after": True, "stick_x": 80}]},
+    {"phases": [{"start_after": 0, "stick_x": 128}]},
+    {"phases": [{"start_after": 0, "stick_x": 80, "button": 1}]},
+    {"phases": {}, "stick_x": 80}, {"start_after": 0}, None,
+])
+def test_rejects_ambiguous_or_unsupported_phase_programs(document):
+    with pytest.raises(ValueError): schedule_from_dict(document)
+
+
+def test_search_reruns_the_complete_selected_phase_program_after_discarded_branch(tmp_path):
+    chosen = schedule_from_dict({"phases": [
+        {"start_after": 1, "stick_x": 80}, {"start_after": 3, "stick_x": 0},
+        {"start_after": 5, "stick_x": -80}]})
+    backend = SyntheticBranchBackend()
+    cues = (sample("action_group", ["idle"], frames=(243,)), sample("facing", ["left"], frames=(245,)))
+    result = bounded_search(backend, cues, (chosen, HorizontalSchedule(0, 80)), 7, tmp_path / "trials")
+    assert result["passed"] and result["accepted_indices"] == [0]
+    assert result["selected_branch_rerun_matches"] and backend.current == state(246, x=-80, facing=-1)
+    trace = json.loads((tmp_path / "trials/000.json").read_text())
+    assert trace["schedule"] == schedule_document(chosen) == result["selected_schedule"]
+    fresh = SyntheticBranchBackend()
+    assert run_schedule(fresh, schedule_from_dict(result["selected_schedule"]), 7)[-1] == backend.current
+
+
+def test_phases_outside_window_fail_before_capturing(tmp_path):
+    backend = SyntheticBranchBackend()
+    schedule = schedule_from_dict({"phases": [{"start_after": 2, "stick_x": 80}]})
+    with pytest.raises(ValueError, match="inside the search window"):
+        bounded_search(backend, (sample(),), (schedule,), 2, tmp_path / "trials")
+    assert backend.captures == 0
+
+
+def test_legacy_grid_documents_round_trip_without_changing_axis_requests():
+    spec = json.loads((Path(__file__).resolve().parents[1] / "configs/manual-horizontal-search.json").read_text())
+    for document in spec["candidates"]:
+        schedule = schedule_from_dict(document)
+        assert schedule_document(schedule) == document
+        for i in range(62):
+            assert schedule.pads(i)[0].stick_x == (document["stick_x"] if i >= document["start_after"] else 0)
 
 
 def test_manual_timer_fill_retains_unknown_automatic_result_and_binds_source():

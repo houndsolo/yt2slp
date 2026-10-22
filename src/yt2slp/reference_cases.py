@@ -29,9 +29,29 @@ class ReferenceCase:
                 "other ports neutral/disconnected")
 
 
+@dataclass(frozen=True)
+class PhasedReferenceCase:
+    """Independent source fixture; not a candidate grid or solver input."""
+    total_steps: int
+    phases: tuple[tuple[int, int], ...]
+
+    def pads(self, step):
+        if type(step) is not int or not 0 <= step < self.total_steps:
+            raise ValueError("source step is outside its declared recording interval")
+        axis = next(axis for start, axis in reversed(self.phases) if step >= start)
+        return (PadInput(stick_x=axis), *NEUTRAL_PADS[1:])
+
+    @property
+    def input_policy(self):
+        return (f"{self.total_steps} steps; P1 stick_x changes at zero-based request indices "
+                f"{self.phases}; other ports neutral/disconnected")
+
+
 REFERENCE_CASES = {
     "fox-falco-battlefield-horizontal-v1": ReferenceCase(240, 180, 80),
     "fox-falco-battlefield-left-delayed-v1": ReferenceCase(246, 74, -80),
+    "fox-falco-battlefield-right-release-left-v1": PhasedReferenceCase(
+        320, ((0, 0), (240, 80), (256, 0), (264, -80))),
 }
 
 

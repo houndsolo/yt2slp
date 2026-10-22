@@ -172,5 +172,7 @@ detector, camera calibration or unknown-state recovery yet. The chosen schedule
 matches the controlled generator's schedule, but other unsearched inputs may be
 visually equivalent. A second controlled clip with delayed leftward movement now
 passes with the same grid, objective and timer calibration; see
-[controlled evaluation](controlled-evaluation.md). Multi-phase movement, jumps,
-combat and more informative/automatic observations remain future work.
+[controlled evaluation](controlled-evaluation.md). A third
+[multi-phase movement case](phased-reconstruction.md) uses an expanded controller
+grid with this same image scorer. Jumps, combat and more informative/automatic
+observations remain future work.

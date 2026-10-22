@@ -14,7 +14,7 @@ import time
 
 from yt2slp.backend import NativeLinuxBackend, RunConfig
 from yt2slp.match import MatchConfig, NEUTRAL_PADS, PlayerConfig
-from yt2slp.search import HorizontalSchedule, bounded_search, run_schedule
+from yt2slp.search import bounded_search, run_schedule, schedule_from_dict
 from yt2slp.timeline import load_timeline
 from yt2slp.video import sha256
 
@@ -51,7 +51,7 @@ def main():
         raise ValueError("invalid bounded match-frame window")
     if any(type(spec[k]) is not int or not 0 <= spec[k] <= 0xFFFFFFFFFFFFFFFF for k in ("rng_seed", "time_base")):
         raise ValueError("explicit integer seed/time base required")
-    candidates = tuple(HorizontalSchedule(**c) for c in spec["candidates"])
+    candidates = tuple(schedule_from_dict(c) for c in spec["candidates"])
     config = RunConfig(Path("build/headless/melee_headless"), Path("build/game/melee_game.so"),
                        Path(os.environ.get("YT2SLP_ISO", "/assets/melee.iso")), Path(".local/runs"),
                        rng_seed=spec["rng_seed"], time_base=spec["time_base"],
@@ -87,7 +87,7 @@ def main():
                 fresh.initialize(config)
                 fresh.start(boot, timeout=180)
                 advance_to(fresh, frame)
-                run_schedule(fresh, HorizontalSchedule(**report["selected_schedule"]), end - frame)
+                run_schedule(fresh, schedule_from_dict(report["selected_schedule"]), end - frame)
                 fresh.record(root / "fresh-selected.slp")
                 report["fresh_selected_observations_match"] = fresh.observations == selected
                 report["fresh_recording_bytes_match"] = sha256(root / "selected.slp") == sha256(root / "fresh-selected.slp")

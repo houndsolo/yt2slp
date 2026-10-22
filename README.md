@@ -3,7 +3,7 @@
 An experimental foundation for reconstructing **approximate** playable Melee
 replays from video. Video cannot recover every original input, RNG value or
 hidden state. Observed, inferred and unknown values are separate types. Automatic gameplay recognition is not implemented. Local video ingestion,
-manual-cue input search and rendered refinement are validated on two controlled
+manual-cue input search and rendered refinement are validated on three controlled
 horizontal-motion cases. The native backend now exports genuine
 selected-branch recordings, with bounded and complete timed-match Slippi playback validated
 locally; this does not establish retail parity.
@@ -261,6 +261,13 @@ image objective and timer calibration: whole-clip RGB error falls from 31.13 to
 selection. Both cases still use supplied starting conditions and manual visual
 annotations. See [controlled evaluation](docs/controlled-evaluation.md) for
 the comparison, reproduction commands and remaining limits.
+
+A third case adds timed movement, release and reversal. Search/refinement selects
+one of 27 phase programs, reducing whole-clip RGB error from 29.56 to 5.46;
+post-selection checks again match nine source fields across 122 player-frames.
+The earlier single-change grid fails on this clip. See
+[phase search](docs/phased-reconstruction.md), including the preserved annotation
+corrections and why this remains a controlled development experiment.
 
 ```bash
 bash scripts/docker.sh run python scripts/ingest_video.py path/to/short.mp4 \
