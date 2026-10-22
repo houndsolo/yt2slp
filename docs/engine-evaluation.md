@@ -30,7 +30,9 @@ This is a practical foundation for experiments, not yet a complete inverse
 simulation backend. The shortest unblocked experiment here is to compile/load
 the real game library and exercise real input, snapshot and recording components
 without assets. The bounded script runner is ready for an asset-backed startup
-experiment; that experiment remains unrun. A process owns the fixed game address
+experiment; the user subsequently reported two matching 3000-retrace Docker
+runs with 974 match observations each. This is user-reported evidence, not an
+ISO-backed cloud test. A process owns the fixed game address
 space, and process isolation lets failures and restarts leave Python intact.
 
 ## Three engine routes
@@ -124,10 +126,11 @@ was not available and is not claimed as validated.
 
 | Operation | Native source | yt2slp interface / evidence |
 | --- | --- | --- |
-| Initialize | `linux_host::initialize(Config)`, ABI negotiation, disc/header/DOL hash checks | `initialize(RunConfig)` binds paths; actual loading occurs in the run child. Native service and ELF load tests pass; real disc startup unrun. |
-| Bounded scripted run | `linux_host::run`, `Config.max_frames`, `InputScript::apply`, `set_pad_override` | `run_script` invokes the existing executable, with timeout, isolated card/log files, seed and timebase. Python transport tested; gameplay unrun. |
+| Initialize | `linux_host::initialize(Config)`, ABI negotiation, disc/header/DOL hash checks | `initialize(RunConfig)` binds paths; actual loading occurs in the run child. Native service and ELF load tests pass; real disc startup user-reported; no cloud ISO test. |
+| Bounded scripted run | `linux_host::run`, `Config.max_frames`, `InputScript::apply`, `set_pad_override` | `run_script` invokes the existing executable, with timeout, isolated card/log files, seed and timebase. Python transport tested; batch gameplay user-reported locally. |
 | Observe | `MuGameApi.state_snapshot`, `set_frame_observer`, `main.cpp::observe` | Strict 77-column CSV parser; six fighters, raw IEEE-754 bits retained. Output is inferred relative to video. No selected-field digest is a full state hash. |
-| Single-frame step | Blocking `game.run`, VI callback inside poll | Clear unsupported error. Needs a cooperative pause boundary that retains the live game stack. |
+| Fixed match | Existing `match_override` callback / game preload and VS entry hooks | Validated `MatchConfig` and Linux `--match`; two players, external character IDs, Battlefield/Final Destination. Rules retain fresh-game defaults. |
+| VI-retrace step | Blocking `game.run`, cooperative socket pause in the existing VI observer | `start`/`step`/`observe` retain the live stack and advance one retrace per step. Native protocol and Python lifecycle tests pass with synthetic states; ISO-backed stepping unrun here. See [semantics](native-stepping.md). |
 | Capture / restore | `snapshot_ranges`, `state_exclusions`; `native_savestate::Engine` | Components tested, including repeated `load_keep` and differential byte comparisons. Minimal host does not integrate them. Unsupported through Python. |
 | Record | `shim/mu_replay.c`, `shim/mu_record_start.inc`; full host `h_replay_event`, `write_replay_recording` | Game recording code compiled. Minimal host leaves replay callbacks null and returns -1 for `slippi_command`; no `.slp` recording adapter yet. Unsupported through Python. |
 

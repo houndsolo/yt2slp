@@ -82,7 +82,7 @@ limitations. No network or secret requirements were changed. Saving did not
 publish the environment; review/save in environment settings and publication
 remain user actions. No new-task restoration is claimed.
 
-## Next concrete task
+## Subsequent environment work
 
 Docker environment: added `docker/Dockerfile` and `scripts/docker.sh` for
 Debian 13 / GCC 14.2.0 / Python 3.13.5, with uv 0.12.23. A fresh isolated
@@ -106,10 +106,36 @@ tests passed through the scripts on the cloud GCC 14 machine. Unversioned
 compiler discovery was also exercised; an actual Arch/GCC 15+ build is not yet
 verified. Use `bash scripts/setup.sh && bash scripts/build_game.sh`.
 
-Once an ISO path is available, execute the README's bounded script with fixed
-seed/timebase, inspect that it actually enters a match, and expose the already
-implemented match override through the headless CLI to fix the setup. Then add
-the cooperative in-match pause/restore protocol and coordinate memory, host
-state and replay-stream marks. Until that exists, `step`, `capture`, `restore`
-and `record` return actionable unsupported-operation errors. No model training,
-video recognition or graphics port is part of this milestone.
+## Fixed matches and resumable stepping — 2026-10-22
+
+Native dependency commit: `c697e5b` on `yt2slp/linux-headless`.
+
+The user reported that the Docker batch experiment completed 3000 retraces,
+including 974 match observations, twice with matching selected fields. This
+supersedes the initial local-startup uncertainty; it is user-reported evidence,
+not a game run in the cloud workspace.
+
+Implemented the existing match override in the minimal Linux CLI and added
+validated Python settings for two players, characters/costumes/CPU settings,
+and Battlefield/Final Destination. Other rules retain fresh-game defaults.
+A private socket protocol blocks inside the existing retrace observer, retains
+the live game stack, and advances one VI retrace per step. Ordinary PAD polling,
+game timing constants, game source, math flags and ABI are unchanged. Observations
+preserve raw bits and keep retrace/match-frame counters separate.
+
+Added pause/step/observe lifecycle, bounded boot, timeouts, process cleanup,
+retained logs/config/input/state traces, and a three-run local validation command.
+Checkpoint capture/restore and recording remain explicit unsupported operations.
+No checkpoint or replay is fabricated. Native protocol tests use synthetic
+states, and Python integration tests drive the same compiled control implementation.
+See [native stepping](native-stepping.md) for exact semantics and the local ISO
+command. Validation: `bash scripts/docker.sh setup` rebuilt the modified host and passed
+10 host/component tests, 76 Python tests and 23 game-library tests in the GCC 14
+container. The host Python suite also passed all 76 tests. The new command was
+exercised end to end against the compiled synthetic protocol fixture, including
+same-input and neutral-input comparisons. No ISO-backed stepping or official
+playback validation was performed here. Existing reusable environment setup
+commands remain sufficient; no environment draft changes were needed.
+
+Next: run that command locally with the ISO, then investigate any observed
+input/timing differences before building checkpoint/recording integration.

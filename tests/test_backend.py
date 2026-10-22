@@ -63,7 +63,7 @@ def test_evidence_source_required():
 def test_unsupported_operations_create_no_replay(tmp_path):
     backend = NativeLinuxBackend()
     output = tmp_path / "result.slp"
-    for operation in (lambda: backend.step({}), backend.capture, lambda: backend.restore(b""), lambda: backend.record(output)):
+    for operation in (backend.capture, lambda: backend.restore(b""), lambda: backend.record(output)):
         with pytest.raises(UnsupportedOperation):
             operation()
     with pytest.raises(BackendError, match="no successful"):
@@ -130,3 +130,16 @@ def test_invalid_run_limits(configured, frames, timeout):
     with pytest.raises(BackendError):
         backend.run_script(script, frames, timeout)
     assert backend.last_run_dir is None
+
+
+def test_batch_forwards_fixed_match(configured, monkeypatch):
+    from dataclasses import replace
+    from yt2slp.match import MatchConfig
+    backend, script = configured
+    backend.initialize(replace(backend.config, match=MatchConfig()))
+    def emit(command, **kwargs):
+        assert command[command.index("--match") + 1] == "31 2 0 0 9 20 0 0 9"
+        Path(command[command.index("--state-digest") + 1]).write_text(digest_row())
+        return subprocess.CompletedProcess(command, 0)
+    monkeypatch.setattr(subprocess, "run", emit)
+    assert len(backend.run_script(script, 1)) == 1

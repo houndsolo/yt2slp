@@ -1,13 +1,9 @@
-"""Backend contract and a process-isolated adapter for MU's bounded Linux runner.
-
-The native ABI uses fixed low addresses and owns a blocking game loop. Loading it
-into Python with ctypes is not a safe stepping API. Each run below gets a fresh
-process and private card directory; unsupported interactive operations fail.
-"""
-from dataclasses import dataclass
+"""Process-isolated native runs with cooperative VI stepping on a live game stack."""
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Protocol
 import csv
+import json
 import math
 import os
 import struct
@@ -15,6 +11,8 @@ import subprocess
 import tempfile
 
 from .evidence import Evidence, Provenance
+from .match import MatchConfig, PadInput
+from .native_control import ControlSession
 
 
 class BackendError(RuntimeError):
@@ -35,6 +33,7 @@ class RunConfig:
     work_dir: Path
     rng_seed: int = 1
     time_base: int = 0
+    match: MatchConfig | None = None
 
 
 @dataclass(frozen=True)
@@ -97,8 +96,16 @@ class Backend(Protocol):
         """Validate and bind artifacts, raising BackendError on missing inputs."""
         ...
 
-    def step(self, inputs: object) -> Observation:
-        """Advance one simulation frame, or raise UnsupportedOperation."""
+    def start(self, script: Path, timeout: float = 120, boot_limit: int = 6000) -> Observation:
+        """Boot to a resumable boundary, or raise UnsupportedOperation."""
+        ...
+
+    def close(self) -> None:
+        """Release any live session and reap its child process."""
+        ...
+
+    def step(self, inputs: tuple[PadInput, ...]) -> Observation:
+        """Advance one documented backend boundary, or raise UnsupportedOperation."""
         ...
 
     def observe(self) -> Observation:
@@ -119,16 +126,19 @@ class Backend(Protocol):
 
 
 class NativeLinuxBackend:
-    """Bounded fresh-process runs; no interactive stepping, restore, or recording.
+    """Fresh-process batch runs and resumable VI-boundary sessions.
 
-    Supported native CLI operations are compiled/tested independently. Actual
-    game startup and these batch runs require a user-provided retail ISO.
+    start() boots with a script and pauses at the first live VS observation.
+    step() supplies all four ports and advances one VI retrace, retaining the
+    game stack. A retrace is not necessarily a completed match simulation frame.
+    Use close() or a context manager to reap the process. No checkpoints/replays.
     """
 
-    capabilities = {"run_script": True, "observe": True, "step": False,
+    capabilities = {"run_script": True, "observe": True, "step": True, "fixed_match": True,
                     "capture": False, "restore": False, "record": False}
 
     def __init__(self) -> None:
+        self._session: ControlSession | None = None
         self.config: RunConfig | None = None
         self.observations: tuple[Observation, ...] = ()
         self.last_run_dir: Path | None = None
@@ -137,8 +147,9 @@ class NativeLinuxBackend:
         """Bind validated paths; the child process loads/validates the game and ISO.
 
         Does not claim the ISO is authentic or the game booted. The native host
-        verifies the retail DOL hash during run_script, without bypasses.
+        verifies the retail DOL hash during run_script/start, without bypasses.
         """
+        self.close()
         self.config = None
         self.observations = ()
         self.last_run_dir = None
@@ -147,6 +158,10 @@ class NativeLinuxBackend:
                 raise BackendError(f"missing {label}: {path}")
         if not os.access(config.host, os.X_OK):
             raise BackendError(f"headless host is not executable: {config.host}")
+        if config.match is not None and not isinstance(config.match, MatchConfig):
+            raise BackendError("match must be MatchConfig or None")
+        if type(config.rng_seed) is not int or type(config.time_base) is not int:
+            raise BackendError("rng_seed and time_base must be integers")
         if not 0 <= config.rng_seed <= 0xFFFFFFFF or not 0 <= config.time_base <= 0xFFFFFFFFFFFFFFFF:
             raise BackendError("rng_seed must be uint32 and time_base must be uint64")
         try:
@@ -155,7 +170,7 @@ class NativeLinuxBackend:
                 pass
         except OSError as exc:
             raise BackendError(f"work directory is not writable: {exc}") from exc
-        self.config = RunConfig(*(p.resolve() for p in (config.host, config.game_library, config.iso, config.work_dir)), config.rng_seed, config.time_base)
+        self.config = RunConfig(*(p.resolve() for p in (config.host, config.game_library, config.iso, config.work_dir)), config.rng_seed, config.time_base, config.match)
 
     def run_script(self, script: Path, retraces: int, timeout: float = 120) -> tuple[Observation, ...]:
         """Boot fresh and run a native script for exactly retraces VI boundaries.
@@ -164,6 +179,7 @@ class NativeLinuxBackend:
         failures. timeout is wall-clock seconds. This is not checkpoint stepping;
         the native host validates script syntax. Failure clears prior observations.
         """
+        self.close()
         self.observations = ()
         self.last_run_dir = None
         if self.config is None:
@@ -183,6 +199,9 @@ class NativeLinuxBackend:
                    "--rng-seed", str(c.rng_seed), "--time-base", str(c.time_base),
                    "--frames", str(retraces), "--input-script", str(script.resolve()),
                    "--card-dir", str(run_dir / "card"), "--state-digest", str(digest)]
+        if c.match is not None:
+            command += ["--match", c.match.native_argument()]
+        (run_dir / "config.json").write_text(json.dumps(asdict(c), default=str, indent=2) + "\n")
         try:
             with (run_dir / "host.log").open("w") as log:
                 completed = subprocess.run(command, cwd=run_dir, stdin=subprocess.DEVNULL,
@@ -199,15 +218,112 @@ class NativeLinuxBackend:
         self.observations = observations
         return observations
 
+    def start(self, script: Path, timeout: float = 120, boot_limit: int = 6000) -> Observation:
+        """Boot to a live VS retrace and wait there. timeout applies per response.
+
+        The script navigates menus; the match override controls stage/players.
+        After this returns, step inputs replace script input on all four ports.
+        The initial snapshot may precede the match's GO animation completing.
+        """
+        self.close()
+        self.observations = ()
+        self.last_run_dir = None
+        if self.config is None or self.config.match is None:
+            raise BackendError("initialize with a fixed MatchConfig before start")
+        if not math.isfinite(timeout) or timeout <= 0:
+            raise BackendError("timeout must be finite and positive")
+        if type(boot_limit) is not int or not 1 <= boot_limit <= 0xFFFFFFFF:
+            raise BackendError("boot_limit must be an integer in 1..4294967295")
+        if not script.is_file():
+            raise BackendError(f"missing input script: {script}")
+        c = self.config
+        run_dir = Path(tempfile.mkdtemp(prefix="step-", dir=c.work_dir))
+        self.last_run_dir = run_dir
+        command = [str(c.host), "--iso", str(c.iso), "--game-library", str(c.game_library),
+                   "--headless", "--fast", "--vanilla-game", "--no-gc-adapter",
+                   "--rng-seed", str(c.rng_seed), "--time-base", str(c.time_base),
+                   "--input-script", str(script.resolve()), "--card-dir", str(run_dir / "card"),
+                   "--state-digest", str(run_dir / "state.csv"), "--match", c.match.native_argument(),
+                   "--boot-limit", str(boot_limit)]
+        (run_dir / "config.json").write_text(json.dumps(asdict(c), default=str, indent=2) + "\n")
+        try:
+            self._session = ControlSession(command, run_dir, timeout)
+            if self._session.receive() != "MUCONTROL 1":
+                raise ValueError("unsupported native control protocol")
+            state = self._receive_state()
+            if not (state.scene_major == 2 and state.scene == 2 and state.match_frame > 0
+                    and state.fighters[0][0] and state.fighters[1][0]):
+                raise ValueError("native control did not pause in a live VS match")
+            self.observations = (state,)
+            return state
+        except (OSError, ValueError) as exc:
+            self._control_failure(exc)
+
+    def _receive_state(self) -> Observation:
+        assert self._session is not None
+        line = self._session.receive()
+        if not line.startswith("STATE "):
+            raise ValueError("expected native STATE response")
+        fields = line[6:].split(",")
+        if len(fields) != 77 or any(not f.isascii() or not f.isdecimal() for f in fields):
+            raise ValueError("invalid native state fields")
+        values = tuple(map(int, fields))
+        if any(v > 0xFFFFFFFF for v in values) or values[0] == 0:
+            raise ValueError("invalid native state range")
+        return Observation(*values[:5], tuple(values[i:i + 12] for i in range(5, 77, 12)))
+
+    def _control_failure(self, exc: Exception) -> None:
+        self.close()
+        self.observations = ()
+        raise BackendError(f"native control failed: {exc}; see {self.last_run_dir}/host.log") from exc
+
     def observe(self) -> Observation:
-        """Return the last successful run's final state; no fabricated zero state."""
+        """Read paused state without advancing; batch mode returns the final state."""
         if not self.observations:
             raise BackendError("no successful native run to observe")
+        if self._session is not None:
+            try:
+                self._session.send("observe")
+                if self._receive_state() != self.observations[-1]:
+                    raise ValueError("native state changed while paused")
+            except (OSError, ValueError) as exc:
+                self._control_failure(exc)
         return self.observations[-1]
 
-    def step(self, inputs: object) -> Observation:
-        """Fail: game.run owns the stack; retrace is not a one-frame step API."""
-        raise UnsupportedOperation("step: no resumable frame-boundary protocol; use run_script for a fresh bounded run")
+    def step(self, inputs: tuple[PadInput, ...]) -> Observation:
+        """Resume to the next VI boundary, holding four raw PAD samples.
+
+        No direct call to game.retrace or game.run is made here. Input reaches
+        the game at its next ordinary PAD poll, not retroactively at this boundary.
+        """
+        if self._session is None:
+            raise BackendError("start a native session before stepping")
+        if not isinstance(inputs, (tuple, list)) or len(inputs) != 4 or any(not isinstance(p, PadInput) for p in inputs):
+            raise BackendError("step requires exactly four PadInput values")
+        command = "step " + " ".join(p.native_argument() for p in inputs)
+        try:
+            with (self.last_run_dir / "inputs.txt").open("a") as log:
+                log.write(f"{self.observations[-1].retrace}: {command}\n")
+            self._session.send(command)
+            state = self._receive_state()
+            if state.retrace != self.observations[-1].retrace + 1:
+                raise ValueError("step did not advance exactly one VI retrace")
+            self.observations += (state,)
+            return state
+        except (OSError, ValueError) as exc:
+            self._control_failure(exc)
+
+    def close(self) -> None:
+        """Disconnect and reap the live process; retained observations are historical."""
+        if self._session is not None:
+            self._session.close()
+            self._session = None
+
+    def __enter__(self) -> "NativeLinuxBackend":
+        return self
+
+    def __exit__(self, *exc: object) -> None:
+        self.close()
 
     def capture(self) -> bytes:
         """Fail: MuStatePod is an observation, not a complete checkpoint."""

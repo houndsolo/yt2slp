@@ -102,8 +102,9 @@ bash scripts/docker.sh run yt2slp experiment \
 
 The helper mounts that file read-only at `/assets/melee.iso` and sets the
 container's `YT2SLP_ISO` accordingly. Slippi Dolphin is not needed for this
-native experiment. Game startup, input timing, and gameplay still need actual
-validation; the container does not establish correctness by itself.
+native experiment. The user has reported a successful 3000-retrace batch run (974 match
+observations) with matching selected fields across two fresh Docker runs. The
+new stepping path still needs validation with an ISO; see the command below.
 
 ## Run a bounded experiment without Docker
 
@@ -129,12 +130,40 @@ simulation ticks. `--vanilla-game` requests the engine's vanilla options; it
 does not establish parity with retail Melee.
 
 `--repeat` compares selected state fields across two fresh boots. It does not
-restore a checkpoint and cannot prove complete game-state equality. No match
-has been run without an ISO. The current backend deliberately raises
-`UnsupportedOperation` for `step`, `capture`, `restore` and `record`. `initialize`
+restore a checkpoint and cannot prove complete game-state equality. No ISO-backed game run
+has been performed in this cloud workspace. The backend raises
+`UnsupportedOperation` for `capture`, `restore` and `record`. `initialize`
 validates/binds paths, `run_script` initializes the game inside the native child,
 and `observe` reads the last successful run's selected state. It never writes a
 dummy `.slp`.
+
+## Fixed matches and resumable stepping
+
+The native backend now supports fixed stage/player settings and a live,
+cooperative pause protocol. `start()` navigates to a match; `step()` advances
+one **VI retrace**, preserving the game's stack and ordinary input/timing path.
+The separate match-frame counter may advance differently. `observe()` does not
+resume a paused session. Checkpoint capture/restore and recording remain
+explicitly unsupported.
+
+Validate locally with your ISO after pulling and rebuilding the host:
+
+```bash
+git pull --ff-only
+bash scripts/docker.sh setup
+export YT2SLP_ISO=/home/houndsolo/Documents/vanilla.iso
+bash scripts/docker.sh run yt2slp step-experiment \
+  --script third_party/melee-unlocked/port/scripts/native_vs.txt \
+  --stage 31 --p1 2 --p2 20 --steps 600 \
+  --seed 1 --time-base 0 --timeout 180 --repeat --check-input
+```
+
+This requests Fox vs. Falco on Battlefield. It checks pause stability, one-retrace
+steps, matching repeated runs, and a different fighter trace from neutral input.
+Logs and traces are retained under `.docker-state/local/runs/step-*`.
+See [native stepping](docs/native-stepping.md) for the Python API, supported
+configuration, timing semantics, protocol and test scope. Stock/time/item/team
+rules retain fresh-game defaults. No ISO-backed stepping test was run in cloud.
 
 For later playback validation, set `YT2SLP_DOLPHIN` to your official Slippi
 Playback executable. The current doctor checks executable presence only;
