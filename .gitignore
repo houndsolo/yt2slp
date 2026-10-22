@@ -45,4 +45,5 @@ extracted/
 # Local tools and state
 .local/
 .cache/
+.docker-state/
 .DS_Store

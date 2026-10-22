@@ -56,7 +56,56 @@ AVX2/FMA baseline, and the upstream game math flags. `build/decomp` uses a local
 Git alternate to the nested checkout; recreate it using the script if that
 object store is removed. Aurora is not needed for these targets.
 
-## Run a bounded experiment when assets are available
+## Docker development environment (recommended for Arch)
+
+Docker keeps the tested GCC 14 toolchain separate from the system compiler.
+The image uses Debian 13, GCC/G++ 14 and Python 3.13; uv is pinned, and Python
+dependencies remain locked by `uv.lock`. Debian security/package updates mean
+this is a fixed toolchain family, not a byte-for-byte frozen OS snapshot.
+
+Run from the repository on your Linux x86-64 host:
+
+```bash
+git pull --ff-only
+bash scripts/docker.sh build
+bash scripts/docker.sh setup
+```
+
+`build` installs tools into `yt2slp-dev:gcc14`. `setup` compiles the host and game
+and runs both native suites plus Python tests. The first game compilation takes
+several minutes; later runs reuse container build output. Docker must be running
+and usable by your account. No privileged container, GPU, or display is needed.
+
+The helper runs as your host UID/GID. Source edits are shared at `/work`, while
+`.venv`, `build`, `.cache`, and `.local` use separate ignored host directories
+under `.docker-state/`. Your existing Arch outputs remain untouched. Inspect
+container logs on the host under `.docker-state/local/runs/`. Only the `docker/`
+directory is sent as the image build context; no game assets enter the image.
+Do not run host-built binaries inside the container or container-built Python
+environments directly from the host. Use the helper for subsequent commands:
+
+```bash
+bash scripts/docker.sh run yt2slp doctor
+bash scripts/docker.sh shell
+# Inside the shell, the venv is already on PATH; working directory is /work.
+```
+
+For an asset-backed run, set the **host** ISO path before invoking the helper:
+
+```bash
+export YT2SLP_ISO=/home/houndsolo/Documents/vanilla.iso
+bash scripts/docker.sh run yt2slp doctor --require-game
+bash scripts/docker.sh run yt2slp experiment \
+  --script third_party/melee-unlocked/port/scripts/native_vs.txt \
+  --retraces 3000 --seed 1 --time-base 0 --timeout 180 --repeat
+```
+
+The helper mounts that file read-only at `/assets/melee.iso` and sets the
+container's `YT2SLP_ISO` accordingly. Slippi Dolphin is not needed for this
+native experiment. Game startup, input timing, and gameplay still need actual
+validation; the container does not establish correctness by itself.
+
+## Run a bounded experiment without Docker
 
 Provide your own legally obtained, uncompressed Melee NTSC 1.02 ISO. No game
 image, extracted asset or generated game source is committed. The native loader

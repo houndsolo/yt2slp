@@ -84,6 +84,17 @@ remain user actions. No new-task restoration is claimed.
 
 ## Next concrete task
 
+Docker environment: added `docker/Dockerfile` and `scripts/docker.sh` for
+Debian 13 / GCC 14.2.0 / Python 3.13.5, with uv 0.12.23. A fresh isolated
+container build passed all 9 host, 36 Python and 23 game-library tests,
+including `native_disc_layout`. Container outputs and the venv live under
+ignored `.docker-state/`, separate from the Arch builds. Verified host UID/GID
+ownership and a read-only ISO bind mount using an empty non-game fixture.
+No real game boot was performed. The user's GCC 16 exit-4 collision-box failure
+also persists with SLP vectorization disabled; its underlying cause remains
+unresolved. The container supplies a validated alternative toolchain, not proof
+that the GCC 16 issue has been fixed.
+
 Arch setup follow-up: setup previously exited silently when `uv` or Debian's
 `gcc-14`/`g++-14` names were missing. Running the game build afterward inside an
 uninitialized engine directory made Git discover the parent repository and
