@@ -20,6 +20,13 @@ GPU, USB adapter, Docker, ISO, or Slippi credentials are needed for the portable
 host tests. Use the existing checkout in cloud tasks; do not create a worktree
 unless explicitly requested.
 
+On Arch Linux, install the prerequisites with
+`sudo pacman -S --needed git uv gcc`. The scripts accept either `gcc-14`/`g++-14`
+or unversioned `gcc`/`g++` (GNU version 14+), and respect explicit `CC`/`CXX`
+executable paths. Newer GCC versions are accepted but were not validated in the
+original cloud build. Run the scripts with `&&` so a setup failure stops the
+sequence: `bash scripts/setup.sh && bash scripts/build_game.sh`.
+
 ```bash
 cd /workspace/yt2slp  # or your checkout
 bash scripts/setup.sh

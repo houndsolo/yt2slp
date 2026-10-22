@@ -7,6 +7,8 @@ import subprocess
 import sys
 import tempfile
 
+from .toolchain import select_compiler
+
 
 def _command(argv: list[str]) -> tuple[bool, str]:
     try:
@@ -32,7 +34,14 @@ def inspect_environment(repo: Path, iso: Path | None = None, dolphin: Path | Non
 
     add("platform", sys.platform == "linux" and platform.machine() in ("x86_64", "AMD64"), platform.platform())
     add("python", sys.version_info >= (3, 11), platform.python_version())
-    for tool in ("git", "gcc-14", "g++-14", "cmake", "ninja"):
+    for variable, names, language in (("CC", ("gcc-14", "gcc"), "c"), ("CXX", ("g++-14", "g++"), "c++")):
+        try:
+            compiler = select_compiler(variable, names, language)
+            ok, version = _command([compiler, "--version"])
+            add(variable, ok, f"{compiler}: {version.splitlines()[0] if version else 'no version output'}")
+        except ValueError as exc:
+            add(variable, False, str(exc))
+    for tool in ("git", "cmake", "ninja"):
         executable = shutil.which(tool)
         ok, version = _command([executable, "--version"]) if executable else (False, "not on PATH; activate .venv")
         add(tool, ok, version.splitlines()[0] if version else "no version output")

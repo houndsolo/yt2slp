@@ -84,6 +84,17 @@ remain user actions. No new-task restoration is claimed.
 
 ## Next concrete task
 
+Arch setup follow-up: setup previously exited silently when `uv` or Debian's
+`gcc-14`/`g++-14` names were missing. Running the game build afterward inside an
+uninitialized engine directory made Git discover the parent repository and
+report a nested-submodule pathspec error. Both scripts now report missing
+prerequisites, accept GNU 14+ compilers under versioned or unversioned names,
+and respect `CC`/`CXX`. The game build initializes the outer submodule first.
+Validation after this fix: 36 Python tests, 9 headless tests and 23 game-library
+tests passed through the scripts on the cloud GCC 14 machine. Unversioned
+compiler discovery was also exercised; an actual Arch/GCC 15+ build is not yet
+verified. Use `bash scripts/setup.sh && bash scripts/build_game.sh`.
+
 Once an ISO path is available, execute the README's bounded script with fixed
 seed/timebase, inspect that it actually enters a match, and expose the already
 implemented match override through the headless CLI to fix the setup. Then add
