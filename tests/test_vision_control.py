@@ -9,7 +9,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tools/learning'))
-from manage import docker_command, inspect, validate_config
+from manage import docker_command, inspect, validate_config, launch
 
 
 def test_worker_is_detached_local_and_bound_to_only_the_selected_gpu():
@@ -28,6 +28,15 @@ def test_controller_never_removes_a_foreign_container():
     with patch('manage.subprocess.run',return_value=result) as call:
         with pytest.raises(ValueError,match='another application'): inspect('training')
         assert call.call_count==1
+
+
+def test_review_uses_render_dependencies_and_blocks_training_until_finished():
+    config = json.loads((ROOT/'configs/vision-v100.json').read_text())
+    command = docker_command(config,ROOT/'configs/vision-v100.json','review')
+    assert config['render_image'] in command and 'tools/learning/review_run.py' in command
+    assert '--network=none' in command and '--detach' in command
+    with patch('manage.inspect',side_effect=lambda kind:{'Running':True} if kind=='review' else None):
+        with pytest.raises(ValueError,match='review'): launch(config,ROOT/'configs/vision-v100.json','training')
 
 
 @pytest.mark.parametrize('key,value',[('gpu','all'),('data_directory','../elsewhere'),('evaluate_every',0),('context_frames',4)])

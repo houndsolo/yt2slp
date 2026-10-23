@@ -382,6 +382,11 @@ to postpone measuring a narrower supported case.
   Codex; [commands and recovery](training-control.md). The final displayed
   validation hold/press/release F1 is 0.1175/0.0513/0.0400; no useful-recognition
   acceptance or learned replay is claimed.
+- [x] Add self-service saved-model review: `~/train-melee review` automatically
+  pauses training, copies the latest checkpoint and renders both validation clips
+  with original/recorded/predicted control panels. `--best` selects the best saved
+  validation model. Predictions precede scoring-label reads; final-test matches
+  stay sealed. MP4/MKV output remains a controller review, not generated gameplay.
 - [ ] Validate the native VI/PAD adapter and integrate useful proposals with simulation.
 - [x] Decode a short local progressive clip with original PTS/time base, dimensions,
   hashes and exact timestamps; retain variable spacing and identical adjacent PNGs.
@@ -556,15 +561,18 @@ features or prerequisites for the first short-clip reconstruction.
 
 ## Latest validation and retained evidence
 
-The latest Docker run passed **412 Python tests**, **14 optional model/trainer tests**
-and **17 parser/preparation/export/catalog tests**. Native code/math is unchanged
-in this learning milestone; native suites were not rerun. The last recorded native
+The latest Docker run passed **413 Python tests**; seven optional trainer tests
+pass, alongside the unchanged eight model tests last exercised in the handover.
+The last independent parser run passed **17 parser/preparation/export/catalog tests**.
+Native code/math is unchanged in this learning milestone; native suites were not
+rerun. The last recorded native
 build passed **10 host/component and 23 game-library tests**. Synthetic protocol/component tests
 establish their tested behavior; the following local ISO runs provide separate
 gameplay, recording and playback evidence.
 
 | Evidence | Result / retained location |
 | --- | --- |
+| Saved-model review | Paused current run at 24,459; immutable checkpoint produces both validation MP4/MKV reviews (241 and 661 frames) with original footage and recorded/predicted controls; `vision-training/default/reviews/` on V100; review worker exits zero with networking disabled; generated gameplay remains pending |
 | Server-local training handover | Six training/two validation clips; detached network-disabled CUDA worker and pause/resume/stop verified; V100 `.docker-state/local/vision-control-validation/` and `vision-training/default/`; left paused at 7,691 |
 | Signed training overfit | 241 images, 211 windows; 10,000-update checkpoint and new frozen-inference regression both have 1.0 event F1/state/axis-bin accuracy; `.docker-state/local/learning-timing-v1/` and V100 `learning-heldout-v1/training-regression-score.json` |
 | Reserved-match prediction | Same frozen model, swapped ports, 422 player-frame predictions; hold F1 0.0187, press/release F1 zero; `.docker-state/local/learning-heldout-v1/score.json` on the V100 |

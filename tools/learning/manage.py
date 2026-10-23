@@ -11,8 +11,8 @@ import time
 
 from runtime_files import ROOT, atomic_json, read_json
 
-NAMES = {'training':'yt2slp-vision-trainer','preparation':'yt2slp-vision-prepare'}
-ROLES = {'training':'vision-trainer','preparation':'vision-prepare'}
+NAMES = {'training':'yt2slp-vision-trainer','preparation':'yt2slp-vision-prepare','review':'yt2slp-vision-review'}
+ROLES = {'training':'vision-trainer','preparation':'vision-prepare','review':'vision-review'}
 
 
 def inspect(kind):
@@ -42,22 +42,24 @@ def validate_config(config):
 
 
 def docker_command(config,config_path,kind,steps=None):
-    image = config['render_image'] if kind=='preparation' else config['training_image']
+    image = config['training_image'] if kind=='training' else config['render_image']
     command = ['docker','run','--detach','--name',NAMES[kind],'--init','--restart=no','--shm-size=512m','--network=none',
         '--user',f'{os.getuid()}:{os.getgid()}', '--mount',f'type=bind,src={ROOT},dst=/work',
         '--workdir','/work','--gpus','device='+config['gpu'],
         '--label','org.yt2slp.role='+ROLES[kind],
         '-e','NVIDIA_DRIVER_CAPABILITIES=compute,utility','-e','PYTHONUNBUFFERED=1','-e','PYTHONPATH=/work/src',
         '-e','TORCH_HOME=/work/.docker-state/cache/torch',image,config['python'],
-        'tools/learning/prepare_dataset.py' if kind=='preparation' else 'tools/learning/train.py',
+        {'preparation':'tools/learning/prepare_dataset.py','training':'tools/learning/train.py','review':'tools/learning/review_run.py'}[kind],
         '--config',str(config_path.relative_to(ROOT))]
     if steps is not None: command += ['--steps',str(steps)]
     return command
 
 
-def launch(config,path,kind,steps=None):
-    other = inspect('preparation' if kind=='training' else 'training')
-    if other and other['Running']: raise ValueError('wait for or stop the other worker before sharing its GPU/dataset')
+def launch(config,path,kind,steps=None,best=False):
+    for other_kind in NAMES:
+        if other_kind==kind: continue
+        other = inspect(other_kind)
+        if other and other['Running']: raise ValueError(f'wait for or stop {other_kind} before sharing its GPU/dataset')
     old = inspect(kind)
     if old and old['Running']:
         print(f'{kind} already running'); return
@@ -74,8 +76,13 @@ def launch(config,path,kind,steps=None):
     for key in required:
         candidate = ROOT/config[key]
         if not (candidate.is_file() or (key=='python' and candidate.is_symlink())): raise ValueError(f'missing {key}; see training-control.md')
+    command = docker_command(config,path,kind,steps)
+    if kind=='review':
+        output = ROOT/config['run_directory']/'reviews'/f'review-{time.time_ns()}'
+        atomic_json(output.parent/'latest.json',{'directory':str(output.relative_to(ROOT))})
+        command += ['--output',str(output.relative_to(ROOT)),'--snapshot','best' if best else 'latest']
     if old: subprocess.run(['docker','rm',NAMES[kind]],check=True,stdout=subprocess.DEVNULL)
-    result = subprocess.run(docker_command(config,path,kind,steps),check=True,capture_output=True,text=True)
+    result = subprocess.run(command,check=True,capture_output=True,text=True)
     print(f'{kind} started ({result.stdout.strip()[:12]}). You can disconnect SSH now.')
 
 
@@ -116,6 +123,14 @@ def show_status(config):
         if info.get('error'): print('  '+info['error'])
     pointer = read_json(ROOT/config['run_directory']/'latest.json')
     if pointer: print(f"Latest checkpoint (step {pointer['step']:,}):",str(ROOT/config['run_directory']/pointer['file']))
+    review = read_json(ROOT/config['run_directory']/'reviews/latest.json')
+    if review:
+        output = ROOT/review['directory']; info = read_json(output/'status.json',{})
+        state = inspect('review'); running = bool(state and state['Running'])
+        label = info.get('state','starting' if running else 'not started')
+        if not running and label in ('loading','predicting','rendering'): label = 'interrupted'
+        print(f'Review: {label}; {output}')
+        for clip in info.get('clips',[]): print('  Video:',output/clip['mp4'])
 
 
 def doctor(config):
@@ -131,19 +146,21 @@ def doctor(config):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command',nargs='?',choices=('start','resume','pause','stop','status','logs','prepare','stop-preparing','doctor'))
+    parser.add_argument('command',nargs='?',choices=('start','resume','pause','stop','status','logs','prepare','stop-preparing','doctor','review'))
     parser.add_argument('--config',type=Path,default=ROOT/'configs/vision-v100.json')
     parser.add_argument('--steps',type=int,help='total step limit, including previous steps')
     parser.add_argument('--follow',action='store_true',help='follow logs; Ctrl-C only closes the log viewer')
     parser.add_argument('--preparation',action='store_true',help='show preparation logs instead of training logs')
+    parser.add_argument('--review',action='store_true',help='show review logs instead of training logs')
+    parser.add_argument('--best',action='store_true',help='review the best validation checkpoint rather than latest')
     args = parser.parse_args(); path = args.config.resolve()
     if not path.is_relative_to(ROOT): parser.error('config must be in checkout')
     config = read_json(path); validate_config(config)
     if args.steps is not None and not 1<=args.steps<=1000000000: parser.error('positive bounded total steps required')
     if not args.command:
-        menu = {'1':'start','2':'pause','3':'resume','4':'stop','5':'status','6':'logs','7':'prepare','8':'doctor'}
+        menu = {'1':'start','2':'pause','3':'resume','4':'stop','5':'status','6':'logs','7':'prepare','8':'doctor','9':'review'}
         while True:
-            print('\n1 Start training   2 Pause   3 Resume   4 Stop\n5 Status   6 Logs   7 Prepare data   8 Check setup   0 Quit')
+            print('\n1 Start training   2 Pause   3 Resume   4 Stop\n5 Status   6 Logs   7 Prepare data   8 Check setup\n9 Review latest model on validation clips   0 Quit')
             choice = input('Choose: ').strip()
             if choice=='0': return
             if choice in menu:
@@ -152,7 +169,8 @@ def main():
     if args.command=='logs':
         command = ['docker','logs','--tail','50']
         if args.follow: command.append('--follow')
-        os.execvp('docker',command+[NAMES['preparation' if args.preparation else 'training']])
+        if args.preparation and args.review: parser.error('choose preparation or review logs')
+        os.execvp('docker',command+[NAMES['preparation' if args.preparation else 'review' if args.review else 'training']])
     lock_path = ROOT/'.docker-state/local/vision-training/controller.lock'; lock_path.parent.mkdir(parents=True,exist_ok=True)
     with lock_path.open('a') as lock:
         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
@@ -161,6 +179,9 @@ def main():
         elif args.command in ('pause','stop'): request(config,args.command)
         elif args.command=='status': show_status(config)
         elif args.command=='doctor': doctor(config)
+        elif args.command=='review':
+            request(config,'pause')
+            launch(config,path,'review',best=args.best)
         elif args.command=='stop-preparing':
             state = inspect('preparation')
             if state and state['Running']: subprocess.run(['docker','stop','-t','10',NAMES['preparation']],check=True)

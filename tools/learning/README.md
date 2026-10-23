@@ -13,6 +13,11 @@ prepared feature shards and durable model/optimizer checkpoints work without
 Codex or the workstation. The older commands below reproduce the bounded pilot;
 `train_smoke.py` is not the long-running controller.
 
+`~/train-melee review` pauses training and makes MP4/MKV controller-prediction
+reviews of the prepared validation clips. Use `review --best` for the best saved
+checkpoint and `status` for completed video paths. Original footage and recorded/
+predicted inputs are displayed together; reconstructed gameplay remains pending.
+
 The executable experiment is a **training-clip optimizer smoke test**. It cannot
 reconstruct a match, validate held-out accuracy or export a replay. Image/post
 phase remains unverified in the original positive-clock pilot; that manifest

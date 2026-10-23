@@ -16,6 +16,7 @@ import manage
 import train
 from runtime_files import atomic_json, digest, read_json
 from stream_data import WindowStore
+from review_run import snapshot
 
 
 class TrainingTests(unittest.TestCase):
@@ -94,6 +95,18 @@ class TrainingTests(unittest.TestCase):
         train.train(self.config,run,'cpu',6)
         self.assertEqual(read_json(run/'status.json')['state'],'stopped')
         self.assertEqual(self.checkpoint(run)['step'],3)
+
+    def test_review_copies_a_bound_snapshot_without_changing_training_checkpoint(self):
+        run = self.root/'review-source'; train.train(self.config,run,'cpu',4)
+        pointer = read_json(run/'latest.json'); output = self.root/'review'; output.mkdir()
+        expected = train.contract(self.config,self.manifest,'cpu')
+        payload, selected = snapshot(run,output,'best',expected)
+        self.assertEqual(selected['step'],4)
+        self.assertEqual(read_json(run/'latest.json'),pointer)
+        self.assert_tree_equal(payload['model'],self.checkpoint(run)['model'])
+        self.assertEqual(digest(output/'model-snapshot.pt'),selected['sha256'])
+        changed = {**expected,'dataset_sha256':'changed'}; other = self.root/'bad-review'; other.mkdir()
+        with self.assertRaisesRegex(ValueError,'mismatch'): snapshot(run,other,'latest',changed)
 
     def test_checkpoint_write_failure_leaves_committed_pointer_intact(self):
         run = self.root/'safe'; train.train(self.config,run,'cpu',2)

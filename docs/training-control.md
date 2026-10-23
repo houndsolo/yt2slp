@@ -33,6 +33,35 @@ The worker checks requests between complete optimizer updates. An in-progress
 validation batch sequence finishes before saving. Closing SSH never sends a stop
 request to the detached worker.
 
+To compare the saved model's controller predictions with original footage:
+
+```bash
+~/train-melee review          # pauses active training; reviews latest checkpoint
+~/train-melee status          # review progress and completed MP4 paths
+~/train-melee logs --review --follow
+# Alternatively, after the current review finishes:
+~/train-melee review --best   # best validation checkpoint rather than latest
+```
+
+Menu option 9 also starts a latest-checkpoint review. The detached review worker
+uses the two already prepared **validation** clips. Reserved final-test matches
+stay unopened. Each clip gets a playable MP4 and lossless MKV showing the original
+footage beside recorded/predicted button holds, presses, releases and stick values.
+These are **controller prediction reviews**; the model-to-native-simulator adapter
+is still needed for reconstructed-gameplay comparisons and generated `.slp` files.
+
+The worker copies a checksum-bound checkpoint into a new directory under
+`vision-training/default/reviews/`, re-encodes the verified image-only views,
+saves predictions, then opens the scoring labels and renders the panels. It never
+updates model/optimizer state or fits a frame offset. Training/preparation stay
+blocked while review uses the GPU. Training remains paused afterward; use
+`~/train-melee resume` when ready. `status` prints the full video paths; the latest
+review directory is also recorded in `reviews/latest.json`. Snapshot, predictions,
+scores and rendering identities remain alongside each movie for reproducibility.
+The command was validated on the user-trained latest checkpoint at step 24,459:
+both 241- and 661-frame validation reviews rendered, with a clean worker exit and
+training left paused. Review creates no reconstructed gameplay or replay file.
+
 Default training is bounded at **100,000 total optimizer steps**. To change the
 limit without resetting progress:
 
