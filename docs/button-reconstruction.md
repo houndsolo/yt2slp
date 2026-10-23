@@ -169,3 +169,11 @@ Generated game material, recordings, images, annotations and clips remain ignore
 The next work is joining windows into longer trajectories and reducing manual
 observation work; these remain unimplemented. No model training is required for
 this controlled jump experiment.
+
+## Short hop versus full hop
+
+The tied programs above are all short hops. A dedicated
+[boundary measurement](fox-hop-boundary.md) confirms the missing three-request
+case: one/two-request holds short-hop, while three/four/eight full-hop, for both
+X and Y. Both have three squat frames; takeoff velocity, apex height and airtime
+differ. Actual official Playback verifies the two/three boundary.

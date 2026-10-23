@@ -276,6 +276,11 @@ inputs but identical official images. Whole-clip RGB error falls from 25.98 to
 [button reconstruction](docs/button-reconstruction.md) for the measured input
 ambiguity, commands and scope.
 
+Fox's [short/full-hop boundary](docs/fox-hop-boundary.md) is also measured:
+one/two-request X/Y holds short-hop; three/four/eight full-hop. Both have three
+squat frames. Official Playback verifies the two/three boundary; the earlier
+four-way input tie is within the short-hop group.
+
 ```bash
 bash scripts/docker.sh run python scripts/ingest_video.py path/to/short.mp4 \
   --output .local/video-NEW

@@ -159,6 +159,9 @@ Dolphin states or rendered images agree.
   state/observation/timer criteria, without changing game timing or math.
 - [x] Validate a fourth source with a jump against those same criteria; independently
   parse actual recorded X/Y masks and press/release durations in candidate replays.
+- [x] Measure Fox's short/full-hop boundary at one/two/three/four/eight held requests
+  for X/Y; verify the two/three boundary with actual official images and selected
+  fields. This mechanics probe is separate from the four reconstruction cases.
 - [x] Prepare a compressed source video only after validating reference identities,
   geometry, timing and independent replay parsing. Keep source controls/state
   outside the ingested video supplied to reconstruction.
@@ -330,8 +333,9 @@ features or prerequisites for the first short-clip reconstruction.
 
 ## Latest validation and retained evidence
 
-The last implementation validation used Docker GCC 14 and passed **235 Python,
-10 host/component, 23 game-library and 9 independent parser tests**. Synthetic protocol/component tests
+The latest Docker Python run passed **246 tests**. The unchanged engine/parser's
+last full component run passed **10 host/component, 23 game-library and 9
+independent parser tests**. Synthetic protocol/component tests
 establish their tested behavior; the following local ISO runs provide separate
 gameplay, recording and playback evidence.
 
@@ -369,6 +373,8 @@ gameplay, recording and playback evidence.
 | Jump official refinement/review | All eight parsed/rendered; four exact image-score ties; fresh winner `.docker-state/local/runs/step-1cynkr0m/review/comparison.mkv`, RGB RMSE 25.98 to 5.55 |
 | Jump input ambiguity | Four distinct replay hashes and input traces, 61 identical official PNGs, nine source fields exact; `.docker-state/local/manual-case-v4/recorded-buttons.json` and `ambiguity-evaluation.json` |
 | Prior phase regression | Same accepted set and genuine replay bytes; `.docker-state/local/manual-case-v4/legacy-phase-regression.json` |
+| Fox short/full-hop boundary | Ten real X/Y recordings: 1/2-request short hops and 3/4/8-request full hops; `.docker-state/local/fox-hop-boundary-v2/measurements.json` |
+| Boundary official comparison | Two/three-request X runs each match nine fields across 122 player-frames; timer-aligned short-left/full-right clip; `official-analysis/` in that probe directory |
 
 The selected replay in both recording runs has SHA-256
 `46b196b913b9a81bc501ddfcdd6f28c2710aabf665b0597d9059c9511e7e5dd2`.
