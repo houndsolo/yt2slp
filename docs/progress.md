@@ -26,8 +26,13 @@ from a fresh boot, parses independently and matches its own official playback's
 nine fields over -39..18. All 24 alternatives are now rendered/ranked; fresh
 selected playback/review passes, with two visually indistinguishable input
 programs. Whole-frame RGB RMSE improves from 67.40 to 63.29 across 17 frames,
-leaving a large visible motion/camera mismatch. This is a short development
-experiment, not an accepted visual reconstruction. Automatic gameplay recognition, unknown-start recovery and general
+leaving a large visible motion/camera mismatch. **The source-start interpretation
+was incorrect:** the user identifies Falco on the top platform in the YouTube
+clip, not the opposite side platform used in the search. That experiment's
+native/official consistency checks remain valid for its own generated branches,
+but its starting-layout hypothesis does not reproduce the supplied footage.
+The immediate benchmark is now an MP4 rendered from a supplied example `.slp`.
+Automatic gameplay recognition, unknown-start recovery and general
 video-to-replay reconstruction remain unimplemented.
 
 Checked items below are implemented and validated within their stated scope.
@@ -45,24 +50,33 @@ promise that its design or acceptance thresholds have already been settled.
 | 5. Video ingestion and observation extraction | Local decoding/manual cues validated; automatic recognition remains | Produce a timestamped, uncertainty-aware observation timeline from a supported clip |
 | 6. Input and hidden-state reconstruction | Controlled consecutive windows and real-opening two-player signed-frame search validated; unknown starts/backtracking remain | Search simulation branches for a playable sequence that matches observations |
 | 7. End-to-end reconstruction and review | One host workflow for annotated, supplied-start windows; general observations/visual acceptance remain | Video in; selected `.slp`, comparison evidence and limitations out |
-| 8. Broader evaluation and practical usability | Five controlled sources; first real opening under manual development | Reproduce results on held-out clips and document supported cases and failure modes |
+| 8. Broader evaluation and practical usability | Five controlled sources; YouTube start hypothesis corrected; supplied-replay benchmark next | Reproduce results on held-out clips and document supported cases and failure modes |
 
-## Immediate priorities after inspecting the real video
+## Immediate priorities: standardized supplied-replay benchmark
 
-The supplied tournament clip changes the order of work. More generated fixtures
-and model training are not the immediate bottleneck: the first real opening needs
-correct control timing, two active input programs and an explicit image mapping.
-The earlier milestones remain useful foundations, not a claim that this video
-has already been reconstructed.
+Spawn policy is a required starting condition. Slippi has custom neutral-start
+codes that place the two fighters on opposite sides; ordinary SSBM uses distinct
+P1..P4 starting points. These must not be treated as the same setup. The user
+corrected the YouTube observation: Falco begins on the **top platform**, so the
+previous left/right spawn override was the wrong hypothesis for that recording.
+Do not compensate for a wrong start by fitting later inputs or image transforms.
+
+Pause further YouTube fitting. First render one of the user-supplied replays in
+`recordings/examples/` to MP4 with official Playback, verify the actual startup
+policy/codes, and reconstruct a short segment of that standardized video.
+Keep the original replay's controls and later state out of candidate selection;
+use them only for a separate post-selection evaluation. Any supplied initial
+settings, seed or prefix must be explicitly declared rather than presented as
+values recovered from the MP4.
 
 | Order | Work | Current status / completion boundary |
 | --- | --- | --- |
-| 1 | Reproduce a supported start and control the pre-clock opening | Stage/ports/stock rules validated; optional early control and genuine branch recording validated. Requested playable frames -39..140 are nine-field exact in official Playback. Full Ready audit retains one float-word mismatch at -113. |
-| 2 | Carry the real recipe and two players through search | Complete for one opening: explicit ports/rules/spawn indices, simultaneous programs, signed recording keys, checkpoint branches and exact fresh selected-history/byte reproduction. Signed multi-window joining remains open. |
-| 3 | Prepare source-only opening observations and comparison geometry | Manual cues and uncertainty frozen; timestamp-preserving crop/window plus fixed 642x528 Lanczos transform implemented. Six source-only image regions frozen; automatic timer failure retained and 17 clocks read individually. |
-| 4 | Reconstruct one short opening from the supplied footage | First bounded grid tried: ordinary slot starts reject all 72; observed left/right platform hypothesis accepts 24. RNG/codes remain unknown. This is a coarse 58-VI continuation, not visual acceptance or a whole match. |
-| 5 | Validate and review the actual reconstructed result | Complete for the declared short grid: all 24 render/parse and match their own official fields across 816 player-frames (1..17). Ranking retains two exact ties; fresh selected official review and 17-frame comparison pass. RMSE 63.29 remains too large to claim visual acceptance. Retain failed early captures/calibrations. |
-| 6 | Improve motion fit, extend coverage, then automate observations | Next: platform-drop/fast-fall and longer movement hypotheses for this opening, then a longer annotated continuation. Preserve ties and failures. Later try another clip, handle drift/backtracking and measure recognition gaps before training. |
+| 1 | Correct the start-policy assumption and retain prior evidence | Documented here. Prior YouTube layout is invalid as a source reproduction; its generated-replay/parser/official checks remain scoped to its own branches. No visual acceptance was established. |
+| 2 | Select a supplied example and render a real MP4 | Next: inspect supported roster/stage/settings and recorded codes without reading original controls; use official Playback with explicit profile/codes and retain hashes, timer labels and frame mapping. |
+| 3 | Verify the standardized starting recipe | Confirm neutral-start versus ordinary per-port spawn behavior from the replay/codes and actual rendered start. Declare supplied settings/seed/prefix and any unsupported differences before search. |
+| 4 | Reconstruct a short video-only segment | Freeze visual observations/uncertainty and a bounded two-player input grid. Retain rejected programs, ties and failed setup hypotheses. Never feed the source's original controls/later state into selection. |
+| 5 | Validate the selected reconstruction | Genuine export, fresh reproduction, independent parser, actual official playback, aligned MP4 comparison and measured motion/image errors. Evaluate source replay fields only after selection. |
+| 6 | Expand coverage after this benchmark | Improve demonstrated input/observation gaps, extend to consecutive windows and another supplied example; return to YouTube with start-policy handling validated. Train vision components only for measured recognition gaps. |
 
 The current seed/time-base choices are simulation hypotheses, not recovered
 source values. General starting-state/RNG recovery, camera/world-coordinate
@@ -98,8 +112,9 @@ task have not been validated. See [README setup](../README.md) and
   ports and stock/countdown rules, with a separate ISO/parser/official probe.
   Unspecified rules retain fresh-game defaults.
 - [x] Expose optional ordinary stage start-point indices before match construction.
-  Visible Ready platforms informed the first real-opening layout hypothesis;
-  omission preserves the old default recording bytes. No live state/math rewrite.
+  Omission preserves the old default recording bytes. The earlier YouTube
+  left/right layout interpretation was corrected by the user and is not source
+  start validation. No live state/math rewrite.
 - [x] Add optional early control and checkpoints while the native match counter is
   zero; observe signed recording frames separately. Real negative-frame branch
   recording/fresh reproduction and official playable-interval checks pass.

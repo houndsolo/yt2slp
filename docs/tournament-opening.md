@@ -1,5 +1,13 @@
 # First tournament opening: two-player search
 
+**Corrected source interpretation:** the user identifies Falco starting on the
+top platform in the supplied video. The left/right platform hypothesis below
+was incorrect. Its parser/native/official checks validate the generated branches
+only; they do not validate that starting setup against the source. Slippi's
+neutral-start codes and ordinary SSBM per-port starts must be distinguished.
+Further fitting of this clip is paused in favor of an MP4 rendered from a supplied
+example replay; see the [current priorities](progress.md#immediate-priorities-standardized-supplied-replay-benchmark).
+
 Validated locally on 2026-10-23 using the user's ISO and the supplied
 [tournament video](https://www.youtube.com/watch?v=OWraeXAYElQ). This is an
 iterative development case with manual observations, not a blind evaluation or
