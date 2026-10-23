@@ -82,9 +82,10 @@ prefix identity checks even when this default recording still reproduces.
 
 The source already shows movement and damage before its clock first decrements.
 Slippi's pinned parser declares `Frames.FIRST_PLAYABLE = -39`; frame 0 is not the
-first playable moment. Current native control starts at a positive match counter.
+first playable moment. Default native control starts at a positive match counter; optional
+[early control](preroll-control.md) now covers the signed pre-clock interval.
 The footage's first `.99` timer reading must therefore not be treated as an idle
-opening or used to discard the earlier playable frames. The next step is control
-and recording validation through that pre-clock interval, followed by source-only
-action annotations and simultaneous two-player input search. Search/refinement
+opening or used to discard the earlier playable frames. Pre-clock recording and official playable-interval validation are now complete
+within their documented scope. Next are source-only action annotations and
+simultaneous two-player input search. Search/refinement
 still has controlled Fox/Falco/Battlefield assumptions and fixed image geometry.

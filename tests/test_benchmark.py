@@ -102,6 +102,12 @@ def test_capture_reports_require_exact_requested_interval_and_file():
     assert module.assess_window(text,219,321,Path('/replay.slp'))
     assert not module.assess_window(text.replace('[CURRENT_FRAME] 240\n',''),219,321,Path('/replay.slp'))
     assert not module.assess_window(text,219,321,Path('/wrong.slp'))
+    assert module.capture_bounds(240,300,20)==(219,321)
+    assert module.capture_bounds(-39,140,0,True)==(-40,141)
+    negative='[FILE_PATH] /replay.slp\n'+''.join(f'[CURRENT_FRAME] {i}\n' for i in range(-40,142))
+    assert module.assess_window(negative,-40,141,Path('/replay.slp'))
+    for first,last,padding,early in [(-39,140,0,False),(-123,140,0,True),(-39,140,-1,True)]:
+        with pytest.raises(ValueError):module.capture_bounds(first,last,padding,early)
 
 
 @pytest.mark.parametrize('frames',[[240,None,242],[240,241,241,242],[242,241,240]])

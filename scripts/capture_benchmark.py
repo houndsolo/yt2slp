@@ -28,6 +28,13 @@ def assess_window(text, start, end, replay):
                 and paths and all(p == str(replay) for p in paths))
 
 
+def capture_bounds(first, last, padding, include_preroll=False):
+    start, end = first-padding-1, last+padding+1
+    if padding < 0 or first > last or start < (-123 if include_preroll else 0):
+        raise ValueError('invalid supported capture interval')
+    return start, end
+
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--dolphin',type=Path,default=os.environ.get('YT2SLP_DOLPHIN'))
@@ -37,10 +44,12 @@ def main():
     p.add_argument('--first',type=int,default=240)
     p.add_argument('--last',type=int,default=300)
     p.add_argument('--padding',type=int,default=20)
+    p.add_argument('--include-preroll',action='store_true',help='allow requests in recorded negative frames, bounded by -123')
     p.add_argument('--timeout',type=float,default=120)
     args=p.parse_args()
-    if args.first <= args.padding or args.padding < 0 or args.last < args.first or not 0 < args.timeout < 3600:
-        p.error('invalid supported capture interval/budget')
+    try:start,end=capture_bounds(args.first,args.last,args.padding,args.include_preroll)
+    except ValueError as exc:p.error(str(exc))
+    if not 0 < args.timeout < 3600:p.error('invalid capture budget')
     for path in (args.dolphin,args.iso,args.replay):
         if path is None or not path.is_file(): p.error(f'missing input: {path}')
     exe,iso,replay=(path.resolve() for path in (args.dolphin,args.iso,args.replay))
@@ -57,7 +66,6 @@ def main():
         '[Interface]\nConfirmStop = False\n[Movie]\nDumpFrames = True\nDumpFramesSilent = True\n'
         '[DSP]\nBackend = No audio output\n')
     (user/'Config/GFX.ini').write_text('[Hardware]\nVSync = False\n[Settings]\nDumpFramesAsImages = True\nEFBScale = 2\nInternalResolutionFrameDumps = True\nShowFPS = False\n')
-    start,end=args.first-args.padding-1,args.last+args.padding+1
     request=out/'request.json'
     request.write_text(json.dumps({'mode':'normal','replay':str(replay),'commandId':'yt2slp-reference-v1',
         'startFrame':start,'endFrame':end,'shouldResync':False,'rollbackDisplayMethod':'off'},indent=2)+'\n')
@@ -98,7 +106,7 @@ def main():
         'wanted_interval':[args.first,args.last],'captured_png_count':len(images),
         'regenerated_replays':[str(path.relative_to(out)) for path in files],
         'capture_passed':passed,'frame_alignment_verified':False,'state_comparison_passed':None,
-        'should_resync':False,'image_equality_measured':False}
+        'should_resync':False,'include_preroll':args.include_preroll,'image_equality_measured':False}
     (out/'capture.json').write_text(json.dumps(result,indent=2)+'\n')
     print(json.dumps(result,indent=2))
     return 0 if passed else 1

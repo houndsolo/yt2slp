@@ -134,6 +134,27 @@ def test_control_forwards_explicit_stock_rules(configured,monkeypatch):
     backend.start(script,timeout=2)
 
 
+def test_opt_in_preroll_uses_retraces_while_the_game_counter_stays_zero(configured):
+    backend,script=configured
+    initial=backend.start(script,timeout=2,include_preroll=True)
+    assert initial.retrace==1 and initial.match_frame==0
+    assert backend.observe()==initial
+    saved=backend.capture()
+    first=tuple(backend.step(NEUTRAL_PADS) for _ in range(4))
+    assert [s.match_frame for s in first]==[0,0,1,2]
+    assert [s.retrace for s in first]==[2,3,4,5]
+    backend.restore(saved)
+    assert backend.observe()==initial
+    assert tuple(backend.step(NEUTRAL_PADS) for _ in range(4))==first
+    assert 'true' in (backend.last_run_dir/'start-options.json').read_text()
+
+
+def test_preroll_rejects_non_boolean_options_before_starting(configured):
+    backend,script=configured
+    with pytest.raises(BackendError,match='boolean'):backend.start(script,include_preroll=1)
+    assert backend._session is None
+
+
 @pytest.mark.parametrize("limit,timeout", [(0, 1), (2**32, 1), (True, 1), (1, 0), (1, float("nan"))])
 def test_bad_start_limits(configured, limit, timeout):
     backend, script = configured

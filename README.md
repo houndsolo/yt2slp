@@ -303,7 +303,8 @@ Yoshi's Story and P2/P3 setup exposes capabilities still needed beyond the contr
 fixtures. A [native setup probe](docs/tournament-start.md) now validates its stage,
 fighters, physical ports and four-stock/eight-minute rules: nine fields agree with
 official Playback across 842 player-frames. No reconstruction of that footage is
-claimed; playable pre-clock input and simultaneous-player search are next.
+claimed. Optional [pre-clock control](docs/preroll-control.md) now covers playable
+negative frames; simultaneous-player search and source/image alignment are next.
 
 ## Development checks
 

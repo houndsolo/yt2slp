@@ -39,6 +39,29 @@ promise that its design or acceptance thresholds have already been settled.
 | 7. End-to-end reconstruction and review | One host workflow for annotated, supplied-start windows; general observations/visual acceptance remain | Video in; selected `.slp`, comparison evidence and limitations out |
 | 8. Broader evaluation and practical usability | Five controlled sources evaluated; real tournament footage is next | Reproduce results on held-out clips and document supported cases and failure modes |
 
+## Immediate priorities after inspecting the real video
+
+The supplied tournament clip changes the order of work. More generated fixtures
+and model training are not the immediate bottleneck: the first real opening needs
+correct control timing, two active input programs and an explicit image mapping.
+The earlier milestones remain useful foundations, not a claim that this video
+has already been reconstructed.
+
+| Order | Work | Current status / completion boundary |
+| --- | --- | --- |
+| 1 | Reproduce a supported start and control the pre-clock opening | Stage/ports/stock rules validated; optional early control and genuine branch recording validated. Requested playable frames -39..140 are nine-field exact in official Playback. Full Ready audit retains one float-word mismatch at -113. |
+| 2 | Carry the real recipe and two players through search | Next: explicit ports/rules and simultaneous input phases, signed replay-frame keys through Ready, checkpoint branching and fresh selected-history reproduction. Current search still assumes Fox/Falco/Battlefield and one active controller. |
+| 3 | Prepare source-only opening observations and comparison geometry | Intake/crop/timer readings exist. Freeze manual action/damage/order evidence and uncertainty before search; define/validate the source-to-render transform. Do not treat the first clock decrement as the first playable frame. |
+| 4 | Reconstruct one short opening from the supplied footage | Search a bounded declared grid with unknown RNG/codes left explicit; retain alternatives and failed candidates. No original replay or hidden-state oracle is available for selection. |
+| 5 | Validate and review the actual reconstructed result | Genuine selected `.slp`, independent parser, official playback, and an aligned source/comparison clip with measured errors. Engine/native agreement and source-video similarity are separate gates. |
+| 6 | Expand coverage, then automate observations | Try another real segment/clip, handle drift/backtracking and measure manual-annotation bottlenecks. Build/train vision components only for measured recognition gaps. |
+
+The current seed/time-base choices are simulation hypotheses, not recovered
+source values. General starting-state/RNG recovery, camera/world-coordinate
+measurement, broad visual acceptance and arbitrary full-match reconstruction
+remain open. See [tournament intake](tournament-video-intake.md),
+[setup validation](tournament-start.md) and [pre-clock control](preroll-control.md).
+
 ## 1. Reproducible native development environment
 
 - [x] Audit engine alternatives and select Melee Unlocked's existing native Linux
@@ -65,8 +88,11 @@ task have not been validated. See [README setup](../README.md) and
   Battlefield/Final Destination; extend to Yoshi's Story, two explicit physical
   ports and stock/countdown rules, with a separate ISO/parser/official probe.
   Unspecified rules retain fresh-game defaults.
-- [ ] Control the playable pre-clock opening. Current start waits for a positive
-  match counter; Slippi includes playable negative frames.
+- [x] Add optional early control and checkpoints while the native match counter is
+  zero; observe signed recording frames separately. Real negative-frame branch
+  recording/fresh reproduction and official playable-interval checks pass.
+- [ ] Resolve the separate one-word Ready-state discrepancy at replay frame -113
+  before claiming complete pre-clock native/official equality; no tolerance added.
 - [x] Retain a live game stack while paused; advance one **VI retrace** per step.
   Keep the separate match-frame counter explicit and preserve ordinary PAD polling.
 - [x] Observe selected state fields without resuming; retain raw float bits.
@@ -363,7 +389,7 @@ features or prerequisites for the first short-clip reconstruction.
 
 ## Latest validation and retained evidence
 
-The latest Docker Python run passed **307 tests**. The current native build passed
+The latest Docker Python run passed **309 tests**. The current native build passed
 **10 host/component and 23 game-library tests**; the unchanged independent parser's
 last component run passed **9 tests**. Synthetic protocol/component tests
 establish their tested behavior; the following local ISO runs provide separate
@@ -415,6 +441,9 @@ gameplay, recording and playback evidence.
 | Tournament setup/control probe | Yoshi's Story, Falco/Captain Falcon on P2/P3, four stocks/480 seconds; three restores and fresh branch bytes reproduce; `.docker-state/local/tournament-start-v1/probe-result.json` |
 | Tournament setup official comparison | Nine fields exact across 842 player-frames (1..421), seven observation fields exact; `official-analysis/result.json` in that probe; no source-video reconstruction claimed |
 | Default-match recording regression | New native build preserves prior two-jump replay SHA-256; `legacy-regression.json` in that probe |
+| Pre-clock checkpoint/recording | Early pause -123; capture -40 while native counter is zero; both inputs affect negative frames; three restores/fresh bytes reproduce; `.docker-state/local/preroll-probe-v1/probe-result.json` |
+| Playable pre-clock official comparison | Requested -39..140: nine fields exact across 360 player-frames; native observation mapping exact over all 528; `official-analysis-requested/result.json` in that probe |
+| Strict Ready audit failure | Full -123..140 gate remains false: one Falco Y word differs at -113; original failed audit in `official-analysis/`, retained alongside requested-interval result |
 
 The selected replay in both recording runs has SHA-256
 `46b196b913b9a81bc501ddfcdd6f28c2710aabf665b0597d9059c9511e7e5dd2`.
@@ -464,16 +493,18 @@ agreement, stock/LRAS endings and retail parity remain unestablished.
 | `5b557bc` | `18ded4f` | Fox short/full-hop measurement and actual official boundary comparison |
 | `12f2c0e` | `18ded4f` | Consecutive annotated windows, verified selected prefixes and a joined 161-frame replay |
 | `a0c8c6b` | `18ded4f` | Tournament footage intake with explicit crops and original timestamps |
+| `d9bcfe6` | `14c13ea` | Tournament stage/ports/stock setup and 842-player-frame official comparison |
 
 The complete timed-match follow-up pins engine `18ded4f`, published before its
 parent gitlink update. It adds the missing completion callback and recording
 status; the parent adds the complete-match experiment and stricter independent
 parser/official frame-report checks.
 
-The tournament setup follow-up pins engine `14c13ea`, published before the parent
-update. It adds Yoshi's Story, explicit physical ports and optional stock/countdown
-setup, with the [native/official probe](tournament-start.md) kept separate from
-source-video reconstruction.
+The tournament setup follow-up used engine `14c13ea`; the current early-control
+follow-up pins `b298efc`, published before the parent update. Setup adds Yoshi's
+Story, physical ports and stock/countdown rules; early control covers negative
+replay frames. The [setup](tournament-start.md) and [pre-clock](preroll-control.md)
+probes remain separate from source-video reconstruction.
 
 Changes are published to `houndsolo/yt2slp` on `main` and
 `houndsolo/melee-unlocked` on `yt2slp/linux-headless`. See Git history for the

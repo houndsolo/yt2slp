@@ -106,7 +106,8 @@ class Backend(Protocol):
         """Validate and bind artifacts, raising BackendError on missing inputs."""
         ...
 
-    def start(self, script: Path, timeout: float = 120, boot_limit: int = 6000) -> Observation:
+    def start(self, script: Path, timeout: float = 120, boot_limit: int = 6000, *,
+              include_preroll: bool = False) -> Observation:
         """Boot to a resumable boundary, or raise UnsupportedOperation."""
         ...
 
@@ -236,12 +237,16 @@ class NativeLinuxBackend:
         self.observations = observations
         return observations
 
-    def start(self, script: Path, timeout: float = 120, boot_limit: int = 6000) -> Observation:
+    def start(self, script: Path, timeout: float = 120, boot_limit: int = 6000, *,
+              include_preroll: bool = False) -> Observation:
         """Boot to a live VS retrace and wait there. timeout applies per response.
 
         The script navigates menus; the match override controls stage/players.
         After this returns, step inputs replace script input on all four ports.
         The initial snapshot may precede the match's GO animation completing.
+        include_preroll pauses as soon as the two fighters exist, including the
+        zero match-counter interval. recording_status gives the separate signed
+        replay counter; do not derive it from the zero-valued match counter.
         """
         self.close()
         self.observations = ()
@@ -252,6 +257,8 @@ class NativeLinuxBackend:
             raise BackendError("timeout must be finite and positive")
         if type(boot_limit) is not int or not 1 <= boot_limit <= 0xFFFFFFFF:
             raise BackendError("boot_limit must be an integer in 1..4294967295")
+        if type(include_preroll) is not bool:
+            raise BackendError('include_preroll must be a boolean')
         if not script.is_file():
             raise BackendError(f"missing input script: {script}")
         c = self.config
@@ -265,13 +272,15 @@ class NativeLinuxBackend:
                    "--boot-limit", str(boot_limit)]
         if c.match.stock_rules is not None:
             command += ['--stock-rules', c.match.stock_rules.native_argument()]
+        if include_preroll:command += ['--control-preroll']
+        (run_dir/'start-options.json').write_text(json.dumps({'include_preroll':include_preroll})+'\n')
         (run_dir / "config.json").write_text(json.dumps(asdict(c), default=str, indent=2) + "\n")
         try:
             self._session = ControlSession(command, run_dir, timeout)
             if self._session.receive() != "MUCONTROL 2":
                 raise ValueError("unsupported native control protocol")
             state = self._receive_state()
-            if not (state.scene_major == 2 and state.scene == 2 and state.match_frame > 0
+            if not (state.scene_major == 2 and state.scene == 2 and (include_preroll or state.match_frame > 0)
                     and tuple(i for i, f in enumerate(state.fighters) if f[0]) == tuple(sorted(c.match.ports))):
                 raise ValueError("native control did not pause in a live VS match")
             self.observations = (state,)

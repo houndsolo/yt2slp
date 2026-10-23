@@ -41,6 +41,12 @@ game together. Game structures, math flags, tick constants and physics are
 unchanged. See [tournament setup](tournament-start.md) for the P2/P3 ISO probe. `requested_match` in experiment output is configuration, not a
 measurement: the selected state snapshot does not contain stage/character IDs.
 
+Pass `include_preroll=True` to `start()` to pause when the two fighters first
+exist, before the native match counter becomes positive. This is opt-in and
+retains the existing VI step unit. During Ready, `recording_status().last_frame`
+provides the separately observed signed replay key. See [pre-clock control](preroll-control.md)
+for the tested interval and retained strict Ready-state discrepancy.
+
 `RunConfig.match` also works with `run_script()`. Leaving it `None` preserves the
 original batch runner's menu-selected match. Interactive `start()` requires it.
 
