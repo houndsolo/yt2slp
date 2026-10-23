@@ -12,9 +12,11 @@ def main():
     parser.add_argument('--context', type=int, default=31)
     args = parser.parse_args()
     result = build_pairs(args.video, args.labels, args.split_plan, args.output, args.context)
+    phase = ('bounded image/post phase audited' if result['training_ready'] else
+             'image/post phase remains unverified, smoke tests only')
     print(f"{args.output}/pairs.json: {len(result['frames'])} frames, "
           f"{len(result['window_centers'])} {result['split']} windows; "
-          "image/post phase remains unverified, smoke tests only")
+          + phase)
 
 
 if __name__ == '__main__':

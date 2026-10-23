@@ -6,11 +6,13 @@ They do not replace host Python or alter game math. See the
 [remote V100 setup](../../docs/remote-training.md) for the tested CUDA lock,
 explicit device selection and actual GPU execution checks.
 
-The current experiment is a **training-clip optimizer smoke test**. It cannot
+The executable experiment is a **training-clip optimizer smoke test**. It cannot
 reconstruct a match, validate held-out accuracy or export a replay. Image/post
-phase and the native VI input adapter remain unverified. The pair manifest
-therefore says `training_ready: false`, even though explicit smoke training is
-allowed. Do not promote the checkpoint to reconstruction based on loss alone.
+phase remains unverified in the original positive-clock pilot; that manifest
+says `training_ready: false`. The [signed-frame follow-up](../../docs/signed-training-data.md)
+now passes a bounded phase audit and training-clip overfit criteria on 241 frames.
+Its pair manifest is ready within that scope. The native VI adapter and held-out
+recognition remain unvalidated. Declining loss alone is not overfit acceptance.
 
 ## Reproduce the small pilot
 
@@ -91,7 +93,7 @@ Local evidence: `.docker-state/local/learning-pilot-v1/` on the host.
 - 100 CPU optimizer updates, seed 1: training loss **10.51475 → 1.83518**.
 - Training F1: holds **0.374**, presses **0.048**, releases **0.043**. This is
   weak edge learning, not a solved training clip or generalization result.
-- Latest Docker validation passes **365 Python tests** and **six optional model
+- Latest Docker validation passes **392 Python tests** and **seven optional model
   tests**. The unchanged parser/preparation/export suite last passed 15 tests.
   Models/features, frames and labels stay ignored. Native code is unchanged;
   native suites were not rerun here.
@@ -103,11 +105,13 @@ examined as a training case. The existing MP4 starts at frame 1, so this opening
 is **absent** from its images/windows. Exporting those controller labels does
 not itself supply correctly aligned pre-clock training images.
 
-Next: validate image/post/control phase on visible transitions, extend frame
-labelling through the playable negative interval, overfit a proper training
-segment with event-sensitive diagnostics, then evaluate a separate whole match.
-Only then connect useful proposals to the native simulator and genuine replay
-validation. A small clip's declining loss is insufficient for any of those gates.
+The signed-frame follow-up fills the negative interval and passes a bounded
+image/post phase audit. A 2,000-update run still fails fixed event-F1 thresholds;
+10,000 updates pass them with 1.0 hold/press/release F1 and state/axis-bin accuracy
+on the training windows. Both attempts are retained. Next: handle the reserved
+match's swapped physical ports explicitly and assess unseen-match behavior,
+then validate native VI/PAD adaptation and genuine replay generation. Loss
+decrease or memorization does not establish those outcomes.
 
 ## Available resources and next work
 

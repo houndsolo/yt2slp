@@ -1,0 +1,136 @@
+"""Make supervised training video from an audited official signed-frame capture.
+
+This intentionally reads training replay controls/posts. Held-out inference must
+never receive the label exports or phase annotations.
+"""
+import argparse
+from fractions import Fraction
+import json
+from pathlib import Path
+import subprocess
+import tempfile
+
+from yt2slp.benchmark import compare_posts
+from yt2slp.frame_index import GEOMETRY, assess_step, cyan_cells, decode_index
+from yt2slp.timer_labels import label_images, png_size
+from yt2slp.training_phase import audit_phase
+from yt2slp.video import ingest_video, sha256
+
+
+def node(tool, *args):
+    return json.loads(subprocess.check_output(['node', 'tools/slippi-parser/'+tool, *map(str, args)]))
+
+
+def audit_capture(folder, replay, timer_calibration):
+    capture = json.loads((folder/'capture.json').read_text())
+    index = json.loads((folder/'capture-index.json').read_text())
+    calibration = json.loads((folder/'osd-calibration.json').read_text())
+    if (capture.get('kind') != 'official-stepped-frame-capture' or capture.get('capture_passed') is not True
+            or capture.get('playback_version') != '3.5.2' or capture.get('should_resync') is not False
+            or capture.get('source_replay_sha256') != sha256(replay)):
+        raise ValueError('successful identity-bound official stepped capture required')
+    first, last = capture['wanted_interval']
+    if not -80 <= first < 0 < last <= 1800 or [r['replay_frame'] for r in index] != list(range(first, last+1)):
+        raise ValueError('incomplete or unsupported signed capture interval')
+    screens = sorted((folder/'screens').glob('*.png'))
+    if [p.name for p in screens] != [f'{i:06d}.png' for i in range(len(screens))]:
+        raise ValueError('missing retained UI screenshot')
+    g = GEOMETRY; width = g['cells']*g['cell_width']; height = g['height']; size = width*height*3
+    raw = subprocess.check_output(['ffmpeg', '-v', 'error', '-start_number', '0', '-i', str(folder/'screens/%06d.png'),
+        '-vf', f'crop={width}:{height}:{g["left"]}:{g["top"]},format=rgb24',
+        '-fps_mode', 'passthrough', '-f', 'rawvideo', 'pipe:1'], timeout=120)
+    if len(raw) != size*len(screens): raise ValueError('decoded UI strip count differs')
+    rendered = {str(p.relative_to(folder)): decode_index(cyan_cells(raw[i*size:(i+1)*size], width, height, cropped=True), calibration)
+                for i, p in enumerate(screens)}
+    for anchor in calibration['sources']:
+        image = folder/anchor['image']
+        pixels = subprocess.check_output(['ffmpeg', '-v', 'error', '-i', str(image), '-frames:v', '1',
+            '-vf', f'crop={width}:{height}:{g["left"]}:{g["top"]},format=rgb24', '-f', 'rawvideo', 'pipe:1'])
+        if sha256(image) != anchor['sha256'] or decode_index(cyan_cells(pixels, width, height, cropped=True), calibration) != anchor['frame']:
+            raise ValueError('OSD calibration source identity or index differs')
+    used = set()
+    for row in index:
+        frame = row['replay_frame']; image = folder/'user/Dump/Frames'/row['capture_image']
+        if row['capture_image'] in used: raise ValueError('reused clean dump image')
+        used.add(row['capture_image'])
+        if (png_size(image) != [642, 528] or sha256(image) != row['capture_image_sha256']
+                or sha256(folder/row['index_screen']) != row['index_screen_sha256']
+                or sha256(folder/row['next_index_screen']) != row['next_index_screen_sha256']
+                or rendered[row['index_screen']] != frame
+                or rendered[row['next_index_screen']] != frame+1
+                or row.get('dump_pipeline_delay_swaps') != 1):
+            raise ValueError('clean PNG / retained OSD screenshot identity or index differs')
+        if row.get('paused_log_minus_osd') != capture.get('paused_log_minus_osd'):
+            raise ValueError('paused log/display association drifted')
+        assess_step(frame, row['next_frame_osd'], row['next_frame_log'], [row['capture_image']],
+                    paused_log_minus_osd=row['paused_log_minus_osd'])
+    timers = node('export-timers.cjs', replay, last)
+    timer_labels = label_images(folder/'user/Dump/Frames', json.loads(timer_calibration.read_text()), timers, 1, last)
+    disagreements = [r['replay_frame'] for r in index if r['replay_frame'] > 0 and
+        timer_labels['selected'].get(r['replay_frame']) != r['capture_image']]
+    if len(capture['regenerated_replays']) != 1: raise ValueError('one real regenerated replay required')
+    state = compare_posts(node('export-state.cjs', replay),
+        node('export-state.cjs', folder/capture['regenerated_replays'][0]), first, last)
+    return capture, index, timers, {'schema': 1,
+        'passed': timer_labels['passed'] and not disagreements and state['passed'],
+        'signed_interval': [first, last], 'hud_osd_disagreement_frames': disagreements,
+        'osd_verified_frames': len(index), 'positive_hud_crosschecked_frames': last,
+        'dump_pipeline_delay_swaps': 1, 'positive_timer_labels': timer_labels,
+        'source_original_vs_official': state,
+        'policy': 'exact rendered OSD per paused frame plus fixed source-audited PBO delay; independent positive HUD crosscheck; no fitted frame offset'}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    for name in ('replay', 'capture', 'timer-calibration', 'phase-observations', 'output'):
+        parser.add_argument('--'+name, type=Path, required=True)
+    args = parser.parse_args()
+    out = args.output.resolve(); out.mkdir(parents=True, exist_ok=False)
+    try:
+        capture, index, timers, audit = audit_capture(args.capture, args.replay, args.timer_calibration)
+        (out/'frame-labels.json').write_text(json.dumps(audit, indent=2)+'\n')
+        if not audit['passed']:
+            raise ValueError('independent positive HUD or original/official state check failed; see retained frame-labels.json')
+        first, last = capture['wanted_interval']
+        labels = node('export-training.cjs', args.replay, first-2, last+2)
+        observations = json.loads(args.phase_observations.read_text())
+        if observations.get('capture_index_sha256') != sha256(args.capture/'capture-index.json'):
+            raise ValueError('manual phase observations belong to another capture')
+        phase = audit_phase(observations, labels, index)
+        (out/'phase-audit.json').write_text(json.dumps(phase, indent=2)+'\n')
+        if not phase['passed']: raise ValueError('predeclared zero image/post phase is unverified or ambiguous')
+        mapping = [{**row, 'video_frame': i, 'literal_timer': timers[str(row['replay_frame'])] if row['replay_frame'] >= 0 else None}
+                   for i, row in enumerate(index)]
+        (out/'capture-index.json').write_text(json.dumps(mapping, indent=2)+'\n')
+        with tempfile.TemporaryDirectory(dir=out) as temporary:
+            for row in mapping:
+                (Path(temporary)/f'{row["video_frame"]:06d}.png').symlink_to(
+                    (args.capture/'user/Dump/Frames'/row['capture_image']).resolve())
+            subprocess.run(['ffmpeg', '-v', 'error', '-framerate', '60', '-i', str(Path(temporary)/'%06d.png'),
+                '-c:v', 'libx264', '-crf', '18', '-preset', 'medium', '-pix_fmt', 'yuv420p', str(out/'source.mp4')],
+                check=True, timeout=120)
+        video = ingest_video(out/'source.mp4', out/'ingested')
+        if (len(video['frames']) != len(mapping) or [video['width'], video['height']] != [642, 528]
+                or any(Fraction(row['relative_seconds']) != Fraction(i, 60) for i, row in enumerate(video['frames']))):
+            raise ValueError('encoding/decoding changed declared frame count, geometry or PTS')
+        setup = node('inspect-settings.cjs', args.replay)['replays'][0]
+        report = {'schema': 1, 'kind': 'supervised-replay-source-video', 'passed': True,
+            'source_replay_sha256': sha256(args.replay), 'video_sha256': video['source_sha256'],
+            'interval': [first, last], 'supplied_setup': setup,
+            'frame_label_method': 'stepped signed OSD with independent positive HUD crosscheck',
+            'original_controls_and_state_used_for_training_audit': True,
+            'native_setup_parity_validated': False,
+            'policy': 'supervised training preparation; clean frames only, UI frame IDs never enter model inputs; native VI adapter remains separate',
+            'identities': {str(p): sha256(p) for p in (Path(__file__), args.replay,
+                args.capture/'capture.json', args.capture/'capture-index.json', args.capture/'osd-calibration.json',
+                args.timer_calibration, args.phase_observations, out/'frame-labels.json', out/'phase-audit.json',
+                out/'capture-index.json', out/'ingested/video.json', Path('src/yt2slp/frame_index.py'),
+                Path('src/yt2slp/training_phase.py'))}}
+        (out/'source-provenance.json').write_text(json.dumps(report, indent=2)+'\n')
+    except Exception as error:
+        (out/'preparation-failure.json').write_text(json.dumps({'passed': False, 'error': str(error)}, indent=2)+'\n')
+        raise
+    print(out/'source.mp4')
+
+
+if __name__ == '__main__': main()

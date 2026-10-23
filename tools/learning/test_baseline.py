@@ -4,7 +4,7 @@ import unittest
 
 import torch
 
-from baseline import AXES, BINS, BUTTONS, TemporalProposal, binary_metrics, proposal_loss, targets_for_frames
+from baseline import AXES, BINS, BUTTONS, TemporalProposal, binary_metrics, proposal_loss, state_metrics, targets_for_frames
 from train_smoke import evaluate
 
 
@@ -82,6 +82,21 @@ class BaselineTests(unittest.TestCase):
             torch.testing.assert_close(batched[key], complete[key], rtol=1e-5, atol=1e-6)
             self.assertEqual(batched[key].device.type, 'cpu')
         torch.testing.assert_close(batched_loss, complete_loss)
+
+    def test_state_metrics_ignore_missing_axes_and_do_not_count_masked_targets(self):
+        targets = targets_for_frames([target_frame()])
+        axes = torch.full((1, 2, len(AXES), BINS), -10.)
+        axes.scatter_(-1, targets['axes'].unsqueeze(-1), 10.)
+        targets['axes_mask'][0, 0, 0] = False
+        axes[0, 0, 0].zero_()  # Deliberately wrong; this target is unavailable.
+        action = torch.full((1, 2, 512), -10.)
+        action.scatter_(-1, targets['action'].unsqueeze(-1), 10.)
+        metrics = state_metrics({'axes': axes, 'action': action,
+            'airborne': torch.full((1, 2), -10.)}, targets)
+        self.assertEqual(metrics['axes']['stick_x']['compared'], 1)
+        self.assertEqual(metrics['axes']['stick_x']['accuracy'], 1)
+        self.assertEqual(metrics['action']['accuracy'], 1)
+        self.assertEqual(metrics['airborne']['accuracy'], 1)
 
 
 if __name__ == '__main__':

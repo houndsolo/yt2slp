@@ -7,8 +7,9 @@ laser and fast-fall involves coordinated direction changes, button edges and
 holds across time; longer play multiplies the possible sequences.
 
 Do not postpone learning until that opening is manually solved. A first CPU
-optimizer smoke test now runs on a provisional paired training clip; no useful
-input reconstruction or held-out accuracy is established. Correct timing and
+optimizer smoke test ran on a provisional paired training clip. The signed-frame
+follow-up now passes a bounded timing audit and a training-clip overfit sanity
+check on the V100. No useful held-out input reconstruction is established. Correct timing and
 whole-match evaluation remain prerequisites for scaling, rather than complete
 native parity or a perfect hand-authored controller grid.
 
@@ -21,18 +22,26 @@ replay/video/image identities and original 60 Hz timestamps. A frozen whole-matc
 and capture-date split reserves another Fox/Falco Battlefield match for validation.
 Cross-date player separation is unknown.
 
-The first training clip has 180 images, 360 player-frame labels and 150 31-frame
+The initial training clip has 180 images, 360 player-frame labels and 150 31-frame
 windows. A frozen pretrained ResNet18 plus small bidirectional GRU predicts button
 hold/press/release probabilities, categorical effective axes and auxiliary state.
 100 CPU updates reduce training loss 10.51 → 1.84, but training edge F1 remains
 only 0.048/0.043. This verifies the data/optimizer path, not accurate recognition,
 successful overfitting, unseen-match performance or simulator integration.
 
-Image/post phase and the native VI adapter remain unverified; manifests explicitly
-retain those gates. Falco's initial dash/short-hop/laser/fast-fall is in negative
-replay frames, before the existing MP4 starts. Its exported labels now expose the
-opening, but negative-frame image labelling must be validated before using that
-sequence as paired training data. No learned proposal has generated a replay yet.
+The [signed-frame follow-up](signed-training-data.md) includes 241 images at
+−60..180, with every signed UI index verified and all 180 positive HUD labels
+independently agreeing. Original/official nine-field comparisons pass across
+482 player-frames. Seven reviewed ground/air observations support zero image/
+post phase locally; ambiguous foot animation and occluded observations remain
+unknown, with the first failed audit retained.
+
+Its 211 temporal windows include Falco's opening. The first 2,000-update run
+fails the predeclared event thresholds despite accurate state/stick predictions;
+10,000 updates pass the same 0.95 thresholds with 1.0 training hold/press/release
+F1 and state/axis-bin accuracy. This is memorization, not unseen-match accuracy.
+The native VI adapter remains unverified and no learned proposal has generated
+a replay yet.
 
 ## Data and timing
 
@@ -85,10 +94,12 @@ Model predictions do not bypass unsupported-code or simulation-compatibility gat
 
 ## First experiments and acceptance
 
-1. Export an audited small dataset (provisional pilot implemented) and verify
-   render/input timing, including playable pre-clock frames (remaining).
-2. Overfit a short **training** clip as a pipeline sanity check, then evaluate
-   separate whole matches. Confirm that neutral-output dominance does not hide
+1. Completed for this bounded pilot: audit signed images and local image/post
+   phase, including playable pre-clock frames. General timing and native VI/PAD
+   adaptation remain separate work.
+2. Completed: overfit one short **training** clip with event-sensitive criteria.
+   Next: evaluate separate whole matches, handling the reserved match's swapped
+   Fox/Falco physical ports explicitly. Confirm that neutral-output dominance does not hide
    missed jump, attack and fast-fall transitions.
 3. Measure button/edge accuracy, stick error, action/ground-air predictions and
    event timing, including short/full hops and dash/short-hop/laser/fast-fall.
@@ -102,8 +113,9 @@ Model predictions do not bypass unsupported-code or simulation-compatibility gat
 A first small model can target the available RTX 3080 10 GB or V100, with measured
 batch sizes and optional cached encoder features. Pin and smoke-test a V100-
 compatible PyTorch/CUDA build; some newer binaries
-[omit Volta support](https://dev-discuss.pytorch.org/t/dropping-volta-support-from-cuda-12-8-binaries-for-release-2-11/3290). GPU memory,
-training throughput and accuracy estimates remain unmeasured. Multi-GPU or mixed
+[omit Volta support](https://dev-discuss.pytorch.org/t/dropping-volta-support-from-cuda-12-8-binaries-for-release-2-11/3290). Larger-run GPU memory,
+training throughput and accuracy estimates remain unmeasured; the pilot has measured
+allocator/RAM usage and timings. Multi-GPU or mixed
 NVIDIA/AMD training is not a prerequisite for this initial experiment.
 The current checkout's host exposes an Intel Arc B580 instead. The user has now
 provided SSH access to the V100 server: [remote setup](remote-training.md) records

@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import random
+import resource
 import sys
 import tempfile
 import time
@@ -21,7 +22,7 @@ import torchvision
 from torchvision.models import resnet18, ResNet18_Weights
 from torchvision.transforms import functional as TF
 
-from baseline import AXES, BINS, BUTTONS, TemporalProposal, binary_metrics, proposal_loss, targets_for_frames
+from baseline import AXES, BINS, BUTTONS, TemporalProposal, binary_metrics, proposal_loss, state_metrics, targets_for_frames
 
 
 def digest(path):
@@ -146,6 +147,7 @@ def main():
         'training_steps_per_second': args.steps/training_seconds,
         'peak_cuda_allocated_bytes': torch.cuda.max_memory_allocated() if device.type == 'cuda' else None,
         'peak_cuda_reserved_bytes': torch.cuda.max_memory_reserved() if device.type == 'cuda' else None,
+        'peak_process_rss_bytes': resource.getrusage(resource.RUSAGE_SELF).ru_maxrss*1024,
         'encoder': 'frozen ResNet18 IMAGENET1K_V1; whole-frame 384x320 letterbox; spatial 2x3 pooling',
         'temporal_model': 'bidirectional GRU, hidden 128; image features only',
         'trainable_parameters': sum(p.numel() for p in model.parameters()),
@@ -153,12 +155,16 @@ def main():
         'baseline_sha256': digest(Path(__file__).with_name('baseline.py')),
         'initial_training_loss': float(initial), 'final_training_loss': float(final),
         'final_loss_components': {k: float(v) for k, v in components.items()},
-        'training_button_metrics': binary_metrics(predictions, targets), 'history': history,
+        'training_button_metrics': binary_metrics(predictions, targets),
+        'training_state_metrics': state_metrics(predictions, targets), 'history': history,
         'image_post_phase_verified': pairs['timing']['image_post_phase_verified'],
         'native_vi_adapter_verified': False, 'held_out_evaluation': False,
         'generated_replay_validated': False, 'generalization_established': False,
         'passed': bool(torch.isfinite(final) and final < initial),
-        'policy': 'optimizer/data-path smoke test on previously examined training clip; provisional phase; no reconstruction or accuracy acceptance'}
+        'pass_criterion': 'finite lower training loss only; separate frozen protocol assesses overfit acceptance',
+        'policy': 'optimizer/data-path smoke test on a previously examined training clip; '
+            + ('bounded image/post phase audited' if pairs['timing']['image_post_phase_verified'] else 'provisional image/post phase')
+            + '; no reconstruction or held-out accuracy acceptance'}
     (args.output/'result.json').write_text(json.dumps(result, indent=2)+'\n')
     print(json.dumps(result, indent=2))
     return 0 if result['passed'] else 1

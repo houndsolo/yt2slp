@@ -39,10 +39,13 @@ and image RMSE remains 54.02/255 over 17 frames. Initial layout is verified for
 this case; the explicit Game Start seed boundary is now validated, while full
 code-set and subsequent RNG/state equality remain open. See the
 [supplied-replay benchmark](example-replay-benchmark.md).
-A first paired-data exporter and small pretrained-encoder/temporal model now
-complete a CPU training smoke test on 180 provisional training images. Loss falls
-10.51 → 1.84, but button-edge F1 remains weak; image/post phase, negative-frame
-images and held-out evaluation remain open. Useful automatic gameplay recognition,
+A paired-data exporter and small pretrained-encoder/temporal model first completed
+a CPU smoke test on 180 provisional training images. The signed-frame follow-up
+now verifies 241 images at −60..180 and a bounded image/post phase convention.
+After 10,000 V100 updates, its 211 windows pass fixed training-clip memorization
+criteria: 1.0 button hold/press/release F1 and state/axis-bin accuracy. The shorter
+2,000-update failure is retained. Held-out evaluation and the native VI input
+adapter remain open. Useful unseen-clip gameplay recognition,
 unknown-start recovery and general video-to-replay reconstruction remain unimplemented.
 
 Checked items below are implemented and validated within their stated scope.
@@ -71,28 +74,30 @@ The next work is deliberately narrow:
 2. Completed: add an opt-in Slippi Game Start seed boundary. The game records the
    requested 33480, fresh reproduction and official playback pass, and default
    item-setup replay bytes remain unchanged. Motion error remains 54.02/255.
-3. Implemented first pilot: paired official-render/replay training export and a
-   small temporal model's CPU optimizer smoke test. Manual grids tested the plumbing;
+3. Completed bounded pilot: paired official-render/replay training export, signed
+   pre-clock images, local image/post phase audit and temporal-model overfit sanity.
+   Manual grids tested the plumbing;
    they cannot scale to compound sequences such as dash, short hop, laser and
    fast-fall. Do not require a perfect manually fitted opening before learning.
-4. Next: verify image/post/input phase and extend labelling through playable
-   pre-clock frames. Falco's initial dash/short-hop/laser/fast-fall occurs before
-   the current frame-1 MP4. Whole-match/capture-date splits are frozen; held-out
-   evaluation remains. Training replays supply controller/state labels intentionally;
+4. Next: evaluate a frozen model on another whole match. The reserved Fox/Falco
+   example swaps physical ports, so explicitly handle character/port association.
+   Falco's opening is now inside the signed −60..180 MP4. Whole-match/capture-date
+   splits remain frozen. Training replays supply controller/state labels intentionally;
    held-out reconstruction inputs/state remain sealed during selection.
-5. Integrate multiple learned input proposals with native verification and timing
-   refinement. Audit source-code compatibility in parallel. Extend coverage and
+5. Measure the effective replay-control → native VI/PAD adapter, then integrate
+   learned proposals with native verification and timing refinement. Audit source-code compatibility in parallel. Extend coverage and
    later handle YouTube appearance differences using measured held-out results.
 
 The [learning plan](learning-plan.md) and [executable pilot](../tools/learning/README.md)
-define this milestone. One CPU training smoke run is complete; useful recognition,
-accurate input proposals and learned reconstruction remain unvalidated. The user
+define this milestone. The [signed training report](signed-training-data.md)
+records the bounded timing audit, retained failures and successful training-clip
+overfit. Useful held-out recognition and learned reconstruction remain unvalidated. The user
 has now supplied SSH access to the V100: an isolated Docker/CUDA 12.6 environment
 passes real GPU kernels/backpropagation and a 100-update training smoke test,
 with about 707 GiB free disk. Existing LLM containers were stopped and restart
 policies disabled at the user's request. [Remote training](remote-training.md)
 records setup, measured results and commands. No additional DDR4 is needed for
-the exercised pilot; image/input timing remains the immediate development task.
+the exercised pilot; held-out evaluation and native input adaptation are next.
 
 Spawn policy is a required starting condition. Slippi has custom neutral-start
 codes that place the two fighters on opposite sides; ordinary SSBM uses distinct
@@ -118,7 +123,7 @@ values recovered from the MP4.
 | 3 | Verify the standardized starting recipe | Initial-layout gate passes: explicit stage points 2/3 match seven fields at -123/-40. Opt-in API 21 Game Start seeding now records the correct 33480, with no later reset; exported setup summary matches. Remaining: full source code configuration, UCF and subsequent hidden-state/RNG equality. |
 | 4 | Reconstruct a short video-only segment | First attempt complete: 64 declared programs, two cue-compatible; both parsed/rendered. Six fixed source regions select index 48. Source controls/later state are excluded from selection. Grid still misses the observed platform descent. |
 | 5 | Validate the selected reconstruction | Fresh genuine bytes/parser/own official fields/timer alignment and 17-frame comparison pass. Post-selection source-state comparison fails; RMSE 54.02, visual acceptance false. Retain the missing automatic clock label and one literal manual reading. |
-| 6 | Start the learned reconstruction baseline | Provisional training labels/pairs, frozen whole-match/date split and first CPU temporal-model smoke run complete. Remaining: image/post phase, pre-clock images, useful event learning, whole-match evaluation and simulator integration. Source-code compatibility remains parallel. |
+| 6 | Start the learned reconstruction baseline | Signed pre-clock dataset and bounded image/post phase audit pass; a longer V100 run memorizes the training clip with 1.0 event F1. Remaining: whole-match evaluation, explicit swapped-port handling, native VI/PAD adaptation and simulator integration. Source-code compatibility remains parallel. |
 
 The current seed/time-base choices are simulation hypotheses, not recovered
 source values. General starting-state/RNG recovery, camera/world-coordinate
@@ -314,11 +319,15 @@ to postpone measuring a narrower supported case.
   evaluation and allocator caps. Validate on the remote 32 GB Volta GPU: 100
   updates, loss 10.51 → 1.84; weak edge F1 remains. GPU setup is no longer blocked
   on user access/storage; data timing and held-out accuracy remain open.
-- [ ] Validate image/post/control phase and paired pre-clock images. Falco's
-  original compound opening occurs at negative replay frames, absent from the
-  current positive-clock training MP4.
-- [ ] Overfit an audited training segment with strong event timing performance;
-  evaluate separate whole matches, then integrate learned proposals with simulation.
+- [x] Validate signed pre-clock image labels and bounded image/post phase: 241
+  images at −60..180, all 180 positive HUD anchors agree, seven visible ground/air
+  observations support zero phase. Retain ambiguous/occluded observations and the
+  first failed audit; do not claim full-state/image or universal phase equality.
+- [x] Overfit the audited training segment under fixed event-sensitive criteria.
+  Keep the 2,000-update failure; 10,000 updates achieve 1.0 button-event F1 and
+  state/axis-bin accuracy across 211 windows. This is training memorization only.
+- [ ] Evaluate separate whole matches with explicit roster/physical-port handling,
+  then validate the native VI/PAD adapter and integrate proposals with simulation.
 - [x] Decode a short local progressive clip with original PTS/time base, dimensions,
   hashes and exact timestamps; retain variable spacing and identical adjacent PNGs.
   Reject missing/substituted PTS, rotation, interlacing and changing dimensions.

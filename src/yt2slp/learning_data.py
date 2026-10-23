@@ -43,7 +43,7 @@ def window_centers(frames: list[dict], context: int) -> list[int]:
 
 def build_pairs(video_dir: Path, labels_path: Path, plan_path: Path,
                 output: Path, context: int = 31) -> dict:
-    """Join the existing positive-clock official MP4 preparation with labels.
+    """Join positive-clock or independently audited signed official MP4 labels.
 
     This first exporter accepts an unmodified prepared source, never a guessed
     timer offset, resized view or arbitrary YouTube clip. It preserves 60 Hz
@@ -59,7 +59,9 @@ def build_pairs(video_dir: Path, labels_path: Path, plan_path: Path,
     digest = labels.get('replay_sha256')
     if labels.get('schema') != 1 or labels.get('kind') != 'supervised-replay-labels' or digest not in matches:
         raise ValueError('versioned training labels and declared whole-match membership required')
-    if (provenance.get('kind') != 'supplied-replay-source-video' or provenance.get('passed') is not True
+    signed_capture = provenance.get('kind') == 'supervised-replay-source-video'
+    if (provenance.get('kind') not in ('supplied-replay-source-video', 'supervised-replay-source-video')
+            or provenance.get('passed') is not True
             or provenance.get('source_replay_sha256') != digest
             or provenance.get('supplied_setup', {}).get('replay_sha256') != digest
             or video.get('kind') != 'local-video' or video.get('schema') != 1
@@ -74,6 +76,24 @@ def build_pairs(video_dir: Path, labels_path: Path, plan_path: Path,
     if (not index or len(index) != len(video['frames'])
             or provenance['interval'] != [index[0]['replay_frame'], index[-1]['replay_frame']]):
         raise ValueError('incomplete preparation frame mapping')
+    phase = None
+    if signed_capture:
+        if not index[0]['replay_frame'] < 0 < index[-1]['replay_frame']:
+            raise ValueError('signed preparation must include pre/post-clock images')
+        phase_path, frame_audit_path = video_dir/'phase-audit.json', video_dir/'frame-labels.json'
+        if (not phase_path.is_file() or not frame_audit_path.is_file()
+                or not {sha256(phase_path), sha256(frame_audit_path)} <= signed):
+            raise ValueError('signed-frame preparation requires identity-bound phase and frame audits')
+        phase, frame_audit = (json.loads(p.read_text()) for p in (phase_path, frame_audit_path))
+        if (phase.get('kind') != 'image-post-phase-audit' or phase.get('passed') is not True
+                or phase.get('source_replay_sha256') != digest or phase.get('image_to_post_offset') != 0
+                or phase.get('matching_diagnostic_offsets') != [0] or phase.get('observation_count', 0) < 6
+                or frame_audit.get('passed') is not True or frame_audit.get('signed_interval') != provenance['interval']
+                or frame_audit.get('osd_verified_frames') != len(index)
+                or frame_audit.get('positive_hud_crosschecked_frames') != index[-1]['replay_frame']
+                or frame_audit.get('dump_pipeline_delay_swaps') != 1
+                or frame_audit.get('source_original_vs_official', {}).get('passed') is not True):
+            raise ValueError('signed frame/phase audit failed or belongs to another preparation')
     ports = sorted(p['port'] for p in labels['settings']['players'])
     if len(ports) != 2 or len(set(ports)) != 2:
         raise ValueError('two distinct physical ports required')
@@ -106,15 +126,20 @@ def build_pairs(video_dir: Path, labels_path: Path, plan_path: Path,
     if not centers:
         raise ValueError('clip too short for the declared temporal context')
     membership = matches[digest]
+    timing = {'timer_frame_mapping_verified': True, 'candidate_image_to_post_offset': 0,
+        'image_post_phase_verified': signed_capture, 'native_vi_adapter_verified': False}
+    if signed_capture:
+        timing.update(signed_frame_mapping_verified=True, positive_timer_crosscheck_interval=[1, index[-1]['replay_frame']],
+            image_post_phase_scope=phase['scope'])
     report = {'schema': 1, 'kind': 'supervised-video-replay-pairs',
         'replay_sha256': digest, 'split': membership['split'], 'group': membership['group'],
         'settings': labels['settings'], 'ports': ports,
         'width': video['width'], 'height': video['height'], 'time_base': video['time_base'],
         'context_frames': context, 'window_centers': centers, 'frames': paired,
-        'timing': {'timer_frame_mapping_verified': True, 'candidate_image_to_post_offset': 0,
-            'image_post_phase_verified': False, 'native_vi_adapter_verified': False},
-        'training_ready': False,
-        'policy': 'provisional same-key targets; smoke tests only until image/post phase calibration; original labels never enter held-out inference',
+        'timing': timing, 'training_ready': signed_capture,
+        'policy': ('audited same-key training targets in the declared phase scope' if signed_capture else
+            'provisional same-key targets; smoke tests only until image/post phase calibration')
+            + '; original labels never enter held-out inference; native VI adapter remains separate',
         'identities': {name: sha256(path) for name, path in (
             ('labels', labels_path), ('split_plan', plan_path), ('video', video_path),
             ('provenance', provenance_path), ('capture_index', index_path))}}

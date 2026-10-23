@@ -109,3 +109,14 @@ def binary_metrics(prediction, targets):
             'f1': 2*tp/(2*tp+fp+fn) if 2*tp+fp+fn else None,
             'positive_labels': int((actual & valid).sum())}
     return result
+
+
+def state_metrics(prediction, targets):
+    def accuracy(guessed, actual, valid):
+        compared = int(valid.sum())
+        correct = int(((guessed == actual) & valid).sum())
+        return {'compared': compared, 'correct': correct, 'accuracy': correct/compared if compared else None}
+    return {'action': accuracy(prediction['action'].argmax(-1), targets['action'], targets['action_mask']),
+        'airborne': accuracy(prediction['airborne'] >= 0, targets['airborne'].bool(), targets['airborne_mask']),
+        'axes': {name: accuracy(prediction['axes'][:, :, i].argmax(-1), targets['axes'][:, :, i],
+            targets['axes_mask'][:, :, i]) for i, name in enumerate(AXES)}}

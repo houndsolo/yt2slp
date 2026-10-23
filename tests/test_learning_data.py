@@ -110,3 +110,56 @@ def test_context_windows_never_cross_missing_frames():
     for context in (2, True, 0):
         with pytest.raises(ValueError):
             window_centers(rows, context)
+
+
+def test_provisional_labels_cannot_self_declare_verified_phase(prepared):
+    path = prepared[1]
+    labels = json.loads(path.read_text())
+    labels['timing'] = {'image_phase_verified': True}
+    path.write_text(json.dumps(labels))
+    result = build_pairs(*prepared, context=3)
+    assert not result['training_ready'] and not result['timing']['image_post_phase_verified']
+
+
+def signed_preparation(prepared):
+    video, labels_path, _, _ = prepared
+    index_path = video/'capture-index.json'
+    index = json.loads(index_path.read_text())
+    for row in index: row['replay_frame'] -= 3
+    index_path.write_text(json.dumps(index))
+    labels = json.loads(labels_path.read_text())
+    for row in labels['rows']: row['frame'] -= 3
+    labels_path.write_text(json.dumps(labels))
+    frame_audit = {'passed': True, 'signed_interval': [-2, 2], 'osd_verified_frames': 5,
+        'positive_hud_crosschecked_frames': 2, 'dump_pipeline_delay_swaps': 1,
+        'source_original_vs_official': {'passed': True}}
+    phase = {'kind': 'image-post-phase-audit', 'passed': True, 'source_replay_sha256': 'a'*64,
+        'image_to_post_offset': 0, 'matching_diagnostic_offsets': [0], 'observation_count': 6,
+        'scope': 'synthetic pairing-audit metadata'}
+    for path, data in ((video/'frame-labels.json', frame_audit), (video/'phase-audit.json', phase)):
+        path.write_text(json.dumps(data))
+    provenance_path = video/'source-provenance.json'
+    provenance = json.loads(provenance_path.read_text())
+    provenance.update(kind='supervised-replay-source-video', interval=[-2, 2])
+    provenance['identities'].update({str(p): sha256(p) for p in (
+        index_path, video/'frame-labels.json', video/'phase-audit.json')})
+    provenance_path.write_text(json.dumps(provenance))
+
+
+def test_signed_pairs_require_bound_frame_and_phase_audits(prepared):
+    signed_preparation(prepared)
+    result = build_pairs(*prepared, context=3)
+    assert result['training_ready'] and result['timing']['signed_frame_mapping_verified']
+    assert result['timing']['positive_timer_crosscheck_interval'] == [1, 2]
+    assert not result['timing']['native_vi_adapter_verified']
+    assert [f['replay_frame'] for f in result['frames']] == [-2, -1, 0, 1, 2]
+
+
+def test_changed_phase_receipt_cannot_promote_signed_pairs(prepared):
+    signed_preparation(prepared)
+    path = prepared[0]/'phase-audit.json'
+    phase = json.loads(path.read_text()); phase['image_to_post_offset'] = 1
+    path.write_text(json.dumps(phase))
+    with pytest.raises(ValueError, match='identity-bound'):
+        build_pairs(*prepared, context=3)
+    assert not prepared[-1].exists()
