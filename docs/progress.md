@@ -197,6 +197,11 @@ to postpone measuring a narrower supported case.
 - [x] Decode a short local progressive clip with original PTS/time base, dimensions,
   hashes and exact timestamps; retain variable spacing and identical adjacent PNGs.
   Reject missing/substituted PTS, rotation, interlacing and changing dimensions.
+- [x] Support explicit decode intervals and manually reviewed gameplay crops,
+  retaining original PTS, indices, source geometry and image hashes without resizing.
+- [x] Download/inspect the supplied tournament opening and retain source-bound manual
+  settings/timer evidence. No reconstruction result is claimed for this footage;
+  see [tournament intake](tournament-video-intake.md).
 - [ ] Detect cuts, missing game frames and unsupported gameplay segments. Ingestion
   explicitly leaves these unknown instead of deriving them from nominal FPS.
 - [ ] Identify the gameplay region, stage, characters and player identities;
@@ -354,7 +359,7 @@ features or prerequisites for the first short-clip reconstruction.
 
 ## Latest validation and retained evidence
 
-The latest Docker Python run passed **275 tests**. The unchanged engine/parser's
+The latest Docker Python run passed **287 tests**. The unchanged engine/parser's
 last full component run passed **10 host/component, 23 game-library and 9
 independent parser tests**. Synthetic protocol/component tests
 establish their tested behavior; the following local ISO runs provide separate

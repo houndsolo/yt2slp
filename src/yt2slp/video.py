@@ -44,18 +44,41 @@ def timestamp_rows(probe: dict, max_frames: int) -> tuple[dict, list[dict]]:
     return stream, rows
 
 
-def ingest_video(source: Path, output: Path, max_frames: int = 1800) -> dict:
+def ingest_video(source: Path, output: Path, max_frames: int = 1800, *,
+                 decode_interval: tuple[int, int] | None = None,
+                 crop: tuple[int, int, int, int] | None = None) -> dict:
     if type(max_frames) is not int or not 1 <= max_frames <= 18000:
         raise ValueError("max_frames must be in 1..18000; trim long videos first")
     source = source.resolve()
     probe = json.loads(subprocess.check_output([
         "ffprobe", "-v", "error", "-select_streams", "v:0", "-show_streams", "-show_frames",
         "-of", "json", str(source)], timeout=120))
-    stream, rows = timestamp_rows(probe, max_frames)
+    stream, all_rows = timestamp_rows(probe, 18000 if decode_interval is not None else max_frames)
+    first, last = (0, len(all_rows)-1) if decode_interval is None else decode_interval
+    if (type(first) is not int or type(last) is not int
+            or not 0 <= first <= last < len(all_rows) or last-first+1 > max_frames):
+        raise ValueError("invalid inclusive decode interval or selected-frame limit")
+    width, height = stream['width'], stream['height']
+    if crop is not None:
+        if len(crop) != 4 or any(type(v) is not int for v in crop):
+            raise ValueError('crop requires integer x,y,width,height')
+        x, y, width, height = crop
+        if not (0 <= x and 0 <= y and width > 0 and height > 0
+                and x+width <= stream['width'] and y+height <= stream['height']):
+            raise ValueError('crop must fit the original video geometry')
+    rows = [dict(row) for row in all_rows[first:last+1]]
+    for index, row in enumerate(rows):
+        if decode_interval is not None:row['source_decode_index'] = row['index']
+        row['index'] = index
+    filters = []
+    if decode_interval is not None:filters.append(f'select=between(n\\,{first}\\,{last})')
+    # Convert before cropping so odd coordinates cannot round to a chroma grid.
+    if crop is not None:filters.extend(['format=rgb24', f'crop={width}:{height}:{x}:{y}:exact=1'])
     output.mkdir(parents=True, exist_ok=False)
     images = output / "frames"
     images.mkdir()
     subprocess.run(["ffmpeg", "-v", "error", "-noautorotate", "-i", str(source), "-map", "0:v:0",
+                    *(['-vf', ','.join(filters)] if filters else []),
                     "-fps_mode", "passthrough", "-threads", "1", "-start_number", "0",
                     str(images / "%06d.png")], check=True, timeout=180)
     if len(list(images.glob("*.png"))) != len(rows):
@@ -70,8 +93,8 @@ def ingest_video(source: Path, output: Path, max_frames: int = 1800) -> dict:
     deltas = [b["pts"] - a["pts"] for a, b in zip(rows, rows[1:])]
     manifest = {"schema": 1, "kind": "local-video", "source": str(source),
                 "source_sha256": sha256(source), "time_base": stream["time_base"],
-                "timestamp_field": "pts", "width": stream["width"],
-                "height": stream["height"], "codec": stream["codec_name"], "frames": rows,
+                "timestamp_field": "pts", "width": width,
+                "height": height, "codec": stream["codec_name"], "frames": rows,
                 "reported_average_frame_rate": stream.get("avg_frame_rate"),
                 "variable_timestamp_spacing": len(set(deltas)) > 1,
                 "cuts_assessed": False, "dropped_game_frames_assessed": False,
@@ -79,6 +102,12 @@ def ingest_video(source: Path, output: Path, max_frames: int = 1800) -> dict:
                 "identities": {str(Path(__file__)): sha256(Path(__file__))},
                 "tools": {name: subprocess.check_output([name, "-version"], text=True).splitlines()[0]
                           for name in ("ffmpeg", "ffprobe")}}
+    if decode_interval is not None or crop is not None:
+        manifest['gameplay_crop'] = list(crop) if crop is not None else None
+        manifest['source_view'] = {'decode_interval': [first, last],
+            'original_geometry': [stream['width'], stream['height']],
+            'policy': 'explicit decode selection/crop; original PTS/source-relative times; no resize, interpolation or game-frame inference',
+            'ffmpeg_filters': filters}
     (output / "video.json").write_text(json.dumps(manifest, indent=2) + "\n")
     return manifest
 

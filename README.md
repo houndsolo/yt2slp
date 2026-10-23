@@ -296,6 +296,11 @@ bash scripts/docker.sh run python scripts/ingest_video.py path/to/short.mp4 \
   --output .local/video-NEW
 ```
 
+The supplied [tournament opening](docs/tournament-video-intake.md) has also been
+inspected and cropped with original timestamps preserved. Its Falco/Captain Falcon,
+Yoshi's Story and P2/P3 setup exposes capabilities still needed beyond the controlled
+fixtures. No reconstruction of that footage is claimed.
+
 ## Development checks
 
 ```bash
