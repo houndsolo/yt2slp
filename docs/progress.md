@@ -86,10 +86,13 @@ The next work is deliberately narrow:
 
 The [learning plan](learning-plan.md) and [executable pilot](../tools/learning/README.md)
 define this milestone. One CPU training smoke run is complete; useful recognition,
-accurate input proposals and learned reconstruction remain unvalidated. The
-reported NVIDIA cards are not visible on this host; GPU access and additional
-dataset storage need arranging before larger runs. Current data/alignment work
-can continue locally.
+accurate input proposals and learned reconstruction remain unvalidated. The user
+has now supplied SSH access to the V100: an isolated Docker/CUDA 12.6 environment
+passes real GPU kernels/backpropagation and a 100-update training smoke test,
+with about 707 GiB free disk. Existing LLM containers were stopped and restart
+policies disabled at the user's request. [Remote training](remote-training.md)
+records setup, measured results and commands. No additional DDR4 is needed for
+the exercised pilot; image/input timing remains the immediate development task.
 
 Spawn policy is a required starting condition. Slippi has custom neutral-start
 codes that place the two fighters on opposite sides; ordinary SSBM uses distinct
@@ -130,6 +133,11 @@ The [benchmark report](example-replay-benchmark.md) retains the earlier mismatch
 
 ## 1. Reproducible native development environment
 
+- [x] Set up the user-authorized remote V100 training workspace over SSH, using
+  isolated Docker/Python tools, a pinned CUDA 12.6 environment and explicit single-
+  GPU selection. Verify real GPU forward/backward execution and pilot training;
+  retain data/models outside Git. This is training setup, not a remote native-
+  engine/ISO or official-rendering validation.
 - [x] Audit engine alternatives and select Melee Unlocked's existing native Linux
   source game, isolated in a child process. Pin the engine and nested game source.
 - [x] Build an independent headless host without display, GPU or USB dependencies.
@@ -302,6 +310,10 @@ to postpone measuring a narrower supported case.
 - [x] Run a separate optional CPU pretrained-encoder/temporal-model smoke test:
   100 updates, 180 images, loss 10.51 → 1.84. Button-edge F1 remains poor, so this
   is an optimizer-path check rather than useful input recognition.
+- [x] Extend the same smoke runner to explicit CUDA execution, with minibatch
+  evaluation and allocator caps. Validate on the remote 32 GB Volta GPU: 100
+  updates, loss 10.51 → 1.84; weak edge F1 remains. GPU setup is no longer blocked
+  on user access/storage; data timing and held-out accuracy remain open.
 - [ ] Validate image/post/control phase and paired pre-clock images. Falco's
   original compound opening occurs at negative replay frames, absent from the
   current positive-clock training MP4.

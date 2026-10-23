@@ -1,8 +1,10 @@
 # Optional first vision/temporal experiment
 
-The core engine environment has no ML dependency. This optional, separate CPU
-environment has been exercised inside the existing GCC 14 Docker image. It
-does not use the host Python environment, require a GPU or alter game math.
+The core engine environment has no ML dependency. Optional, separate CPU and
+CUDA environments have been exercised inside the existing GCC 14 Docker image.
+They do not replace host Python or alter game math. See the
+[remote V100 setup](../../docs/remote-training.md) for the tested CUDA lock,
+explicit device selection and actual GPU execution checks.
 
 The current experiment is a **training-clip optimizer smoke test**. It cannot
 reconstruct a match, validate held-out accuracy or export a replay. Image/post
@@ -89,9 +91,10 @@ Local evidence: `.docker-state/local/learning-pilot-v1/` on the host.
 - 100 CPU optimizer updates, seed 1: training loss **10.51475 → 1.83518**.
 - Training F1: holds **0.374**, presses **0.048**, releases **0.043**. This is
   weak edge learning, not a solved training clip or generalization result.
-- Docker validation passes **358 Python tests**, **15 parser/preparation/export
-  tests**, and **five optional model tests**. Models/features, frames and labels
-  stay ignored. Native code is unchanged; native suites were not rerun here.
+- Latest Docker validation passes **365 Python tests** and **six optional model
+  tests**. The unchanged parser/preparation/export suite last passed 15 tests.
+  Models/features, frames and labels stay ignored. Native code is unchanged;
+  native suites were not rerun here.
 
 Falco's initial dash → short-hop laser → fast-fall occurs **before frame 0**:
 the replay labels show dash at −31, X held −28..−26 and released −25, airborne
@@ -106,20 +109,21 @@ segment with event-sensitive diagnostics, then evaluate a separate whole match.
 Only then connect useful proposals to the native simulator and genuine replay
 validation. A small clip's declining loss is insufficient for any of those gates.
 
-## What the user needs to provide
+## Available resources and next work
 
 No per-frame manual controller annotations or new hardware purchase is required
 for this pilot. The existing ISO, official Playback and supplied replays suffice
-for ongoing data/alignment work. This host reports an Intel Arc B580 and no
-`nvidia-smi`; the reported RTX 3080/V100 are not visible here. We need their
-location/access method, or the user can run a supplied training command later.
-The current smoke runner is CPU-only; GPU runtime, driver/wheel compatibility,
-memory and throughput have not been validated. Pin a compatible CUDA build and
-perform a real GPU execution check before scaling, especially for V100.
+for ongoing data/alignment work. The Arch workstation reports an Intel Arc B580;
+the user supplied SSH access to the V100 server. Its isolated Docker/CUDA 12.6
+environment now passes real convolution/GRU forward/backward checks and the
+100-update training smoke test. The runner accepts explicit CPU/CUDA selection,
+caps allocator memory and batches evaluation. See the remote report for measured
+timings and limits; this does not establish useful input prediction.
 
-The filesystem had about **12 GB free after this pilot**. Choose a larger
-dataset location before bulk rendering; keep short/compressed clips and bounded
-decoded windows rather than accumulating unrestricted PNG dumps. More diverse
+The workstation filesystem had about **12 GB free after the first pilot**. The
+remote workspace has about **707 GiB free after setup** and can store larger
+datasets. Keep short/compressed clips and bounded decoded windows rather than
+accumulating unrestricted PNG dumps. More diverse
 Fox/Falco matches will be needed for measured generalization, after the existing
-two-match pilot establishes timing and evaluation. The RX 6800 XT is not needed
-to unblock this first model.
+two-match pilot establishes timing and evaluation. Extra system RAM and the
+RX 6800 XT are not needed to unblock this first model.

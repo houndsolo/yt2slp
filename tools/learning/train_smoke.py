@@ -7,6 +7,7 @@ from pathlib import Path
 import random
 import sys
 import tempfile
+import time
 
 # The development container runs with the host UID, which has no passwd entry.
 # torchvision imports Dynamo even for eager CPU execution; avoid its username-
@@ -28,11 +29,11 @@ def digest(path):
         return hashlib.file_digest(handle, 'sha256').hexdigest()
 
 
-def encode_images(pairs_path, pairs, batch_size):
+def encode_images(pairs_path, pairs, batch_size, device):
     # Retain the entire frame, including off-center fighters; no central crop.
     # Coarse spatial pooling retains more location evidence than one global vector.
     encoder = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
-    encoder = nn.Sequential(*list(encoder.children())[:-2], nn.AdaptiveAvgPool2d((2, 3)), nn.Flatten()).eval()
+    encoder = nn.Sequential(*list(encoder.children())[:-2], nn.AdaptiveAvgPool2d((2, 3)), nn.Flatten()).to(device).eval()
     features = []
     with torch.inference_mode():
         for start in range(0, len(pairs['frames']), batch_size):
@@ -45,9 +46,22 @@ def encode_images(pairs_path, pairs, batch_size):
                     image = ImageOps.pad(image.convert('RGB'), (384, 320), method=Image.Resampling.BILINEAR)
                     tensor = TF.to_tensor(image)
                 images.append(TF.normalize(tensor, [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]))
-            features.append(encoder(torch.stack(images)))
+            features.append(encoder(torch.stack(images).to(device)).cpu())
             print(f"encoded {min(start+batch_size, len(pairs['frames']))}/{len(pairs['frames'])}", flush=True)
     return torch.cat(features).clone()
+
+
+def evaluate(model, inputs, targets, weights, device, batch_size):
+    """Keep complete clip tensors on CPU; bound GPU memory by minibatch size."""
+    predictions = {}
+    model.eval()
+    with torch.no_grad():
+        for start in range(0, len(inputs), batch_size):
+            for name, value in model(inputs[start:start+batch_size].to(device)).items():
+                predictions.setdefault(name, []).append(value.cpu())
+    predictions = {k: torch.cat(v) for k, v in predictions.items()}
+    loss, components = proposal_loss(predictions, targets, weights.cpu())
+    return predictions, loss, components
 
 
 def main():
@@ -58,9 +72,24 @@ def main():
     parser.add_argument('--batch-size', type=int, default=8)
     parser.add_argument('--threads', type=int, default=4)
     parser.add_argument('--seed', type=int, default=1)
+    parser.add_argument('--device', choices=('cpu', 'cuda'), default='cpu')
+    parser.add_argument('--gpu-memory-fraction', type=float, default=.5)
     args = parser.parse_args()
     if not 1 <= args.steps <= 10000 or not 1 <= args.batch_size <= 64 or not 1 <= args.threads <= 32:
         parser.error('invalid bounded smoke-test settings')
+    if not 0 < args.gpu_memory_fraction <= 1:
+        parser.error('GPU memory fraction must be in (0, 1]')
+    device = torch.device(args.device)
+    hardware = {}
+    if device.type == 'cuda':
+        if not torch.cuda.is_available():
+            parser.error('CUDA explicitly requested but unavailable; no CPU fallback')
+        torch.cuda.set_per_process_memory_fraction(args.gpu_memory_fraction)
+        properties = torch.cuda.get_device_properties(0)
+        hardware = {'name': properties.name, 'capability': list(torch.cuda.get_device_capability(0)),
+            'total_memory_bytes': properties.total_memory, 'allocator_memory_fraction': args.gpu_memory_fraction,
+            'cuda_version': torch.version.cuda, 'cudnn_version': torch.backends.cudnn.version(),
+            'compiled_architectures': torch.cuda.get_arch_list()}
     pairs = json.loads(args.pairs.read_text())
     if (pairs.get('kind') != 'supervised-video-replay-pairs' or pairs.get('split') != 'train'
             or sorted(p['character'] for p in pairs['settings']['players']) != [2, 20]
@@ -68,45 +97,55 @@ def main():
         parser.error('smoke test requires a declared Fox/Falco Battlefield training clip')
     args.output.mkdir(parents=True, exist_ok=False)
     random.seed(args.seed); torch.manual_seed(args.seed); torch.set_num_threads(args.threads)
-    features = encode_images(args.pairs, pairs, args.batch_size)
+    if device.type == 'cuda':
+        torch.cuda.manual_seed_all(args.seed)
+        torch.cuda.reset_peak_memory_stats()
+    started = time.perf_counter()
+    features = encode_images(args.pairs, pairs, args.batch_size, device)
+    encoding_seconds = time.perf_counter()-started
     torch.save({'pairs_sha256': digest(args.pairs), 'features': features}, args.output/'features.pt')
     centers = torch.tensor(pairs['window_centers'])
     half = pairs['context_frames']//2
     offsets = torch.arange(-half, half+1)
     inputs = features[centers[:, None]+offsets]
     targets = {k: v[centers] for k, v in targets_for_frames(pairs['frames']).items()}
-    model = TemporalProposal(feature_size=features.shape[1])
+    model = TemporalProposal(feature_size=features.shape[1]).to(device)
     # Derived only from this training clip; never from validation/test labels.
     positive = (targets['buttons']*targets['buttons_mask']).sum(0)
     negative = ((1-targets['buttons'])*targets['buttons_mask']).sum(0)
-    weights = (negative/positive.clamp(min=1)).clamp(min=1, max=20)
+    weights = (negative/positive.clamp(min=1)).clamp(min=1, max=20).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=.001)
-    model.eval()
-    with torch.no_grad():
-        initial, _ = proposal_loss(model(inputs), targets, weights)
+    _, initial, _ = evaluate(model, inputs, targets, weights, device, args.batch_size)
     history = []
     model.train()
+    training_started = time.perf_counter()
     for step in range(args.steps):
         chosen = torch.randint(len(centers), (min(args.batch_size, len(centers)),))
         optimizer.zero_grad()
-        loss, _ = proposal_loss(model(inputs[chosen]), {k: v[chosen] for k, v in targets.items()}, weights)
+        loss, _ = proposal_loss(model(inputs[chosen].to(device)),
+            {k: v[chosen].to(device) for k, v in targets.items()}, weights)
         if not torch.isfinite(loss):
             raise ValueError('non-finite training loss')
         loss.backward(); nn.utils.clip_grad_norm_(model.parameters(), 5); optimizer.step()
         if step % 10 == 0 or step+1 == args.steps:
             history.append({'step': step+1, 'minibatch_loss': float(loss.detach())})
             print(history[-1], flush=True)
-    model.eval()
-    with torch.no_grad():
-        predictions = model(inputs)
-        final, components = proposal_loss(predictions, targets, weights)
+    if device.type == 'cuda':
+        torch.cuda.synchronize()
+    training_seconds = time.perf_counter()-training_started
+    predictions, final, components = evaluate(model, inputs, targets, weights, device, args.batch_size)
     torch.save({'model': model.state_dict(), 'pairs_sha256': digest(args.pairs),
         'buttons': BUTTONS, 'axes': AXES, 'axis_bins': BINS, 'context': pairs['context_frames']}, args.output/'model.pt')
-    result = {'schema': 1, 'kind': 'training-clip-smoke-test', 'device': 'cpu',
+    result = {'schema': 1, 'kind': 'training-clip-smoke-test', 'device': str(device), 'hardware': hardware,
         'torch_version': torch.__version__, 'seed': args.seed, 'steps': args.steps,
         'torchvision_version': torchvision.__version__,
         'encoder_weights_sha256': digest(Path(torch.hub.get_dir())/'checkpoints/resnet18-f37072fd.pth'),
         'frames': len(features), 'train_windows': len(centers), 'context_frames': pairs['context_frames'],
+        'batch_size': args.batch_size, 'threads': args.threads,
+        'encoding_seconds': encoding_seconds, 'training_seconds': training_seconds,
+        'training_steps_per_second': args.steps/training_seconds,
+        'peak_cuda_allocated_bytes': torch.cuda.max_memory_allocated() if device.type == 'cuda' else None,
+        'peak_cuda_reserved_bytes': torch.cuda.max_memory_reserved() if device.type == 'cuda' else None,
         'encoder': 'frozen ResNet18 IMAGENET1K_V1; whole-frame 384x320 letterbox; spatial 2x3 pooling',
         'temporal_model': 'bidirectional GRU, hidden 128; image features only',
         'trainable_parameters': sum(p.numel() for p in model.parameters()),

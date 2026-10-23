@@ -5,6 +5,7 @@ import unittest
 import torch
 
 from baseline import AXES, BINS, BUTTONS, TemporalProposal, binary_metrics, proposal_loss, targets_for_frames
+from train_smoke import evaluate
 
 
 def target_frame():
@@ -68,6 +69,19 @@ class BaselineTests(unittest.TestCase):
         for head in ('hold', 'press', 'release'):
             self.assertEqual(metrics[head]['f1'], 0)
             self.assertGreater(metrics[head]['fn'], 0)
+
+    def test_batched_evaluation_preserves_predictions_and_masked_loss(self):
+        torch.manual_seed(1)
+        model = TemporalProposal(feature_size=8, hidden=8)
+        inputs = torch.randn(3, 5, 8)
+        targets = targets_for_frames([target_frame() for _ in range(3)])
+        weights = torch.ones(2, 3, len(BUTTONS))
+        complete, complete_loss, _ = evaluate(model, inputs, targets, weights, torch.device('cpu'), 3)
+        batched, batched_loss, _ = evaluate(model, inputs, targets, weights, torch.device('cpu'), 1)
+        for key in complete:
+            torch.testing.assert_close(batched[key], complete[key], rtol=1e-5, atol=1e-6)
+            self.assertEqual(batched[key].device.type, 'cpu')
+        torch.testing.assert_close(batched_loss, complete_loss)
 
 
 if __name__ == '__main__':

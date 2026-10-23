@@ -29,6 +29,12 @@ args=(run --rm --init --user "$(id -u):$(id -g)"
   --mount "type=bind,src=$root/.docker-state/cache,dst=/work/.cache"
   --mount "type=bind,src=$root/.docker-state/local,dst=/work/.local"
   -e "YT2SLP_JOBS=${YT2SLP_JOBS:-4}")
+if [ -n "${YT2SLP_GPU:-}" ]; then
+  if [[ ! "$YT2SLP_GPU" =~ ^[0-9]+$ && ! "$YT2SLP_GPU" =~ ^GPU-[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}$ ]]; then
+    echo "yt2slp: YT2SLP_GPU must select one numeric GPU index or NVIDIA GPU UUID" >&2; exit 2
+  fi
+  args+=(--gpus "device=$YT2SLP_GPU" -e NVIDIA_DRIVER_CAPABILITIES=compute,utility)
+fi
 if [ -n "${YT2SLP_ISO:-}" ]; then
   if [ ! -f "$YT2SLP_ISO" ]; then
     echo "yt2slp: YT2SLP_ISO must name an existing host file" >&2; exit 1

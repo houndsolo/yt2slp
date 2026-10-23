@@ -105,6 +105,10 @@ compatible PyTorch/CUDA build; some newer binaries
 [omit Volta support](https://dev-discuss.pytorch.org/t/dropping-volta-support-from-cuda-12-8-binaries-for-release-2-11/3290). GPU memory,
 training throughput and accuracy estimates remain unmeasured. Multi-GPU or mixed
 NVIDIA/AMD training is not a prerequisite for this initial experiment.
-The current checkout's host exposes an Intel Arc B580 instead; NVIDIA access
-and a larger dataset storage location remain user-side setup information.
-The optional CPU smoke test can run here while those are arranged.
+The current checkout's host exposes an Intel Arc B580 instead. The user has now
+provided SSH access to the V100 server: [remote setup](remote-training.md) records
+an isolated Docker/CUDA 12.6 environment, real GPU forward/backward checks and a
+successful 100-update smoke run, with about 707 GiB free disk. The existing LLM
+containers were stopped and their restart policies disabled at the user's request.
+No additional system RAM is needed for the exercised pilot; measure larger-run
+memory after timing/data correctness is established.
