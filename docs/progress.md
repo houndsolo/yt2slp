@@ -39,8 +39,11 @@ and image RMSE remains 54.02/255 over 17 frames. Initial layout is verified for
 this case; the explicit Game Start seed boundary is now validated, while full
 code-set and subsequent RNG/state equality remain open. See the
 [supplied-replay benchmark](example-replay-benchmark.md).
-Automatic gameplay recognition, unknown-start recovery and general
-video-to-replay reconstruction remain unimplemented.
+A first paired-data exporter and small pretrained-encoder/temporal model now
+complete a CPU training smoke test on 180 provisional training images. Loss falls
+10.51 → 1.84, but button-edge F1 remains weak; image/post phase, negative-frame
+images and held-out evaluation remain open. Useful automatic gameplay recognition,
+unknown-start recovery and general video-to-replay reconstruction remain unimplemented.
 
 Checked items below are implemented and validated within their stated scope.
 Unchecked items are remaining work. Proposed later work is a roadmap, not a
@@ -68,19 +71,25 @@ The next work is deliberately narrow:
 2. Completed: add an opt-in Slippi Game Start seed boundary. The game records the
    requested 33480, fresh reproduction and official playback pass, and default
    item-setup replay bytes remain unchanged. Motion error remains 54.02/255.
-3. Next: build paired official-render/replay training data and start a small
-   temporal observation/input-proposal baseline. Manual grids tested the plumbing;
+3. Implemented first pilot: paired official-render/replay training export and a
+   small temporal model's CPU optimizer smoke test. Manual grids tested the plumbing;
    they cannot scale to compound sequences such as dash, short hop, laser and
    fast-fall. Do not require a perfect manually fitted opening before learning.
-4. Verify video/replay/input timing and split whole matches/sessions before
-   training. Training replays supply controller/state labels intentionally;
+4. Next: verify image/post/input phase and extend labelling through playable
+   pre-clock frames. Falco's initial dash/short-hop/laser/fast-fall occurs before
+   the current frame-1 MP4. Whole-match/capture-date splits are frozen; held-out
+   evaluation remains. Training replays supply controller/state labels intentionally;
    held-out reconstruction inputs/state remain sealed during selection.
 5. Integrate multiple learned input proposals with native verification and timing
    refinement. Audit source-code compatibility in parallel. Extend coverage and
    later handle YouTube appearance differences using measured held-out results.
 
-The [learning plan](learning-plan.md) defines this next milestone. Training and
-automatic recognition are not implemented yet; no training run has started.
+The [learning plan](learning-plan.md) and [executable pilot](../tools/learning/README.md)
+define this milestone. One CPU training smoke run is complete; useful recognition,
+accurate input proposals and learned reconstruction remain unvalidated. The
+reported NVIDIA cards are not visible on this host; GPU access and additional
+dataset storage need arranging before larger runs. Current data/alignment work
+can continue locally.
 
 Spawn policy is a required starting condition. Slippi has custom neutral-start
 codes that place the two fighters on opposite sides; ordinary SSBM uses distinct
@@ -106,7 +115,7 @@ values recovered from the MP4.
 | 3 | Verify the standardized starting recipe | Initial-layout gate passes: explicit stage points 2/3 match seven fields at -123/-40. Opt-in API 21 Game Start seeding now records the correct 33480, with no later reset; exported setup summary matches. Remaining: full source code configuration, UCF and subsequent hidden-state/RNG equality. |
 | 4 | Reconstruct a short video-only segment | First attempt complete: 64 declared programs, two cue-compatible; both parsed/rendered. Six fixed source regions select index 48. Source controls/later state are excluded from selection. Grid still misses the observed platform descent. |
 | 5 | Validate the selected reconstruction | Fresh genuine bytes/parser/own official fields/timer alignment and 17-frame comparison pass. Post-selection source-state comparison fails; RMSE 54.02, visual acceptance false. Retain the missing automatic clock label and one literal manual reading. |
-| 6 | Start the learned reconstruction baseline | Next: aligned replay/video dataset, whole-match splits, and a temporal model predicting controller distributions plus action/ground-air cues. Validate timing on compound movement; simulator refines proposals. Source-code compatibility remains a parallel validation task. |
+| 6 | Start the learned reconstruction baseline | Provisional training labels/pairs, frozen whole-match/date split and first CPU temporal-model smoke run complete. Remaining: image/post phase, pre-clock images, useful event learning, whole-match evaluation and simulator integration. Source-code compatibility remains parallel. |
 
 The current seed/time-base choices are simulation hypotheses, not recovered
 source values. General starting-state/RNG recovery, camera/world-coordinate
@@ -285,6 +294,19 @@ to postpone measuring a narrower supported case.
 
 ## 5. Video ingestion and observation extraction
 
+- [x] Export original replay controller/state training labels with missing-value
+  masks, separate physical/effective values and press/release edges; exclude account
+  metadata. Independently test against an actual supplied replay.
+- [x] Bind provisional official-MP4 training pairs to replay/video/image identities
+  and original 60 Hz timestamps; freeze whole-match/date groups before windows.
+- [x] Run a separate optional CPU pretrained-encoder/temporal-model smoke test:
+  100 updates, 180 images, loss 10.51 → 1.84. Button-edge F1 remains poor, so this
+  is an optimizer-path check rather than useful input recognition.
+- [ ] Validate image/post/control phase and paired pre-clock images. Falco's
+  original compound opening occurs at negative replay frames, absent from the
+  current positive-clock training MP4.
+- [ ] Overfit an audited training segment with strong event timing performance;
+  evaluate separate whole matches, then integrate learned proposals with simulation.
 - [x] Decode a short local progressive clip with original PTS/time base, dimensions,
   hashes and exact timestamps; retain variable spacing and identical adjacent PNGs.
   Reject missing/substituted PTS, rotation, interlacing and changing dimensions.

@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "scope": "Fox/Falco Battlefield pilot; freeze whole-match/date groups before overlapping windows",
+  "grouping": "filename UTC capture date; player identities not inspected, cross-date player separation unverified",
+  "matches": [
+    {
+      "file": "recordings/examples/Game_20260622T203533.slp",
+      "replay_sha256": "c13e36c0f079200b6f00e2b3bef22ffe1165cde23797325218509718d794b40f",
+      "group": "capture-date-20260622",
+      "split": "train",
+      "previously_examined": true
+    },
+    {
+      "file": "recordings/examples/Game_20260623T163435.slp",
+      "replay_sha256": "35f1c56f2c5ac6ceeb74ff5144d923443bf34251d4404802408c28e577a48ae7",
+      "group": "capture-date-20260623",
+      "split": "validation",
+      "previously_examined": false
+    }
+  ]
+}

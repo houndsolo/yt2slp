@@ -6,10 +6,33 @@ playback. They are not a scalable strategy for real matches. A dash, short hop,
 laser and fast-fall involves coordinated direction changes, button edges and
 holds across time; longer play multiplies the possible sequences.
 
-Do not postpone learning until that opening is manually solved. No model has
-been trained yet. The immediate prerequisites for the first training run are
-correctly aligned examples and an evaluation split, rather than complete native
-parity or a perfect hand-authored controller grid.
+Do not postpone learning until that opening is manually solved. A first CPU
+optimizer smoke test now runs on a provisional paired training clip; no useful
+input reconstruction or held-out accuracy is established. Correct timing and
+whole-match evaluation remain prerequisites for scaling, rather than complete
+native parity or a perfect hand-authored controller grid.
+
+## Implemented pilot
+
+The [executable baseline](../tools/learning/README.md) exports original pre-frame
+controls, separate physical fields, press/release edges and masked post-state
+labels without account metadata. It binds these to the prepared official MP4's
+replay/video/image identities and original 60 Hz timestamps. A frozen whole-match
+and capture-date split reserves another Fox/Falco Battlefield match for validation.
+Cross-date player separation is unknown.
+
+The first training clip has 180 images, 360 player-frame labels and 150 31-frame
+windows. A frozen pretrained ResNet18 plus small bidirectional GRU predicts button
+hold/press/release probabilities, categorical effective axes and auxiliary state.
+100 CPU updates reduce training loss 10.51 → 1.84, but training edge F1 remains
+only 0.048/0.043. This verifies the data/optimizer path, not accurate recognition,
+successful overfitting, unseen-match performance or simulator integration.
+
+Image/post phase and the native VI adapter remain unverified; manifests explicitly
+retain those gates. Falco's initial dash/short-hop/laser/fast-fall is in negative
+replay frames, before the existing MP4 starts. Its exported labels now expose the
+opening, but negative-frame image labelling must be validated before using that
+sequence as paired training data. No learned proposal has generated a replay yet.
 
 ## Data and timing
 
@@ -62,7 +85,8 @@ Model predictions do not bypass unsupported-code or simulation-compatibility gat
 
 ## First experiments and acceptance
 
-1. Export an audited small dataset and verify render/input timing.
+1. Export an audited small dataset (provisional pilot implemented) and verify
+   render/input timing, including playable pre-clock frames (remaining).
 2. Overfit a short **training** clip as a pipeline sanity check, then evaluate
    separate whole matches. Confirm that neutral-output dominance does not hide
    missed jump, attack and fast-fall transitions.
@@ -81,3 +105,6 @@ compatible PyTorch/CUDA build; some newer binaries
 [omit Volta support](https://dev-discuss.pytorch.org/t/dropping-volta-support-from-cuda-12-8-binaries-for-release-2-11/3290). GPU memory,
 training throughput and accuracy estimates remain unmeasured. Multi-GPU or mixed
 NVIDIA/AMD training is not a prerequisite for this initial experiment.
+The current checkout's host exposes an Intel Arc B580 instead; NVIDIA access
+and a larger dataset storage location remain user-side setup information.
+The optional CPU smoke test can run here while those are arranged.
