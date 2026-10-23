@@ -11,6 +11,7 @@ from yt2slp.match import MatchConfig
 from yt2slp.search import run_schedule, schedule_from_dict
 from yt2slp.timeline import load_timeline, score_timeline
 from yt2slp.video import sha256
+from yt2slp.trajectory import native_identities, reproduce_prefix, render_interval, validate_prefix
 from reconstruct_manual import advance_to
 
 
@@ -44,6 +45,11 @@ def main():
                        Path(os.environ.get("YT2SLP_ISO", "/assets/melee.iso")), Path(".local/runs"),
                        rng_seed=spec["rng_seed"], time_base=spec["time_base"], match=MatchConfig())
     boot = Path("third_party/melee-unlocked/port/scripts/native_vs.txt")
+    prefix=json.loads((root/'prefix.json').read_text()) if (root/'prefix.json').exists() else None
+    if spec.get('required_prefix_sha256') and (prefix is None or sha256(root/'prefix.json')!=spec['required_prefix_sha256']):
+        raise ValueError('candidate population is missing its bound prefix')
+    if prefix is not None:
+        validate_prefix(prefix,spec,video['source_sha256'],native_identities(config,boot))
     if any(sha256(p) not in prior["identities"].values() for p in (config.host, config.game_library, config.iso, boot)):
         raise ValueError("native build/ISO/boot differs from coarse search")
     out = args.output.resolve()
@@ -51,12 +57,16 @@ def main():
     (out / "coarse-search.json").write_text(json.dumps(prior, indent=2) + "\n")
     (out / "search-spec.json").write_text(json.dumps(spec, indent=2) + "\n")
     (out / "timeline.json").write_text(json.dumps(timeline, indent=2) + "\n")
+    if prefix is not None:(out/'prefix.json').write_text((root/'prefix.json').read_text())
     candidates = []
     try:
         with NativeLinuxBackend() as backend:
             backend.initialize(config)
             backend.start(boot, timeout=180)
-            advance_to(backend, spec["checkpoint_frame"])
+            if prefix is None:
+                advance_to(backend, spec["checkpoint_frame"])
+            else:
+                reproduce_prefix(backend,prefix,out/'prefix-reproduced.slp')
             checkpoint = backend.capture()
             for index in indices:
                 schedule = spec["candidates"][index]
@@ -87,7 +97,7 @@ def main():
         raise
     manifest = {"schema": 1, "kind": "rendered-candidate-population", "export_passed": True,
                 "source_video_sha256": video["source_sha256"], "expected_indices": indices, "candidates": candidates,
-                "window": prior["window"], "capture_interval": [240, 300], "capture_padding": 0,
+                "window": prior["window"], "capture_interval": render_interval(spec), "capture_padding": 0,
                 "native_run": native_run, "iso_sha256": sha256(config.iso),
                 "identities": {str(p): sha256(p) for p in (Path(__file__), root / "search-result.json", root / "search-spec.json",
                     root / "timeline.json", args.video / "video.json", config.host, config.game_library, config.iso, boot,

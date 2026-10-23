@@ -3,8 +3,10 @@
 An experimental foundation for reconstructing **approximate** playable Melee
 replays from video. Video cannot recover every original input, RNG value or
 hidden state. Observed, inferred and unknown values are separate types. Automatic gameplay recognition is not implemented. Local video ingestion,
-manual-cue input search and rendered refinement are validated on four controlled
-cases: three horizontal motions and a jump. The native backend now exports genuine
+manual-cue input search and rendered refinement are validated on five controlled
+cases: three horizontal motions, a jump, and a two-window short/full-hop sequence.
+A host workflow carries verified selected input history between windows and
+produces a joined replay and comparison. The native backend exports genuine
 selected-branch recordings, with bounded and complete timed-match Slippi playback validated
 locally; this does not establish retail parity.
 
@@ -280,6 +282,14 @@ Fox's [short/full-hop boundary](docs/fox-hop-boundary.md) is also measured:
 one/two-request X/Y holds short-hop; three/four/eight full-hop. Both have three
 squat frames. Official Playback verifies the two/three boundary; the earlier
 four-way input tie is within the short-hop group.
+
+The fifth case joins two search windows over 161 video frames. The selected
+short hop and full hop reproduce from fresh boots and play together in official
+Dolphin; nine source fields match across 322 player-frames after selection.
+Whole-clip RGB RMSE is 5.47, with no absolute visual acceptance threshold.
+See [consecutive windows](docs/multi-window-reconstruction.md) for the single
+host workflow command, verified prefix format and current limits. Supplied
+starts and manual annotations are still required.
 
 ```bash
 bash scripts/docker.sh run python scripts/ingest_video.py path/to/short.mp4 \

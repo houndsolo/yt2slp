@@ -66,13 +66,34 @@ class JumpReferenceCase:
                 f"from zero-based request {self.press_step}; all axes neutral; other ports neutral/disconnected")
 
 
+@dataclass(frozen=True)
+class DoubleJumpReferenceCase:
+    total_steps: int = 480
+    clip_interval: tuple[int, int] = (240, 400)
+
+    def pads(self, step):
+        if type(step) is not int or not 0 <= step < self.total_steps:
+            raise ValueError("source step is outside its declared recording interval")
+        pressed = 244 <= step < 246 or 324 <= step < 328
+        return (PadInput(button=0x400 if pressed else 0), *NEUTRAL_PADS[1:])
+
+    @property
+    def input_policy(self):
+        return "480 requests; X on 244..245 and 324..327 (zero-based); axes neutral; P2 neutral, ports 3/4 disconnected"
+
+
 REFERENCE_CASES = {
     "fox-falco-battlefield-horizontal-v1": ReferenceCase(240, 180, 80),
     "fox-falco-battlefield-left-delayed-v1": ReferenceCase(246, 74, -80),
     "fox-falco-battlefield-right-release-left-v1": PhasedReferenceCase(
         320, ((0, 0), (240, 80), (256, 0), (264, -80))),
     "fox-falco-battlefield-jump-v1": JumpReferenceCase(320, 244, 2),
+    "fox-falco-battlefield-two-jumps-v1": DoubleJumpReferenceCase(),
 }
+
+
+def reference_interval(case):
+    return getattr(REFERENCE_CASES[case], 'clip_interval', (240, 300))
 
 
 def validate_reference_report(report, replay_sha256, clip_sha256):
@@ -80,12 +101,14 @@ def validate_reference_report(report, replay_sha256, clip_sha256):
     if (report.get("case") not in REFERENCE_CASES or report.get("passed") is not True
             or report.get("native_vs_official_postframes", {}).get("passed") is not True
             or report.get("native_observation_phase_check", {}).get("passed") is not True
-            or report.get("frame_alignment", {}).get("passed") is not True
-            or report.get("frame_alignment", {}).get("interval") != [240, 300]):
+            or report.get("frame_alignment", {}).get("passed") is not True):
         raise ValueError("source reference lacks complete state/frame validation")
+    first, last = reference_interval(report['case'])
+    if report.get('frame_alignment', {}).get('interval') != [first, last]:
+        raise ValueError('source reference lacks its complete declared frame interval')
     if report.get("native_replay_sha256") != replay_sha256 or report.get("reference_clip_sha256") != clip_sha256:
         raise ValueError("source replay/clip identity differs from validated reference")
     clip = report.get("reference_clip", {})
-    if (clip.get("nb_read_frames") != "61" or clip.get("r_frame_rate") != "60/1"
+    if (clip.get("nb_read_frames") != str(last-first+1) or clip.get("r_frame_rate") != "60/1"
             or [clip.get("width"), clip.get("height")] != [642, 528] or clip.get("codec_name") != "ffv1"):
         raise ValueError("unsupported source reference geometry/count/rate")

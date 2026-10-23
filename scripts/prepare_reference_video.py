@@ -40,7 +40,8 @@ def main():
             raise ValueError('source parser identity or declared partial-ending policy differs')
         subprocess.run(command,check=True,timeout=120)
         video=ingest_video(encoded,output/'ingested')
-        if len(video['frames'])!=61 or any(Fraction(row['relative_seconds'])!=Fraction(i,60) for i,row in enumerate(video['frames'])):
+        first,last=report['frame_alignment']['interval']
+        if len(video['frames'])!=last-first+1 or any(Fraction(row['relative_seconds'])!=Fraction(i,60) for i,row in enumerate(video['frames'])):
             raise ValueError('transcode changed the declared reference count/timing')
         provenance={'schema':1,'kind':'controlled-source-video','case':report['case'],
             'source_replay_sha256':sha256(replay),'source_clip_sha256':sha256(clip),

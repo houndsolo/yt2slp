@@ -9,15 +9,18 @@ values must remain distinguishable from observations and unknowns.
 checkpoint branching and genuine replay export. Bounded and complete timed-match recordings have
 passed independent parsing and actual official Playback Dolphin progression.
 A controlled nine-field comparison, timer-labelled reference capture, local video
-decoding and bounded input search now work for four clips: right, delayed left,
-movement/release/reversal and a jump. The first two use a single-change grid;
+decoding and bounded input search now work for five controlled clips: right, delayed left,
+movement/release/reversal, a jump, and a two-window short/full-hop sequence.
+The first two use a single-change grid;
 the later cases use timed axis/button phases. Manual fighter/stage regions select a closer
 continuation using the same image objective and timer calibration. Separate
 post-selection checks match each known source's nine state fields exactly.
 The jump retains four tied input programs with distinct recorded controls and
 identical official images. All cases use supplied starting conditions and manual
-annotations. Automatic gameplay recognition, general reconstruction and
-a single end-to-end video-to-replay command remain unimplemented.
+annotations. A single host command now runs consecutive annotated windows,
+verifies selected history between sessions and validates the joined replay.
+Automatic gameplay recognition, unknown-start recovery and general
+video-to-replay reconstruction remain unimplemented.
 
 Checked items below are implemented and validated within their stated scope.
 Unchecked items are remaining work. Proposed later work is a roadmap, not a
@@ -30,11 +33,11 @@ promise that its design or acceptance thresholds have already been settled.
 | 1. Reproducible native development environment | Complete for Linux/GCC 14 | Build and test the host/game without committing game assets |
 | 2. Controllable simulation and checkpoint branching | Complete for the initial supported scope | Boot a fixed match, apply inputs, pause, observe, capture and repeatedly restore |
 | 3. Genuine recording and official playback | Bounded and complete timed matches validated; broader cases remain | Export only the selected branch, parse it independently, and play it in official Dolphin |
-| 4. Reference comparison and controlled benchmarks | Four cases, including a jump, validated; broader cases remain | Measure agreement between native simulation, official playback and rendered observations |
+| 4. Reference comparison and controlled benchmarks | Five cases, including a 161-frame sequence, validated; broader cases remain | Measure agreement between native simulation, official playback and rendered observations |
 | 5. Video ingestion and observation extraction | Local decoding/manual cues validated; automatic recognition remains | Produce a timestamped, uncertainty-aware observation timeline from a supported clip |
-| 6. Input and hidden-state reconstruction | Single-window search/refinement with axis/button phases validated on four cases; broader recovery remains | Search simulation branches for a playable sequence that matches observations |
-| 7. End-to-end reconstruction and review | Manual staged workflow exists; visual acceptance and unified workflow remain | Video in; selected `.slp`, comparison evidence and limitations out |
-| 8. Broader evaluation and practical usability | Four controlled motions evaluated; broader evaluation remains | Reproduce results on held-out clips and document supported cases and failure modes |
+| 6. Input and hidden-state reconstruction | Single-window phases and consecutive windows with verified history validated; unknown starts/backtracking remain | Search simulation branches for a playable sequence that matches observations |
+| 7. End-to-end reconstruction and review | One host workflow for annotated, supplied-start windows; general observations/visual acceptance remain | Video in; selected `.slp`, comparison evidence and limitations out |
+| 8. Broader evaluation and practical usability | Five controlled sources evaluated; real tournament footage is next | Reproduce results on held-out clips and document supported cases and failure modes |
 
 ## 1. Reproducible native development environment
 
@@ -167,8 +170,10 @@ Dolphin states or rendered images agree.
   outside the ingested video supplied to reconstruction.
 - [ ] Establish native/rendered image agreement and the rendering/post-update
   phase relationship. The headless backend does not supply comparison pixels.
-- [ ] Expand beyond this stage/character pair and the 240..300 interval, including
-  combat, nonzero damage and stock changes. Horizontal motion and one jump are covered.
+- [x] Validate a fifth source over 240..400 with consecutive short/full hops; extend
+  source-only timer glyph coverage before candidate search, retaining initial failures.
+- [ ] Expand beyond this stage/character pair, including combat, nonzero damage
+  and stock changes. Horizontal motion and short/full hops are covered.
 - [ ] Define video-reconstruction accuracy thresholds and broader visual metrics
   before claiming a successful reconstruction. Current criteria are benchmark gates.
 
@@ -234,11 +239,15 @@ recognition and a general video observation system remain unimplemented.
   Reject Start/pause before simulation, retain legacy formats and validate a jump.
 - [x] Preserve measured input ambiguity: four distinct jump recordings tie on
   image evidence and produce identical official PNGs over the comparison interval.
-- [ ] Join windows into a consistent trajectory and handle drift, failed searches
-  and conflicting observations. Add more checkpoint capacity only if needed.
+- [x] Join consecutive windows by reproducing selected input history in fresh sessions
+  and checking exact boundary observations and replay bytes before branching.
+- [ ] Handle drift, conflicting observations and later-window failures with backtracking.
+  The current workflow carries one rendered minimum and retains tie evidence.
 - [x] Persist start recipe, candidate inputs, costs, traces, identities and chosen
   continuation. Search checkpoints remain session-local; failed searches export nothing.
-- [ ] Resume search across sessions and join multiple windows.
+- [x] Continue from completed selected windows across sessions and validate the joined
+  trajectory from two fresh boots. Native process checkpoints remain session-local.
+- [ ] Resume an unfinished candidate grid or automatically revisit earlier selections.
 - [x] Export only the selected continuation; compare its observations/replay bytes
   against a fresh boot with only the chosen inputs and validate parsing/playback.
 - [x] Select a closer controlled trajectory from supplied initial conditions and
@@ -281,16 +290,26 @@ also match those fields and have 61 identical official PNGs despite distinct
 recorded inputs. Earlier phase-search results and replay bytes remain unchanged.
 See [button reconstruction](button-reconstruction.md).
 
+A fifth controlled source joins two windows over frames 240..400. Eight first-
+window and 16 second-window candidates pass coarse cues; all 24 are parsed and
+actually rendered. Image ranking selects a short hop and then a full hop, with
+four tied programs at each selection. The next session reproduces the selected
+prefix state and replay bytes before searching. Two fresh joined boots, parsing
+and official Playback pass; nine source fields match across 322 player-frames
+only after selection. Whole-clip RGB RMSE is 5.47 without an absolute acceptance
+threshold. See [consecutive windows](multi-window-reconstruction.md) for the
+single host workflow, source calibration extension, exact scope and artifacts.
+
 Acceptance: a known reference clip can be reconstructed within the predefined
 error bounds, with uncertainty and failures reported. Exact original inputs and
 hidden state are not required or claimed.
 
 ## 7. End-to-end reconstruction and review
 
-- [ ] Provide a command/workflow connecting video ingestion, observations,
-  reconstruction, selected-branch export and validation.
-  Separate manual ingestion/search/capture/review scripts now cover the controlled
-  prototype; one workflow with general observation/trajectory acceptance remains open.
+- [x] Provide one host command connecting consecutive annotated-window search,
+  genuine export, official rendering/ranking, prefix checks and joined replay review.
+- [ ] Connect arbitrary video/YouTube ingestion and automatic observations to that
+  workflow, with unknown-start recovery and general trajectory acceptance.
 - [x] Parse the prototype's exported replay and run official Playback, with each
   result separate and failed timer-recognition evidence preserved.
 - [x] Produce a controlled timer-aligned source/reconstruction clip and report
@@ -317,6 +336,8 @@ and an honest comparison report using a documented reproducible workflow.
 - [x] Evaluate a jump using source-only annotations and unchanged scoring/calibration;
   independently validate recorded buttons and preserve four indistinguishable
   trajectories with different recorded inputs.
+- [x] Validate a two-window short/full-hop sequence over 161 frames, including
+  prefix reproduction, all accepted candidate renders and joined official review.
 - [ ] Evaluate end-to-end reconstruction on held-out clips, including camera
   changes, occlusion, compression artifacts and timing irregularities.
 - [ ] Publish supported cases, accuracy/error distributions, failure rates,
@@ -333,7 +354,7 @@ features or prerequisites for the first short-clip reconstruction.
 
 ## Latest validation and retained evidence
 
-The latest Docker Python run passed **246 tests**. The unchanged engine/parser's
+The latest Docker Python run passed **275 tests**. The unchanged engine/parser's
 last full component run passed **10 host/component, 23 game-library and 9
 independent parser tests**. Synthetic protocol/component tests
 establish their tested behavior; the following local ISO runs provide separate
@@ -375,6 +396,12 @@ gameplay, recording and playback evidence.
 | Prior phase regression | Same accepted set and genuine replay bytes; `.docker-state/local/manual-case-v4/legacy-phase-regression.json` |
 | Fox short/full-hop boundary | Ten real X/Y recordings: 1/2-request short hops and 3/4/8-request full hops; `.docker-state/local/fox-hop-boundary-v2/measurements.json` |
 | Boundary official comparison | Two/three-request X runs each match nine fields across 122 player-frames; timer-aligned short-left/full-right clip; `official-analysis/` in that probe directory |
+| Two-window source | Nine native/official fields exact over 322 player-frames and 161 timer labels; `.docker-state/local/runs/step-j0x10eav/analysis-expanded-clock/` |
+| Timestamp-preserving windows | Original PTS/source identity retained; source-only annotations, calibration extension and frozen protocol in `.docker-state/local/manual-case-v5/` |
+| Verified selected prefix | Second search reproduces first window boundary state and recording before capture; `.docker-state/local/runs/step-typtf91s/search-result.json` |
+| Complete two-window workflow | All 24 accepted candidates parsed/rendered, exact ties retained; `.docker-state/local/joined-jumps-v1/result.json` and `window-*/` |
+| Joined replay and review | Two fresh boots reproduce; actual official Playback and post-selection source checks pass across 322 player-frames; `joined/trajectory-verification.json` under that workflow |
+| Joined comparison | 161-frame `joined/review/comparison.mkv`, whole-clip RGB RMSE 5.47; no visual acceptance threshold |
 
 The selected replay in both recording runs has SHA-256
 `46b196b913b9a81bc501ddfcdd6f28c2710aabf665b0597d9059c9511e7e5dd2`.
@@ -420,6 +447,8 @@ agreement, stock/LRAS endings and retail parity remain unestablished.
 | `75333f4` | `18ded4f` | Rendered candidate refinement and post-selection source-state verification |
 | `01409b0` | `18ded4f` | Second controlled motion and validated compressed-source preparation |
 | `33af2bf` | `18ded4f` | Timed horizontal phases and movement/release/reversal evaluation |
+| `7fc16a0` | `18ded4f` | Explicit button phases, jump reconstruction and measured input ambiguity |
+| `5b557bc` | `18ded4f` | Fox short/full-hop measurement and actual official boundary comparison |
 
 The complete timed-match follow-up pins engine `18ded4f`, published before its
 parent gitlink update. It adds the missing completion callback and recording

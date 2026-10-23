@@ -116,6 +116,9 @@ def rank(args):
         spec = json.loads((root / "search-spec.json").read_text())
         spec["candidates"] = [selected["schedule"]]
         (out / "selected-spec.json").write_text(json.dumps(spec, indent=2) + "\n")
+        if (root/'prefix.json').exists():
+            (out/'prefix.json').write_text((root/'prefix.json').read_text())
+            identities[str(root/'prefix.json')]=sha256(root/'prefix.json')
         # Copy complete genuine bytes only after the whole declared population passes.
         source = root / selected["replay"]
         with (out / "selected.slp").open("xb") as handle:

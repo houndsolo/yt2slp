@@ -62,6 +62,17 @@ def test_jump_source_releases_button_without_changing_axes_or_other_ports():
     assert all(case.pads(i)[1:]==NEUTRAL_PADS[1:] for i in range(320))
 
 
+def test_two_window_reference_requires_its_full_declared_span():
+    case=REFERENCE_CASES['fox-falco-battlefield-two-jumps-v1']
+    assert case.clip_interval==(240,400) and case.total_steps==480
+    assert [case.pads(i)[0].button for i in (243,244,245,246,323,324,327,328)]==[0,1024,1024,0,0,1024,1024,0]
+    report=validated_report();report['case']='fox-falco-battlefield-two-jumps-v1'
+    with pytest.raises(ValueError):validate_reference_report(report,'replay-identity','clip-identity')
+    report['frame_alignment']['interval']=[240,400]
+    report['reference_clip']['nb_read_frames']='161'
+    validate_reference_report(report,'replay-identity','clip-identity')
+
+
 @pytest.mark.parametrize('component',['passed','native_vs_official_postframes','native_observation_phase_check','frame_alignment','geometry','rate'])
 def test_incomplete_reference_is_not_prepared_as_a_valid_source(component):
     report=deepcopy(validated_report())

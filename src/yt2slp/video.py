@@ -6,6 +6,7 @@ Numbered PNGs are decode indices only; time comes from the source stream PTS.
 from fractions import Fraction
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 
@@ -80,3 +81,29 @@ def ingest_video(source: Path, output: Path, max_frames: int = 1800) -> dict:
                           for name in ("ffmpeg", "ffprobe")}}
     (output / "video.json").write_text(json.dumps(manifest, indent=2) + "\n")
     return manifest
+
+
+def window_view(source: Path, output: Path, first: int, last: int) -> dict:
+    """A contiguous decode-index view; preserve original PTS and source-video identity."""
+    source, output = source.resolve(), output.resolve()
+    parent = json.loads((source/'video.json').read_text())
+    if (parent.get('schema') != 1 or parent.get('kind') != 'local-video'
+            or type(first) is not int or type(last) is not int or not 0 <= first <= last < len(parent['frames'])):
+        raise ValueError('invalid contiguous video window')
+    selected = parent['frames'][first:last+1]
+    for row in selected:
+        if sha256(source/row['image']) != row['image_sha256']:
+            raise ValueError('source image identity differs before creating window view')
+    output.mkdir(parents=True,exist_ok=False)
+    (output/'frames').mkdir()
+    rows=[]
+    for index,row in enumerate(selected):
+        image=output/'frames'/f'{index:06d}.png'
+        image.symlink_to(os.path.relpath(source/row['image'],image.parent))
+        rows.append({**row,'index':index,'source_decode_index':row.get('source_decode_index',row['index']),
+            'image':str(image.relative_to(output)),
+            'identical_previous_decoded_png':False if index==0 else row['identical_previous_decoded_png']})
+    document={**parent,'frames':rows,'view':{'parent_video_json_sha256':sha256(source/'video.json'),
+        'parent_decode_interval':[first,last],'policy':'contiguous view; original PTS, source-relative time and image hashes retained'}}
+    (output/'video.json').write_text(json.dumps(document,indent=2)+'\n')
+    return document

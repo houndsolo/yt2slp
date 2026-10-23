@@ -14,7 +14,7 @@ import subprocess
 
 from yt2slp.backend import NativeLinuxBackend, RunConfig
 from yt2slp.match import MatchConfig
-from yt2slp.reference_cases import REFERENCE_CASES
+from yt2slp.reference_cases import REFERENCE_CASES, reference_interval
 
 
 def sha256(path):
@@ -41,8 +41,9 @@ def main():
         b.record(replay)
         (directory / 'observations.json').write_text(json.dumps([asdict(o) for o in observations])+'\n')
         config = b.config
+        first,last=reference_interval(args.case)
         manifest = {'schema': 1, 'case': args.case,
-            'clip': {'first':240,'last':300,'fps':60,'timer_pauses_allowed':False},
+            'clip': {'first':first,'last':last,'fps':60,'timer_pauses_allowed':False},
             'native_observation_frames':[o.match_frame for o in observations],
             'input_policy':case.input_policy,
             'seed':config.rng_seed,'time_base':config.time_base,'requested_match':asdict(config.match),
