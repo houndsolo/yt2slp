@@ -32,6 +32,12 @@ clip, not the opposite side platform used in the search. That experiment's
 native/official consistency checks remain valid for its own generated branches,
 but its starting-layout hypothesis does not reproduce the supplied footage.
 The immediate benchmark is now an MP4 rendered from a supplied example `.slp`.
+That three-second Fox/Falco Battlefield MP4 is created and its official rendering
+matches nine source fields over 180 frames. A first 64-program search accepts two
+programs; fresh selected playback/review passes, but source-state evaluation fails
+and image RMSE remains 54.02/255 over 17 frames. Initial layout is verified for
+this case; full code-set and RNG-start parity remain open. See the
+[supplied-replay benchmark](example-replay-benchmark.md).
 Automatic gameplay recognition, unknown-start recovery and general
 video-to-replay reconstruction remain unimplemented.
 
@@ -50,9 +56,21 @@ promise that its design or acceptance thresholds have already been settled.
 | 5. Video ingestion and observation extraction | Local decoding/manual cues validated; automatic recognition remains | Produce a timestamped, uncertainty-aware observation timeline from a supported clip |
 | 6. Input and hidden-state reconstruction | Controlled consecutive windows and real-opening two-player signed-frame search validated; unknown starts/backtracking remain | Search simulation branches for a playable sequence that matches observations |
 | 7. End-to-end reconstruction and review | One host workflow for annotated, supplied-start windows; general observations/visual acceptance remain | Video in; selected `.slp`, comparison evidence and limitations out |
-| 8. Broader evaluation and practical usability | Five controlled sources; YouTube start hypothesis corrected; supplied-replay benchmark next | Reproduce results on held-out clips and document supported cases and failure modes |
+| 8. Broader evaluation and practical usability | Five controlled sources; supplied-replay MP4 and first bounded search evaluated; source motion still mismatches | Reproduce results on held-out clips and document supported cases and failure modes |
 
 ## Immediate priorities: standardized supplied-replay benchmark
+
+The next work is deliberately narrow:
+
+1. Finish and publish the supplied-example MP4/preparation tools and honest first
+   search results; retain the corrected YouTube interpretation and local edits.
+2. Add an explicit Slippi Game Start seed boundary, preserving the existing
+   item-setup behavior by default. Validate actual recorded settings, fresh
+   reproduction and official playback before using it in a new benchmark.
+3. Audit the remaining source code configuration, then add vertical/platform
+   cues and descent programs. Keep the source controls/later state out of selection.
+4. Extend the fitted interval only after motion improves; then try another
+   supplied example. YouTube fitting and model training remain later work.
 
 Spawn policy is a required starting condition. Slippi has custom neutral-start
 codes that place the two fighters on opposite sides; ordinary SSBM uses distinct
@@ -72,11 +90,11 @@ values recovered from the MP4.
 | Order | Work | Current status / completion boundary |
 | --- | --- | --- |
 | 1 | Correct the start-policy assumption and retain prior evidence | Documented here. Prior YouTube layout is invalid as a source reproduction; its generated-replay/parser/official checks remain scoped to its own branches. No visual acceptance was established. |
-| 2 | Select a supplied example and render a real MP4 | Next: inspect supported roster/stage/settings and recorded codes without reading original controls; use official Playback with explicit profile/codes and retain hashes, timer labels and frame mapping. |
-| 3 | Verify the standardized starting recipe | Confirm neutral-start versus ordinary per-port spawn behavior from the replay/codes and actual rendered start. Declare supplied settings/seed/prefix and any unsupported differences before search. |
-| 4 | Reconstruct a short video-only segment | Freeze visual observations/uncertainty and a bounded two-player input grid. Retain rejected programs, ties and failed setup hypotheses. Never feed the source's original controls/later state into selection. |
-| 5 | Validate the selected reconstruction | Genuine export, fresh reproduction, independent parser, actual official playback, aligned MP4 comparison and measured motion/image errors. Evaluate source replay fields only after selection. |
-| 6 | Expand coverage after this benchmark | Improve demonstrated input/observation gaps, extend to consecutive windows and another supplied example; return to YouTube with start-policy handling validated. Train vision components only for measured recognition gaps. |
+| 2 | Select a supplied example and render a real MP4 | Complete: `Game_20260622T203533.slp`, Fox/Falco/Battlefield. Three-second MP4, 180 unique timer-labelled frames, verified timestamps; original source vs official nine fields exact over 360 player-frames. |
+| 3 | Verify the standardized starting recipe | Initial-layout gate passes: explicit stage points 2/3 match seven fields at -123/-40. Source neutral-start hook and UCF are recorded. Remaining: full supported code configuration and seed boundary; native item-init override is later than Slippi Game Start and records a different seed. |
+| 4 | Reconstruct a short video-only segment | First attempt complete: 64 declared programs, two cue-compatible; both parsed/rendered. Six fixed source regions select index 48. Source controls/later state are excluded from selection. Grid still misses the observed platform descent. |
+| 5 | Validate the selected reconstruction | Fresh genuine bytes/parser/own official fields/timer alignment and 17-frame comparison pass. Post-selection source-state comparison fails; RMSE 54.02, visual acceptance false. Retain the missing automatic clock label and one literal manual reading. |
+| 6 | Improve this benchmark before expanding | Next: align supported start codes/RNG boundary, add vertical/platform constraints, and search effective descent/movement timings. Then extend the fitted interval and another example; return to YouTube after start-policy validation. |
 
 The current seed/time-base choices are simulation hypotheses, not recovered
 source values. General starting-state/RNG recovery, camera/world-coordinate
@@ -84,6 +102,9 @@ measurement, broad visual acceptance and arbitrary full-match reconstruction
 remain open. See [tournament intake](tournament-video-intake.md),
 [setup validation](tournament-start.md), [pre-clock control](preroll-control.md)
 and [first opening search](tournament-opening.md).
+For the supplied example, the source Game Start seed is known setup metadata,
+but it is not interchangeable with the current native override's later boundary.
+The [benchmark report](example-replay-benchmark.md) retains that mismatch.
 
 ## 1. Reproducible native development environment
 
@@ -426,7 +447,8 @@ features or prerequisites for the first short-clip reconstruction.
 
 The latest Docker Python run passed **343 tests**. The current native build passed
 **10 host/component and 23 game-library tests**; the unchanged independent parser's
-last component run passed **9 tests**. Synthetic protocol/component tests
+combined parser/preparation run passed **12 tests** (nine parser and three
+supplied-replay preparation checks). Synthetic protocol/component tests
 establish their tested behavior; the following local ISO runs provide separate
 gameplay, recording and playback evidence.
 
@@ -437,6 +459,8 @@ gameplay, recording and playback evidence.
 | First real opening | 24/72 sparse-cue-compatible programs after explicit platform setup; coarse selected recording/fresh/parser pass, nine own official fields exact across 116 player-frames (-39..18); `.docker-state/local/runs/step-ozreb1l0/official-analysis/result.json` |
 | First real-opening image review | All 24 actual renders/timer labels/own nine fields pass; two exact minima have identical 17-frame images and selected state despite different controls. Fresh selected comparison RMSE 63.29, visual acceptance false; `.docker-state/local/runs/step-g3m7lfe7/review/` and `tournament-opening-v2/ranking-ready-border-v1/verification.json` |
 | Bright-stage timer correction | Explicit opt-in border-component segmentation; source manual readings retained, thresholds unchanged. Prior 161-frame labels/records unchanged; `tournament-opening-v2/timer-legacy-regression.json` |
+| Supplied-replay source | Three-second MP4 from `Game_20260622T203533.slp`, 180 labelled frames; original/official nine fields exact across 360 player-frames; `.docker-state/local/example-reference-v1/video/source.mp4` and `post-selection/result.json` |
+| Supplied-replay reconstruction attempt | Two of 64 accepted, both actually rendered; fresh selected official comparison passes its pipeline checks but source motion/state mismatch remains. RMSE 54.02/255; `.docker-state/local/runs/step-i9yqw5lf/review/` |
 | Recording and independent parser | Branch-byte comparisons and parser report; `.docker-state/local/runs/step-qa9h0_nl/` |
 | Reusable recording experiment | Same selected replay bytes and matching selected states; `.docker-state/local/runs/step-jrevwdnh/recording-result.json` |
 | Bounded official Playback 3.5.2 | Contiguous -123..422 frame reports, resync disabled; `.local/playback-full/result.json` and `stdout.log` |
