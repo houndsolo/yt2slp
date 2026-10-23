@@ -50,6 +50,12 @@ retains the existing VI step unit. During Ready, `recording_status().last_frame`
 provides the separately observed signed replay key. See [pre-clock control](preroll-control.md)
 for the tested interval and retained strict Ready-state discrepancy.
 
+`RunConfig.rng_seed_boundary` defaults to `item-setup`. Opt into
+`slippi-game-start` to apply a supplied source seed at Slippi's initial match
+boundary, before the genuine Game Start event, with no later item reset. Host
+API 21 adds the optional callback; rebuild both artifacts. See
+[seed boundaries](seed-boundaries.md) for the difference and validation.
+
 `RunConfig.match` also works with `run_script()`. Leaving it `None` preserves the
 original batch runner's menu-selected match. Interactive `start()` requires it.
 

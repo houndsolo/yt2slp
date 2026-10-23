@@ -1,5 +1,6 @@
 """Contract tests use synthetic CSV, not simulated gameplay or replay evidence."""
 from pathlib import Path
+from dataclasses import replace
 import subprocess
 
 import pytest
@@ -79,6 +80,28 @@ def test_missing_artifacts_block_initialization(tmp_path):
         backend.run_script(tmp_path / "script", 1)
 
 
+@pytest.mark.parametrize('boundary', ['auto', None, True])
+def test_unsupported_seed_boundary_is_rejected(configured, boundary):
+    backend, _ = configured
+    with pytest.raises(BackendError, match='rng_seed_boundary'):
+        backend.initialize(replace(backend.config, rng_seed_boundary=boundary))
+
+
+def test_explicit_game_start_seed_boundary_survives_configuration_and_batch_transport(configured, monkeypatch):
+    backend, script = configured
+    backend.initialize(replace(backend.config, rng_seed=33480, rng_seed_boundary='slippi-game-start'))
+    calls = []
+    def emit(command, **kwargs):
+        calls.append(command)
+        Path(command[command.index('--state-digest')+1]).write_text(digest_row())
+        return subprocess.CompletedProcess(command, 0)
+    monkeypatch.setattr(subprocess, 'run', emit)
+    backend.run_script(script, 1)
+    assert backend.config.rng_seed_boundary == 'slippi-game-start'
+    assert calls[0][calls[0].index('--rng-seed-boundary')+1] == 'slippi-game-start'
+    assert calls[0][calls[0].index('--rng-seed')+1] == '33480'
+
+
 def test_transport_uses_private_directories_and_clears_failed_state(configured, monkeypatch):
     backend, script = configured
     calls = []
@@ -96,6 +119,7 @@ def test_transport_uses_private_directories_and_clears_failed_state(configured, 
     assert backend.last_run_dir != first_dir
     command, options = calls[-1]
     assert "--vanilla-game" in command
+    assert '--rng-seed-boundary' not in command
     assert command[command.index("--time-base") + 1] == "0"
     assert command[command.index("--card-dir") + 1].startswith(str(backend.last_run_dir))
     assert options["cwd"] == backend.last_run_dir

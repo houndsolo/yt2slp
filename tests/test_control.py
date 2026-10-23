@@ -58,6 +58,15 @@ def test_restart_and_initialize_reap_previous_process(configured):
     assert process.poll() == 0 and not backend.observations
 
 
+def test_control_passes_explicit_game_start_seed_boundary(configured):
+    backend, script = configured
+    backend.initialize(replace(backend.config, rng_seed_boundary='slippi-game-start'))
+    backend.start(script, timeout=2)
+    command = backend._session.process.args
+    assert command[command.index('--rng-seed-boundary')+1] == 'slippi-game-start'
+    assert '"rng_seed_boundary": "slippi-game-start"' in (backend.last_run_dir/'config.json').read_text()
+
+
 def test_validation_does_not_advance_live_session(configured):
     backend, script = configured
     first = backend.start(script, timeout=2)

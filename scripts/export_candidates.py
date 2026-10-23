@@ -37,6 +37,8 @@ def main():
             raise ValueError('unsupported signed opening population')
         match = match_from_document(spec['match'])
     else:
+        if spec.get('rng_seed_boundary','item-setup') != 'item-setup':
+            raise ValueError('legacy prefix recipes support the item-setup seed boundary only')
         if (spec['case'] != 'fox-falco-battlefield-manual-v1'
                 or spec['known_match'] != {'stage': 31, 'characters': [2, 20]}):
             raise ValueError('unsupported legacy match recipe')
@@ -54,7 +56,8 @@ def main():
             raise ValueError("manual source image identity mismatch")
     config = RunConfig(Path("build/headless/melee_headless"), Path("build/game/melee_game.so"),
                        Path(os.environ.get("YT2SLP_ISO", "/assets/melee.iso")), Path(".local/runs"),
-                       rng_seed=spec["rng_seed"], time_base=spec["time_base"], match=match)
+                       rng_seed=spec["rng_seed"], time_base=spec["time_base"], match=match,
+                       rng_seed_boundary=spec.get('rng_seed_boundary','item-setup'))
     boot = Path("third_party/melee-unlocked/port/scripts/native_vs.txt")
     prefix=json.loads((root/'prefix.json').read_text()) if (root/'prefix.json').exists() else None
     if opening and prefix is not None:raise ValueError('signed opening prefix joining is not implemented')
@@ -108,6 +111,10 @@ def main():
                 with (directory / "parser-result.json").open("x") as handle:
                     subprocess.run(["node", "tools/slippi-parser/validate.cjs", str(replay), "--last-frame", str(spec["end_frame"])],
                                    stdout=handle, check=True)
+                if config.rng_seed_boundary == 'slippi-game-start':
+                    parsed=json.loads((directory/'parser-result.json').read_text())
+                    if parsed['settings']['randomSeed'] != config.rng_seed:
+                        raise ValueError('candidate Game Start seed differs from explicit initial seed')
                 if index == prior["selected_index"] and sha256(replay) != prior["selected_replay_sha256"]:
                     raise ValueError("previous selected replay bytes changed")
                 candidates.append({"index": index, "schedule": schedule, "replay": str(replay.relative_to(out)),
@@ -126,7 +133,8 @@ def main():
                     Path("src/yt2slp/search.py"), Path("tools/slippi-parser/validate.cjs"), Path("tools/slippi-parser/package-lock.json"))}}
     if opening:
         manifest.update(requested_match=asdict(match), player_ports=list(match.ports), frame_clock='slippi-replay',
-                        capture_request_start=-123, include_preroll=True)
+                        capture_request_start=-123, include_preroll=True,
+                        simulation_rng_seed_boundary=config.rng_seed_boundary, simulation_seed=config.rng_seed)
     (out / "candidates.json").write_text(json.dumps(manifest, indent=2) + "\n")
     print(json.dumps({"output": str(out), "exported": indices}, indent=2))
 

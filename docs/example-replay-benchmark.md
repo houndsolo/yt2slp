@@ -95,6 +95,32 @@ equality and reconstruction of the entire three-second MP4 remain unvalidated.
 Original source inputs remain outside the reconstruction interface. This is an
 iterative development example, not an independent held-out match evaluation.
 
+## Seed-boundary follow-up
+
+The [explicit boundary](seed-boundaries.md) is now implemented as opt-in
+`rng_seed_boundary: "slippi-game-start"`, with the earlier item-setup behavior
+preserved by default. The [second configuration](../configs/example-opening-search-v2.json)
+keeps the same 64 inputs, source observations, regions, calibration and objective.
+The actual game records **33480**, applies that seed once before Game Start, and
+does not reset it at item setup. Seven supplied initial fields still match at
+-123/-40. Accepted indices remain 40/48; both genuine branches pass parser,
+official rendering and exact own nine-field checks across 68 player-frames.
+
+Image ranking again selects 48. Fresh observations, signed keys and bytes
+reproduce, and the fresh selected official review/ranking verification pass.
+Selected SHA-256:
+`3600b2845e71b901419d237b21fc04bd161affe1ce670f02c73600630ea44dad`.
+The exported setup summary now matches the source, including its seed. The
+source trajectory still fails its separate post-selection comparison, and image
+RMSE is unchanged at **54.02/255**. Correcting the seed boundary does not supply
+the missing descent/action hypotheses or establish UCF/full-code compatibility.
+
+Follow-up evidence: `.docker-state/local/example-reference-v2-seed/`, with fresh
+selected review in `.docker-state/local/runs/step-mwoay6gb/review/`. The default
+two-jump recording remains byte-identical. API 21 engine commit `fba2f21` was
+published before the parent update; Docker checks pass 348 Python, 10 host and
+23 game tests. The original v1 artifacts and failed seed check remain retained.
+
 ## Reproduction and artifacts
 
 Native/preparation tools run in Docker; official capture runs on the Arch host.
@@ -136,6 +162,7 @@ Ignored host artifacts:
 
 Abbreviated paths are under `.docker-state/local/`. Generated MP4s, SLPs, images,
 glyph templates and state exports remain outside Git. The curated supplied
-example remains tracked. Docker checks: **343 Python tests** and **12 parser/
-preparation tests** pass. The native engine is unchanged from `5d283cc` with its
-previous 10 host/component and 23 game tests.
+example remains tracked. The initial v1 run passed 343 Python and 12 parser/
+preparation tests using engine `5d283cc`. The seed follow-up's current build
+passes 348 Python tests and the same 10 host/component and 23 game tests; the
+unchanged parser/preparation suite's last run passed 12 tests.

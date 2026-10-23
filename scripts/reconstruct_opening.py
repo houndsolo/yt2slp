@@ -49,7 +49,8 @@ def main():
         row=video['frames'][s.video_frame]
         if sha256(a.video/row['image'])!=row['image_sha256']:raise ValueError('annotated source image identity differs')
     config=RunConfig(Path('build/headless/melee_headless'),Path('build/game/melee_game.so'),
-        Path(os.environ.get('YT2SLP_ISO','/assets/melee.iso')),Path('.local/runs'),spec['rng_seed'],spec['time_base'],match)
+        Path(os.environ.get('YT2SLP_ISO','/assets/melee.iso')),Path('.local/runs'),spec['rng_seed'],spec['time_base'],match,
+        spec.get('rng_seed_boundary','item-setup'))
     with NativeLinuxBackend() as backend:
         backend.initialize(config);backend.start(BOOT,timeout=180,include_preroll=True)
         root=backend.last_run_dir
@@ -58,7 +59,8 @@ def main():
         report=bounded_search(backend,samples,candidates,end+40,root/'trials',frame_clock='slippi-replay',player_ports=match.ports)
         report.update(source_video_sha256=video['source_sha256'],requested_match=asdict(match),start_source=spec['start_source'],
             source_hidden_state_recovered=False,original_inputs_identified=False,visual_accuracy_accepted=False,
-            simulation_seed=spec['rng_seed'],simulation_time_base=spec['time_base'],parser_validated=False,
+            simulation_seed=spec['rng_seed'],simulation_time_base=spec['time_base'],
+            simulation_rng_seed_boundary=config.rng_seed_boundary,parser_validated=False,
             official_playback_validated=False,pixel_agreement_measured=False,
             identities={str(path):sha256(path) for path in (Path(__file__),a.spec,a.timeline,a.video/'video.json',
                 config.host,config.game_library,config.iso,BOOT,Path('src/yt2slp/search.py'),Path('src/yt2slp/timeline.py'),Path('src/yt2slp/match.py'))})
@@ -86,6 +88,8 @@ def main():
             if match.stock_rules and (settings['startingTimerSeconds']!=match.stock_rules.seconds
                     or settings['inGameMode']!=32 or any(p['startStocks']!=match.stock_rules.stocks for p in settings['players'])):
                 raise ValueError('parsed stock rules differ')
+            if config.rng_seed_boundary=='slippi-game-start' and settings['randomSeed']!=config.rng_seed:
+                raise ValueError('recorded Game Start seed differs from explicit initial seed')
             report['parser_validated']=True;report['selected_replay_sha256']=sha256(root/'selected.slp')
             report['passed'] &= all(report[k] for k in ('fresh_selected_observations_match','fresh_recording_keys_match','fresh_recording_bytes_match'))
         (root/'search-result.json').write_text(json.dumps(report,indent=2)+'\n')

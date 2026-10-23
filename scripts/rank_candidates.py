@@ -67,6 +67,9 @@ def rank(args):
             native_file, official_file = out / f"native-{index:03d}.json", out / f"official-{index:03d}.json"
             native = export_state(replay, native_file)
             official = export_state(official_dir / capture["regenerated_replays"][0], official_file)
+            if (population.get('simulation_rng_seed_boundary') == 'slippi-game-start'
+                    and native['settings']['seed'] != population['simulation_seed']):
+                raise ValueError('candidate initial seed differs from declared Game Start recipe')
             state_check = compare_posts(native, official, first, last, player_indices=tuple(population.get('player_ports', (0, 1))))
             if not state_check["passed"]:
                 raise ValueError("native/official selected-state disagreement; no visual winner selected")

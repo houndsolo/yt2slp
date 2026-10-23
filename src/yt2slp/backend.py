@@ -36,6 +36,7 @@ class RunConfig:
     rng_seed: int = 1
     time_base: int = 0
     match: MatchConfig | None = None
+    rng_seed_boundary: str = 'item-setup'
 
 
 @dataclass(frozen=True)
@@ -181,13 +182,15 @@ class NativeLinuxBackend:
             raise BackendError("rng_seed and time_base must be integers")
         if not 0 <= config.rng_seed <= 0xFFFFFFFF or not 0 <= config.time_base <= 0xFFFFFFFFFFFFFFFF:
             raise BackendError("rng_seed must be uint32 and time_base must be uint64")
+        if config.rng_seed_boundary not in ('item-setup', 'slippi-game-start'):
+            raise BackendError('rng_seed_boundary must be item-setup or slippi-game-start')
         try:
             config.work_dir.mkdir(parents=True, exist_ok=True)
             with tempfile.TemporaryFile(dir=config.work_dir):
                 pass
         except OSError as exc:
             raise BackendError(f"work directory is not writable: {exc}") from exc
-        self.config = RunConfig(*(p.resolve() for p in (config.host, config.game_library, config.iso, config.work_dir)), config.rng_seed, config.time_base, config.match)
+        self.config = RunConfig(*(p.resolve() for p in (config.host, config.game_library, config.iso, config.work_dir)), config.rng_seed, config.time_base, config.match, config.rng_seed_boundary)
 
     def run_script(self, script: Path, retraces: int, timeout: float = 120) -> tuple[Observation, ...]:
         """Boot fresh and run a native script for exactly retraces VI boundaries.
@@ -220,6 +223,7 @@ class NativeLinuxBackend:
             command += ["--match", c.match.native_argument()]
             if c.match.stock_rules is not None:
                 command += ['--stock-rules', c.match.stock_rules.native_argument()]
+        if c.rng_seed_boundary != 'item-setup':command += ['--rng-seed-boundary', c.rng_seed_boundary]
         (run_dir / "config.json").write_text(json.dumps(asdict(c), default=str, indent=2) + "\n")
         try:
             with (run_dir / "host.log").open("w") as log:
@@ -273,6 +277,7 @@ class NativeLinuxBackend:
         if c.match.stock_rules is not None:
             command += ['--stock-rules', c.match.stock_rules.native_argument()]
         if include_preroll:command += ['--control-preroll']
+        if c.rng_seed_boundary != 'item-setup':command += ['--rng-seed-boundary', c.rng_seed_boundary]
         (run_dir/'start-options.json').write_text(json.dumps({'include_preroll':include_preroll})+'\n')
         (run_dir / "config.json").write_text(json.dumps(asdict(c), default=str, indent=2) + "\n")
         try:
