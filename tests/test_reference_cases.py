@@ -54,6 +54,14 @@ def test_multiphase_source_includes_real_release_and_reversal_boundaries():
         with pytest.raises(ValueError):case.pads(invalid)
 
 
+def test_jump_source_releases_button_without_changing_axes_or_other_ports():
+    case=REFERENCE_CASES['fox-falco-battlefield-jump-v1']
+    assert case.total_steps==320
+    assert [case.pads(i)[0].button for i in (0,243,244,245,246,319)] == [0,0,0x400,0x400,0,0]
+    assert all(case.pads(i)[0].stick_x==case.pads(i)[0].stick_y==0 for i in range(320))
+    assert all(case.pads(i)[1:]==NEUTRAL_PADS[1:] for i in range(320))
+
+
 @pytest.mark.parametrize('component',['passed','native_vs_official_postframes','native_observation_phase_check','frame_alignment','geometry','rate'])
 def test_incomplete_reference_is_not_prepared_as_a_valid_source(component):
     report=deepcopy(validated_report())

@@ -2,8 +2,9 @@
 
 The controller search now supports multiple timed horizontal phases within one
 checkpoint window. It retains the previous single-change format and keeps the
-game's ordinary PAD polling, math and timing. It does not yet search jumps,
-buttons, unknown starting conditions or joined windows.
+game's ordinary PAD polling, math and timing. The later
+[button extension](button-reconstruction.md) adds explicit jump press/release
+programs. Unknown starting conditions and joined windows remain unimplemented.
 
 ## Phase format and bounds
 
@@ -165,6 +166,5 @@ legacy grid compatibility. An actual rerun of the previous delayed-left search
 also preserves its accepted candidates and selected replay bytes.
 
 Generated game material, recordings, clips, images and annotations remain ignored.
-The next useful case is a button-driven jump, followed by multi-window search
-and more automatic observations; neither is implemented by this horizontal-phase
-extension.
+The [fourth case](button-reconstruction.md) now evaluates a button-driven jump.
+Multi-window search and more automatic observations remain future work.

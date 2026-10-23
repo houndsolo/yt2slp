@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "case": "fox-falco-battlefield-manual-v1",
+  "start_source": "Supplied controlled benchmark recipe: fresh vanilla Fox/Falco Battlefield, seed 1, time base 0, neutral from first match boundary to frame 239. These conditions are supplied, not recovered from video.",
+  "known_match": {
+    "stage": 31,
+    "characters": [
+      2,
+      20
+    ]
+  },
+  "rng_seed": 1,
+  "time_base": 0,
+  "checkpoint_frame": 239,
+  "end_frame": 301,
+  "candidates": [
+    {"pad_phases": [{"start_after": 2, "stick_x": 0, "stick_y": 0, "button": 1024}, {"start_after": 3, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 2, "stick_x": 0, "stick_y": 0, "button": 2048}, {"start_after": 3, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 2, "stick_x": 0, "stick_y": 0, "button": 1024}, {"start_after": 4, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 2, "stick_x": 0, "stick_y": 0, "button": 2048}, {"start_after": 4, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 2, "stick_x": 0, "stick_y": 0, "button": 1024}, {"start_after": 6, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 2, "stick_x": 0, "stick_y": 0, "button": 2048}, {"start_after": 6, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 2, "stick_x": 0, "stick_y": 0, "button": 1024}, {"start_after": 10, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 2, "stick_x": 0, "stick_y": 0, "button": 2048}, {"start_after": 10, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 6, "stick_x": 0, "stick_y": 0, "button": 1024}, {"start_after": 7, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 6, "stick_x": 0, "stick_y": 0, "button": 2048}, {"start_after": 7, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 6, "stick_x": 0, "stick_y": 0, "button": 1024}, {"start_after": 8, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 6, "stick_x": 0, "stick_y": 0, "button": 2048}, {"start_after": 8, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 6, "stick_x": 0, "stick_y": 0, "button": 1024}, {"start_after": 10, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 6, "stick_x": 0, "stick_y": 0, "button": 2048}, {"start_after": 10, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 6, "stick_x": 0, "stick_y": 0, "button": 1024}, {"start_after": 14, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 6, "stick_x": 0, "stick_y": 0, "button": 2048}, {"start_after": 14, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 10, "stick_x": 0, "stick_y": 0, "button": 1024}, {"start_after": 11, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 10, "stick_x": 0, "stick_y": 0, "button": 2048}, {"start_after": 11, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 10, "stick_x": 0, "stick_y": 0, "button": 1024}, {"start_after": 12, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 10, "stick_x": 0, "stick_y": 0, "button": 2048}, {"start_after": 12, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 10, "stick_x": 0, "stick_y": 0, "button": 1024}, {"start_after": 14, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 10, "stick_x": 0, "stick_y": 0, "button": 2048}, {"start_after": 14, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 10, "stick_x": 0, "stick_y": 0, "button": 1024}, {"start_after": 18, "stick_x": 0, "stick_y": 0, "button": 0}]},
+    {"pad_phases": [{"start_after": 10, "stick_x": 0, "stick_y": 0, "button": 2048}, {"start_after": 18, "stick_x": 0, "stick_y": 0, "button": 0}]}
+  ]
+}

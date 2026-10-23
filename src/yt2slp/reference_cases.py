@@ -47,11 +47,31 @@ class PhasedReferenceCase:
                 f"{self.phases}; other ports neutral/disconnected")
 
 
+@dataclass(frozen=True)
+class JumpReferenceCase:
+    """Known source controller kept outside reconstruction's candidate programs."""
+    total_steps: int
+    press_step: int
+    held_steps: int
+
+    def pads(self, step):
+        if type(step) is not int or not 0 <= step < self.total_steps:
+            raise ValueError("source step is outside its declared recording interval")
+        pressed = self.press_step <= step < self.press_step + self.held_steps
+        return (PadInput(button=0x400 if pressed else 0), *NEUTRAL_PADS[1:])
+
+    @property
+    def input_policy(self):
+        return (f"{self.total_steps} steps; P1 X button held for {self.held_steps} requests "
+                f"from zero-based request {self.press_step}; all axes neutral; other ports neutral/disconnected")
+
+
 REFERENCE_CASES = {
     "fox-falco-battlefield-horizontal-v1": ReferenceCase(240, 180, 80),
     "fox-falco-battlefield-left-delayed-v1": ReferenceCase(246, 74, -80),
     "fox-falco-battlefield-right-release-left-v1": PhasedReferenceCase(
         320, ((0, 0), (240, 80), (256, 0), (264, -80))),
+    "fox-falco-battlefield-jump-v1": JumpReferenceCase(320, 244, 2),
 }
 
 

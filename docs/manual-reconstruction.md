@@ -27,6 +27,8 @@ That recipe describes the original experiment. The same scripts now also accept
 ordered horizontal phases for movement, release and reversal; see
 [phase search](phased-reconstruction.md) for the format and third controlled case.
 This still uses one checkpoint window and supplied starting conditions.
+Explicit main-stick/button snapshots and a [jump case](button-reconstruction.md)
+are also supported by these scripts; the original recipe is unchanged.
 
 The solver reads the manual timeline, start recipe and ingested video identities.
 It does **not** read the source replay, original controller trace, source replay

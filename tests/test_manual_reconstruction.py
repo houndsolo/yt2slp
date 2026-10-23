@@ -10,7 +10,7 @@ import pytest
 
 from yt2slp.backend import Observation
 from yt2slp.evidence import Evidence, Provenance
-from yt2slp.search import (HorizontalSchedule, HorizontalSequence, bounded_search, run_schedule,
+from yt2slp.search import (HorizontalSchedule, HorizontalSequence, PadSequence, bounded_search, run_schedule,
                            schedule_document, schedule_from_dict)
 from yt2slp.timeline import (Cue, Sample, apply_manual_timer_labels, check_rendered_clock_timing,
                              load_timeline, score_timeline)
@@ -263,6 +263,92 @@ def test_legacy_grid_documents_round_trip_without_changing_axis_requests():
         assert schedule_document(schedule) == document
         for i in range(62):
             assert schedule.pads(i)[0].stick_x == (document["stick_x"] if i >= document["start_after"] else 0)
+
+
+def pad_program(start=1, release=3, button=0x400):
+    return {"pad_phases": [
+        {"start_after": start, "stick_x": 64, "stick_y": 40, "button": button},
+        {"start_after": release, "stick_x": -80, "stick_y": -20, "button": 0}]}
+
+
+@pytest.mark.parametrize("button", [0x400, 0x800])
+def test_button_hold_release_axes_and_port_states_are_complete_snapshots(button):
+    from yt2slp.match import NEUTRAL_PADS
+    document = pad_program(button=button)
+    schedule = schedule_from_dict(document)
+    assert isinstance(schedule, PadSequence)
+    pads = [schedule.pads(i) for i in range(5)]
+    assert [(p[0].button, p[0].stick_x, p[0].stick_y) for p in pads] == [
+        (0, 0, 0), (button, 64, 40), (button, 64, 40), (0, -80, -20), (0, -80, -20)]
+    assert all(p[1:] == NEUTRAL_PADS[1:] for p in pads)
+    assert schedule_document(schedule) == document
+    assert schedule_from_dict(json.loads(json.dumps(document))) == schedule
+
+
+@pytest.mark.parametrize("field,value", [
+    ("button", -1), ("button", 65536), ("button", True),
+    ("button", 0x1000), ("button", 0x1400), ("stick_x", 128),
+    ("stick_y", -129), ("stick_y", 1.5), ("start_after", -1), ("start_after", True),
+])
+def test_controller_program_rejects_invalid_samples_and_pause_before_search(field, value):
+    document = pad_program()
+    document["pad_phases"][0][field] = value
+    with pytest.raises(ValueError): schedule_from_dict(document)
+
+
+@pytest.mark.parametrize("fault", ["empty", "too_many", "missing", "unknown", "unordered", "duplicate", "unchanged"])
+def test_controller_program_requires_explicit_ordered_changes(fault):
+    document = pad_program()
+    phases = document["pad_phases"]
+    if fault == "empty": document["pad_phases"] = []
+    elif fault == "too_many": document["pad_phases"] *= 9
+    elif fault == "missing": del phases[0]["button"]
+    elif fault == "unknown": phases[0]["trigger_l"] = 100
+    elif fault == "unordered": phases.reverse()
+    elif fault == "duplicate": phases[1]["start_after"] = 1
+    elif fault == "unchanged": phases[1] = {**phases[0], "start_after": 3}
+    with pytest.raises(ValueError): schedule_from_dict(document)
+
+
+def test_button_branch_is_rerun_after_rejection_with_release_intact(tmp_path):
+    class SyntheticPadBackend(SyntheticBranchBackend):
+        """Log controller transport only; this does not simulate Melee jumping."""
+        def restore(self, handle):
+            super().restore(handle)
+            self.requests = []
+
+        def step(self, pads):
+            self.requests.append(pads)
+            p = pads[0]
+            self.current = state(self.current.match_frame + 1, x=float(p.stick_x),
+                                 facing=-1 if p.stick_x < 0 else 1, action=25 if p.button else 14)
+            return self.current
+
+    backend = SyntheticPadBackend()
+    chosen = schedule_from_dict(pad_program())
+    cues = (sample("action_group", ["airborne"], frames=(241,)), sample("facing", ["left"], frames=(243,)))
+    report = bounded_search(backend, cues, (chosen, HorizontalSchedule(0, 0)), 5, tmp_path / "trials")
+    assert report["passed"] and report["accepted_indices"] == [0]
+    assert report["kind"] == "bounded-controller-search" and report["selected_branch_rerun_matches"]
+    assert [p[0].button for p in backend.requests] == [0, 0x400, 0x400, 0, 0]
+    assert backend.current == state(244, x=-80, facing=-1, action=14)
+    assert report["selected_schedule"] == pad_program()
+
+
+def test_controller_release_outside_window_is_rejected_before_capture(tmp_path):
+    backend = SyntheticBranchBackend()
+    chosen = schedule_from_dict(pad_program(release=5))
+    with pytest.raises(ValueError, match="inside the search window"):
+        bounded_search(backend, (sample(),), (chosen,), 5, tmp_path / "trials")
+    assert backend.captures == 0
+
+
+def test_legacy_multiphase_grid_round_trips_without_button_fields():
+    spec = json.loads((Path(__file__).resolve().parents[1] / "configs/manual-phased-search.json").read_text())
+    for document in spec["candidates"]:
+        schedule = schedule_from_dict(document)
+        assert schedule_document(schedule) == document
+        assert all(schedule.pads(i)[0].button == 0 for i in range(62))
 
 
 def test_manual_timer_fill_retains_unknown_automatic_result_and_binds_source():
