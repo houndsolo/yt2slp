@@ -62,7 +62,9 @@ pooling produces 3072 features. A learned projection and bidirectional GRU with
 128 hidden units read 31 consecutive 60 Hz frames, including future context.
 The 917,364 trainable parameters predict the center frame for the two declared
 physical-port slots. Changing match configuration is outside this narrow smoke
-test; no automatic roster/player association exists.
+test; no automatic visual roster/player association exists. Frozen inference now
+maps the known unique Fox/Falco character slots to supplied physical ports;
+mirrors and doubles remain unsupported.
 
 Heads predict 12 physical button holds, presses and releases; 17-bin categorical
 effective values for four stick axes and the combined trigger; action ID; and
@@ -93,8 +95,8 @@ Local evidence: `.docker-state/local/learning-pilot-v1/` on the host.
 - 100 CPU optimizer updates, seed 1: training loss **10.51475 → 1.83518**.
 - Training F1: holds **0.374**, presses **0.048**, releases **0.043**. This is
   weak edge learning, not a solved training clip or generalization result.
-- Latest Docker validation passes **392 Python tests** and **seven optional model
-  tests**. The unchanged parser/preparation/export suite last passed 15 tests.
+- Latest Docker validation passes **403 Python tests** and **eight optional model
+  tests**. The parser/preparation/export/catalog suite passes 17 tests.
   Models/features, frames and labels stay ignored. Native code is unchanged;
   native suites were not rerun here.
 
@@ -108,8 +110,12 @@ not itself supply correctly aligned pre-clock training images.
 The signed-frame follow-up fills the negative interval and passes a bounded
 image/post phase audit. A 2,000-update run still fails fixed event-F1 thresholds;
 10,000 updates pass them with 1.0 hold/press/release F1 and state/axis-bin accuracy
-on the training windows. Both attempts are retained. Next: handle the reserved
-match's swapped physical ports explicitly and assess unseen-match behavior,
+on the training windows. Both attempts are retained. The [frozen reserved-match
+evaluation](../../docs/heldout-image-evaluation.md) now handles swapped physical
+ports and exposes failed generalization: hold/press/release F1 is 0.0187/0/0.
+The image-only training regression still scores perfectly. A source-footage plus
+controller-panel review MKV is retained on the V100. Next: build a separately
+split multi-match dataset from the [new catalog](../../docs/replay-corpus.md),
 then validate native VI/PAD adaptation and genuine replay generation. Loss
 decrease or memorization does not establish those outcomes.
 

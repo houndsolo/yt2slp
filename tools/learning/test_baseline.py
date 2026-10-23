@@ -6,6 +6,8 @@ import torch
 
 from baseline import AXES, BINS, BUTTONS, TemporalProposal, binary_metrics, proposal_loss, state_metrics, targets_for_frames
 from train_smoke import evaluate
+from predict import decode_batch
+from yt2slp.prediction_scoring import BUTTONS as SCORE_BUTTONS, AXES as SCORE_AXES
 
 
 def target_frame():
@@ -29,6 +31,18 @@ class BaselineTests(unittest.TestCase):
         self.assertEqual(target['buttons'][0, 0, :, names.index('b')].tolist(), [0, 0, 1])
         self.assertEqual(int(target['action'][0, 1]), 24)
         self.assertEqual(float(target['airborne'][0, 1]), 0)
+
+    def test_prediction_decoder_maps_semantic_slots_to_swapped_ports(self):
+        self.assertEqual(SCORE_BUTTONS, BUTTONS); self.assertEqual(SCORE_AXES, AXES)
+        output = TemporalProposal(feature_size=8, hidden=8)(torch.zeros(1,3,8))
+        output['buttons'] = torch.full_like(output['buttons'], -1)
+        output['buttons'][0,0,0,list(BUTTONS).index('x')] = 1
+        rows = decode_batch(output, [{'replay_frame':-20,'index':40}], [1,0], [2,20])
+        self.assertEqual([(r['port'],r['character']) for r in rows], [(1,2),(0,20)])
+        self.assertEqual(rows[0]['buttons']['hold'],1024)
+        self.assertEqual(rows[1]['buttons']['hold'],0)
+        output['airborne'][0,0] = float('nan')
+        with self.assertRaises(ValueError): decode_batch(output,[{'replay_frame':-20,'index':40}],[1,0],[2,20])
 
     def test_missing_control_values_remain_unsupervised(self):
         frame = target_frame()

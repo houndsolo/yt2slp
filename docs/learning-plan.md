@@ -98,9 +98,12 @@ Model predictions do not bypass unsupported-code or simulation-compatibility gat
    phase, including playable pre-clock frames. General timing and native VI/PAD
    adaptation remain separate work.
 2. Completed: overfit one short **training** clip with event-sensitive criteria.
-   Next: evaluate separate whole matches, handling the reserved match's swapped
-   Fox/Falco physical ports explicitly. Confirm that neutral-output dominance does not hide
-   missed jump, attack and fast-fall transitions.
+   Completed first frozen reserved-match evaluation with explicit swapped-port
+   mapping: useful recognition fails (hold F1 0.0187, press/release F1 zero).
+   The same inference code retains perfect training metrics. Next: expand to
+   multiple rendered matches from the [catalog](replay-corpus.md), with frozen
+   whole-match/date splits and indexed feature loading. Keep neutral baselines
+   alongside event metrics so missed transitions remain visible.
 3. Measure button/edge accuracy, stick error, action/ground-air predictions and
    event timing, including short/full hops and dash/short-hop/laser/fast-fall.
 4. Reconstruct held-out short windows using model proposals and simulator checks.

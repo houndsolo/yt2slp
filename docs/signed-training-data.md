@@ -6,6 +6,8 @@ After a bounded image/post phase audit, the paired dataset produces **211
 31-frame windows**, with center-frame targets at −45..165. A longer V100 run
 memorizes this training clip, including button edges. Held-out recognition,
 native input adaptation and learned replay generation are still unvalidated.
+The subsequent [reserved-match probe](heldout-image-evaluation.md) reproduces
+perfect training metrics but exposes poor recognition on the separate match.
 
 The source remains `recordings/examples/Game_20260622T203533.slp`, SHA-256
 `c13e36c0f079200b6f00e2b3bef22ffe1165cde23797325218509718d794b40f`.

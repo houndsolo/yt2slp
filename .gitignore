@@ -51,7 +51,7 @@ extracted/
 # Independent replay parser tooling
 node_modules/
 
-# Curated, user-supplied reference replays; generated recordings stay ignored.
+# Existing curated fixtures remain tracked. New/bulk replay imports stay local;
+# adding another curated fixture requires an explicit git add -f.
 !/recordings/examples/
-!/recordings/examples/*.slp
 !/recordings/examples/README.md

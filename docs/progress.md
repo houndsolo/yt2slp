@@ -44,8 +44,14 @@ a CPU smoke test on 180 provisional training images. The signed-frame follow-up
 now verifies 241 images at −60..180 and a bounded image/post phase convention.
 After 10,000 V100 updates, its 211 windows pass fixed training-clip memorization
 criteria: 1.0 button hold/press/release F1 and state/axis-bin accuracy. The shorter
-2,000-update failure is retained. Held-out evaluation and the native VI input
-adapter remain open. Useful unseen-clip gameplay recognition,
+2,000-update failure is retained. A frozen reserved-match evaluation now exposes
+memorization: hold F1 is 0.0187, press/release F1 are zero, and main-stick bin
+accuracy is below an always-neutral baseline. Explicit character-to-port mapping
+handles the swapped ports; the same inference code reproduces perfect training
+metrics. The V100 collection has 2,224 settings-eligible singles, including 58
+Fox/Falco Battlefield candidates; doubles are skipped. Next is a diverse,
+separately split rendered dataset and multi-match training. The native VI input
+adapter remains open. Useful unseen-clip gameplay recognition,
 unknown-start recovery and general video-to-replay reconstruction remain unimplemented.
 
 Checked items below are implemented and validated within their stated scope.
@@ -79,25 +85,34 @@ The next work is deliberately narrow:
    Manual grids tested the plumbing;
    they cannot scale to compound sequences such as dash, short hop, laser and
    fast-fall. Do not require a perfect manually fitted opening before learning.
-4. Next: evaluate a frozen model on another whole match. The reserved Fox/Falco
-   example swaps physical ports, so explicitly handle character/port association.
-   Falco's opening is now inside the signed −60..180 MP4. Whole-match/capture-date
-   splits remain frozen. Training replays supply controller/state labels intentionally;
-   held-out reconstruction inputs/state remain sealed during selection.
-5. Measure the effective replay-control → native VI/PAD adapter, then integrate
+4. Completed first reserved-match probe: freeze checkpoint/preprocessing/threshold,
+   map Fox/Falco by supplied character IDs to swapped physical ports, save image-only
+   predictions, then export scoring labels. The model memorizes the training clip
+   and fails on the reserved clip. Its controller review MKV is on the V100;
+   [results and commands](heldout-image-evaluation.md) distinguish this from
+   generated gameplay. The phase convention is transferred from training, without
+   independently reviewed target phase boundaries or a fitted validation offset.
+5. Next: build a bounded multi-match Fox/Falco Battlefield dataset from the
+   [new replay catalog](replay-corpus.md). Freeze whole-match/date train/validation/test
+   groups before labels/windows; keep this examined validation match out of unseen
+   test claims. Render/audit short samples, use indexed/chunked feature loading,
+   train across matches, and measure event metrics plus neutral baselines.
+6. Measure the effective replay-control → native VI/PAD adapter, then integrate
    learned proposals with native verification and timing refinement. Audit source-code compatibility in parallel. Extend coverage and
    later handle YouTube appearance differences using measured held-out results.
 
 The [learning plan](learning-plan.md) and [executable pilot](../tools/learning/README.md)
 define this milestone. The [signed training report](signed-training-data.md)
 records the bounded timing audit, retained failures and successful training-clip
-overfit. Useful held-out recognition and learned reconstruction remain unvalidated. The user
+overfit. The [reserved-match report](heldout-image-evaluation.md) records poor
+generalization without retraining on the scoring labels. Useful held-out
+recognition and learned reconstruction remain unvalidated. The user
 has now supplied SSH access to the V100: an isolated Docker/CUDA 12.6 environment
 passes real GPU kernels/backpropagation and a 100-update training smoke test,
-with about 707 GiB free disk. Existing LLM containers were stopped and restart
+with about 676 GiB free disk after the replay import. Existing LLM containers were stopped and restart
 policies disabled at the user's request. [Remote training](remote-training.md)
 records setup, measured results and commands. No additional DDR4 is needed for
-the exercised pilot; held-out evaluation and native input adaptation are next.
+the exercised pilot; multi-match data/training and native input adaptation are next.
 
 Spawn policy is a required starting condition. Slippi has custom neutral-start
 codes that place the two fighters on opposite sides; ordinary SSBM uses distinct
@@ -123,7 +138,7 @@ values recovered from the MP4.
 | 3 | Verify the standardized starting recipe | Initial-layout gate passes: explicit stage points 2/3 match seven fields at -123/-40. Opt-in API 21 Game Start seeding now records the correct 33480, with no later reset; exported setup summary matches. Remaining: full source code configuration, UCF and subsequent hidden-state/RNG equality. |
 | 4 | Reconstruct a short video-only segment | First attempt complete: 64 declared programs, two cue-compatible; both parsed/rendered. Six fixed source regions select index 48. Source controls/later state are excluded from selection. Grid still misses the observed platform descent. |
 | 5 | Validate the selected reconstruction | Fresh genuine bytes/parser/own official fields/timer alignment and 17-frame comparison pass. Post-selection source-state comparison fails; RMSE 54.02, visual acceptance false. Retain the missing automatic clock label and one literal manual reading. |
-| 6 | Start the learned reconstruction baseline | Signed pre-clock dataset and bounded image/post phase audit pass; a longer V100 run memorizes the training clip with 1.0 event F1. Remaining: whole-match evaluation, explicit swapped-port handling, native VI/PAD adaptation and simulator integration. Source-code compatibility remains parallel. |
+| 6 | Start the learned reconstruction baseline | Signed data/phase and training memorization pass; frozen reserved-match evaluation with swapped ports now fails useful recognition. Remaining: multi-match rendering/training, native VI/PAD adaptation and simulator integration. Source-code compatibility remains parallel. |
 
 The current seed/time-base choices are simulation hypotheses, not recovered
 source values. General starting-state/RNG recovery, camera/world-coordinate
@@ -326,8 +341,18 @@ to postpone measuring a narrower supported case.
 - [x] Overfit the audited training segment under fixed event-sensitive criteria.
   Keep the 2,000-update failure; 10,000 updates achieve 1.0 button-event F1 and
   state/axis-bin accuracy across 211 windows. This is training memorization only.
-- [ ] Evaluate separate whole matches with explicit roster/physical-port handling,
-  then validate the native VI/PAD adapter and integrate proposals with simulation.
+- [x] Evaluate the frozen model on a reserved whole match with explicit swapped-port
+  handling. Image-only inference is separate from subsequent label scoring; the
+  training regression still scores perfectly. Reserved hold/press/release F1 is
+  0.0187/0/0. This establishes a failed generalization probe, not useful recognition.
+- [x] Catalog the V100 replay import without moving/deleting files or exposing
+  controller/account fields. Find 2,224 settings-eligible singles and 58 narrow
+  Fox/Falco Battlefield candidates; skip multiplayer, CPU/followers and an oversized
+  file. Preserve the original 28 tracked fixtures; ignore new bulk imports.
+- [ ] Freeze a larger whole-match/date split, render/audit a bounded sample and
+  train across matches with indexed/chunked feature access. Evaluate on separate
+  matches, retain failures and compare event/axis metrics with neutral baselines.
+- [ ] Validate the native VI/PAD adapter and integrate useful proposals with simulation.
 - [x] Decode a short local progressive clip with original PTS/time base, dimensions,
   hashes and exact timestamps; retain variable spacing and identical adjacent PNGs.
   Reject missing/substituted PTS, rotation, interlacing and changing dimensions.
@@ -501,15 +526,19 @@ features or prerequisites for the first short-clip reconstruction.
 
 ## Latest validation and retained evidence
 
-The latest Docker Python run passed **348 tests**. The current native build passed
-**10 host/component and 23 game-library tests**; the unchanged independent parser's
-combined parser/preparation run passed **12 tests** (nine parser and three
-supplied-replay preparation checks). Synthetic protocol/component tests
+The latest Docker run passed **403 Python tests**, **eight optional model tests**
+and **17 parser/preparation/export/catalog tests**. Native code/math is unchanged
+in this learning milestone; native suites were not rerun. The last recorded native
+build passed **10 host/component and 23 game-library tests**. Synthetic protocol/component tests
 establish their tested behavior; the following local ISO runs provide separate
 gameplay, recording and playback evidence.
 
 | Evidence | Result / retained location |
 | --- | --- |
+| Signed training overfit | 241 images, 211 windows; 10,000-update checkpoint and new frozen-inference regression both have 1.0 event F1/state/axis-bin accuracy; `.docker-state/local/learning-timing-v1/` and V100 `learning-heldout-v1/training-regression-score.json` |
+| Reserved-match prediction | Same frozen model, swapped ports, 422 player-frame predictions; hold F1 0.0187, press/release F1 zero; `.docker-state/local/learning-heldout-v1/score.json` on the V100 |
+| Controller prediction review | V100 `.docker-state/local/learning-heldout-v1/review/prediction-review.mkv`; 241 source-footage frames plus recorded/model controls, no generated gameplay |
+| Imported replay catalog | 3,326 files; 2,224 settings-eligible singles, 1,030 four-player and 21 one-player files skipped; `.docker-state/local/replay-catalog-v2/` on the V100; rendering/training readiness remains false |
 | Batch and stepping | User-reported matching 3000-retrace runs; 600-step check advanced match frames 1..601 with stable pauses and input effects |
 | Checkpoint experiment | Capture 241, four continuations to 421, three successful restores; `.docker-state/local/runs/step-2o7rj74b/` |
 | First real opening | 24/72 sparse-cue-compatible programs after explicit platform setup; coarse selected recording/fresh/parser pass, nine own official fields exact across 116 player-frames (-39..18); `.docker-state/local/runs/step-ozreb1l0/official-analysis/result.json` |

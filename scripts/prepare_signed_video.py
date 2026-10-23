@@ -1,7 +1,9 @@
-"""Make supervised training video from an audited official signed-frame capture.
+"""Prepare official signed-frame video for training or frozen-model evaluation.
 
-This intentionally reads training replay controls/posts. Held-out inference must
-never receive the label exports or phase annotations.
+Training phase audits intentionally read controller/state labels; reference mode
+transfers the training convention without exporting target controls. Both modes
+compare original/official post state to validate capture. Inference receives none
+of these labels or phase annotations.
 """
 import argparse
 from fractions import Fraction
@@ -13,7 +15,7 @@ import tempfile
 from yt2slp.benchmark import compare_posts
 from yt2slp.frame_index import GEOMETRY, assess_step, cyan_cells, decode_index
 from yt2slp.timer_labels import label_images, png_size
-from yt2slp.training_phase import audit_phase
+from yt2slp.training_phase import audit_phase, frozen_phase_reference
 from yt2slp.video import ingest_video, sha256
 
 
@@ -82,8 +84,12 @@ def audit_capture(folder, replay, timer_calibration):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    for name in ('replay', 'capture', 'timer-calibration', 'phase-observations', 'output'):
+    for name in ('replay', 'capture', 'timer-calibration', 'output'):
         parser.add_argument('--'+name, type=Path, required=True)
+    phase_options = parser.add_mutually_exclusive_group(required=True)
+    phase_options.add_argument('--phase-observations', type=Path)
+    phase_options.add_argument('--phase-reference', type=Path,
+        help='apply a frozen training phase convention; does not export validation controls for phase fitting')
     args = parser.parse_args()
     out = args.output.resolve(); out.mkdir(parents=True, exist_ok=False)
     try:
@@ -92,11 +98,18 @@ def main():
         if not audit['passed']:
             raise ValueError('independent positive HUD or original/official state check failed; see retained frame-labels.json')
         first, last = capture['wanted_interval']
-        labels = node('export-training.cjs', args.replay, first-2, last+2)
-        observations = json.loads(args.phase_observations.read_text())
-        if observations.get('capture_index_sha256') != sha256(args.capture/'capture-index.json'):
-            raise ValueError('manual phase observations belong to another capture')
-        phase = audit_phase(observations, labels, index)
+        setup = node('inspect-settings.cjs', args.replay)['replays'][0]
+        if args.phase_observations:
+            labels = node('export-training.cjs', args.replay, first-2, last+2)
+            observations = json.loads(args.phase_observations.read_text())
+            if observations.get('capture_index_sha256') != sha256(args.capture/'capture-index.json'):
+                raise ValueError('manual phase observations belong to another capture')
+            phase = audit_phase(observations, labels, index)
+            phase_inputs = [args.phase_observations]
+        else:
+            phase = frozen_phase_reference(args.phase_reference, setup, sha256(args.replay))
+            phase_inputs = [args.phase_reference, args.phase_reference.parent/'phase-audit.json',
+                            args.phase_reference.parent/'frame-labels.json']
         (out/'phase-audit.json').write_text(json.dumps(phase, indent=2)+'\n')
         if not phase['passed']: raise ValueError('predeclared zero image/post phase is unverified or ambiguous')
         mapping = [{**row, 'video_frame': i, 'literal_timer': timers[str(row['replay_frame'])] if row['replay_frame'] >= 0 else None}
@@ -113,17 +126,18 @@ def main():
         if (len(video['frames']) != len(mapping) or [video['width'], video['height']] != [642, 528]
                 or any(Fraction(row['relative_seconds']) != Fraction(i, 60) for i, row in enumerate(video['frames']))):
             raise ValueError('encoding/decoding changed declared frame count, geometry or PTS')
-        setup = node('inspect-settings.cjs', args.replay)['replays'][0]
         report = {'schema': 1, 'kind': 'supervised-replay-source-video', 'passed': True,
             'source_replay_sha256': sha256(args.replay), 'video_sha256': video['source_sha256'],
             'interval': [first, last], 'supplied_setup': setup,
             'frame_label_method': 'stepped signed OSD with independent positive HUD crosscheck',
-            'original_controls_and_state_used_for_training_audit': True,
+            'original_controls_exported_for_phase_audit': args.phase_observations is not None,
+            'original_post_state_used_for_playback_audit': True,
+            'phase_method': phase['kind'],
             'native_setup_parity_validated': False,
-            'policy': 'supervised training preparation; clean frames only, UI frame IDs never enter model inputs; native VI adapter remains separate',
+            'policy': 'audited source preparation; phase method explicitly recorded; clean frames only, UI frame IDs never enter network features; native VI adapter remains separate',
             'identities': {str(p): sha256(p) for p in (Path(__file__), args.replay,
                 args.capture/'capture.json', args.capture/'capture-index.json', args.capture/'osd-calibration.json',
-                args.timer_calibration, args.phase_observations, out/'frame-labels.json', out/'phase-audit.json',
+                args.timer_calibration, *phase_inputs, out/'frame-labels.json', out/'phase-audit.json',
                 out/'capture-index.json', out/'ingested/video.json', Path('src/yt2slp/frame_index.py'),
                 Path('src/yt2slp/training_phase.py'))}}
         (out/'source-provenance.json').write_text(json.dumps(report, indent=2)+'\n')
