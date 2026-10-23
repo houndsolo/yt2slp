@@ -100,10 +100,12 @@ Model predictions do not bypass unsupported-code or simulation-compatibility gat
 2. Completed: overfit one short **training** clip with event-sensitive criteria.
    Completed first frozen reserved-match evaluation with explicit swapped-port
    mapping: useful recognition fails (hold F1 0.0187, press/release F1 zero).
-   The same inference code retains perfect training metrics. Next: expand to
-   multiple rendered matches from the [catalog](replay-corpus.md), with frozen
-   whole-match/date splits and indexed feature loading. Keep neutral baselines
-   alongside event metrics so missed transitions remain visible.
+   The same inference code retains perfect training metrics. The expanded
+   six-train/two-validation starter set and [server-local training controls](training-control.md)
+   are now ready, with frozen whole-match/date splits and indexed feature loading.
+   Next: measure useful multi-match learning and expand the data according to
+   failures. Keep neutral baselines alongside event metrics so missed transitions
+   remain visible, and preserve the separate unseen test groups.
 3. Measure button/edge accuracy, stick error, action/ground-air predictions and
    event timing, including short/full hops and dash/short-hop/laser/fast-fall.
 4. Reconstruct held-out short windows using model proposals and simulator checks.

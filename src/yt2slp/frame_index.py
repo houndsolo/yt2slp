@@ -4,9 +4,27 @@ This reads the emulator UI, not game sprites or the frozen Ready HUD timer.
 Templates are calibrated from retained screenshots and stay outside Git.
 """
 import re
+import hashlib
 
 GEOMETRY = {'left': 20, 'top': 20, 'cell_width': 9, 'height': 15, 'cells': 18}
 ALPHABET = set('Frame: -0123456789')
+
+
+def complete_png_digest(path):
+    """A dump filename can appear before libpng finishes writing its contents."""
+    data = path.read_bytes()
+    if not data.startswith(b'\x89PNG\r\n\x1a\n') or not data.endswith(b'\0\0\0\0IEND\xaeB`\x82'):
+        return None
+    return hashlib.sha256(data).hexdigest()
+
+
+def verify_log_policy(row: dict, capture: dict) -> None:
+    policy = capture.get('paused_log_association','fixed')
+    offset = row['paused_log_minus_osd']
+    if policy not in ('fixed','per-step') or offset not in (0,1):
+        raise ValueError('unsupported paused console/display association')
+    if policy=='fixed' and offset!=capture['paused_log_minus_osd']:
+        raise ValueError('paused log/display association drifted')
 
 
 def cyan_cells(rgb: bytes, width: int, height: int, *, cropped: bool = False) -> list[str]:

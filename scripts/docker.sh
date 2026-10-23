@@ -3,7 +3,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 root="$PWD"
-image="yt2slp-dev:gcc14"
+image="${YT2SLP_DOCKER_IMAGE:-yt2slp-dev:gcc14}"
 action="${1:-shell}"
 if [ "$#" -gt 0 ]; then shift; fi
 case "$action" in
@@ -22,7 +22,7 @@ case "$action" in
   *) echo "usage: bash scripts/docker.sh {build|setup|shell|run COMMAND...}" >&2; exit 2 ;;
 esac
 mkdir -p .docker-state/{venv,build,cache,local}
-args=(run --rm --init --user "$(id -u):$(id -g)"
+args=(run --rm --init --shm-size=512m --user "$(id -u):$(id -g)"
   --mount "type=bind,src=$root,dst=/work"
   --mount "type=bind,src=$root/.docker-state/venv,dst=/work/.venv"
   --mount "type=bind,src=$root/.docker-state/build,dst=/work/build"

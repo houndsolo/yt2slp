@@ -23,10 +23,32 @@ edited. No interactive action or extra system RAM is needed for this pilot.
 
 The host's Python 3.14, driver and Docker daemon were not replaced. The image
 build installs its own tools; ML packages live in a separate ignored virtual
-environment. Game rendering/ISO work remains on the Arch workstation for now;
-the remote checkout has not built the asset-backed native engine or validated
-official Playback. The existing prepared pilot images/labels and public encoder
-weights were copied over SSH; no ISO or credentials were transferred.
+environment. During the original pilot setup, rendering remained on the Arch
+workstation; only prepared images/labels and public encoder weights were copied.
+The self-service follow-up now installs official Playback and server-local
+rendering as described below. Credentials were not transferred.
+
+## Self-service training follow-up
+
+Use **`~/train-melee` on the V100**, or
+`bash /home/prompter/yt2slp/scripts/train-v100.sh`. The menu and direct
+start/pause/resume/stop/status commands are documented in
+[training-control.md](training-control.md). Workers run in detached Docker
+containers with networking disabled. The workstation and Codex are not runtime
+dependencies. Model, optimizer and sampler/random state are checkpointed.
+
+The user-provided ISO is **`recordings/vanilla.iso`** on the V100. The installed
+official Playback 3.5.2 files are under
+`.docker-state/local/playback/squashfs-root/`. The additional
+`yt2slp-render:gcc14` image supplies Xvfb, Mesa software rendering, X11 capture
+and runtime libraries; it mounts the game/executable locally rather than baking
+assets into the image. Its 512 MiB shared-memory limit avoids the fault caused
+by Docker's default 64 MiB. The native engine is not rebuilt for model training.
+
+The [larger frozen split](../configs/learning-corpus-split-v1.json) preserves the
+pilot date reservations and reserves ten new test matches. Only the selected
+six training and two development-validation clips enter preparation. See the
+control guide for local data/checkpoint paths, recovery behavior and expansion.
 
 The CUDA package lock is
 [`tools/learning/requirements-cu126.lock`](../tools/learning/requirements-cu126.lock).

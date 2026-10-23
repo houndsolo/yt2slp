@@ -46,9 +46,16 @@ bash scripts/docker.sh run node tools/slippi-parser/catalog-replays.cjs \
   recordings/examples .local/NEW-catalog configs/learning-pilot-split-v1.json
 ```
 
-Next steps before larger training:
+The [expanded frozen split](../configs/learning-corpus-split-v1.json) now assigns
+34 training, 14 validation and ten test candidates while preserving the pilot's
+date reservations. A completed six-train/two-validation starter selection has
+4,448 images and 4,208 temporal windows. Server-local preparation and resumable
+training controls are installed; see [training-control.md](training-control.md).
+Test matches remain unrendered/unlabelled. Useful recognition remains unestablished.
 
-1. Freeze train/validation/test membership by replay hash and whole date groups.
+Data expansion workflow:
+
+1. Retain frozen train/validation/test membership by replay hash and whole date groups.
    Retain June 22 as training and June 23 as examined validation; reserve new
    dates for unseen testing before reading their control labels.
 2. Render short compatible samples with official Playback and audit frame mapping,
@@ -56,8 +63,8 @@ Next steps before larger training:
    every settings-eligible replay plays or aligns correctly.
 3. Export supervised labels only into the appropriate training/evaluation side,
    use bounded decoded windows/cached features, and load windows by index.
-   The pilot eagerly stacks all overlapping windows and should not scale to the
-   whole collection unchanged on 32 GB system RAM.
+   The new runner memory maps feature shards and materializes minibatches. The
+   original smoke script's eager window stack remains confined to that small pilot.
 4. Train across multiple matches, then evaluate frozen predictions on separate
    matches with event-sensitive metrics and neutral baselines. Preserve an unseen
    test group while iterating on development validation.

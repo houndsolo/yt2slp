@@ -14,10 +14,10 @@ import signal
 import subprocess
 import time
 
-from PIL import Image
+from PIL import Image, ImageGrab, features
 
 from capture_benchmark import sha256
-from yt2slp.frame_index import assess_step, cyan_cells, decode_index
+from yt2slp.frame_index import assess_step, cyan_cells, decode_index, complete_png_digest
 
 
 def current_frame(log):
@@ -38,11 +38,26 @@ def press(key):
     subprocess.run(['xdotool', 'keyup', key], check=True)
 
 
-def screenshot(path):
-    subprocess.run(['import', '-window', 'root', str(path)], check=True, timeout=10)
+def screenshot(path, full=False):
+    # Preserve original screen coordinates but encode only the UI corner needed
+    # for exact glyph verification. Full-screen PNG compression dominated remote
+    # stepping; clean game dumps retain the whole gameplay image separately.
+    if features.check_feature('xcb'):
+        ImageGrab.grab(bbox=None if full else (0,0,182,35),xdisplay=os.environ.get('DISPLAY')).convert('RGB').save(path)
+    else:
+        crop = [] if full else ['-crop','182x35+0+0','+repage']
+        subprocess.run(['import', '-window', 'root', *crop, str(path)], check=True, timeout=10)
     with Image.open(path) as image:
         image = image.convert('RGB')
         return cyan_cells(image.tobytes(), *image.size)
+
+
+def wait_png(path,deadline):
+    while time.monotonic()<deadline:
+        value = complete_png_digest(path)
+        if value is not None: return value
+        time.sleep(.01)
+    raise TimeoutError('frame dump did not finish writing its PNG IEND chunk')
 
 
 def capture(args):
@@ -93,6 +108,10 @@ def capture(args):
         'playback_version': '3.5.2', 'version_command_exit_code': version.returncode,
         'source_commit': 'bffe989d0bd3b83a4be3eaee708cf2755659e01e',
         'source_replay_sha256': sha256(replay), 'wanted_interval': [args.first, args.last],
+        'ui_screenshot_region': 'full calibration screen' if args.collect_calibration else [0,0,182,35],
+        'ui_screenshot_backend': 'Pillow XCB' if features.check_feature('xcb') else 'ImageMagick',
+        'paused_log_association': 'per-step' if args.per_step_log_association else 'fixed',
+        'png_completion_guard': 'IEND-before-hash-v1',
         'request_interval': [-123, args.last+3], 'should_resync': False, 'command': command,
         'identities': identities,
         'image_post_phase_verified': False, 'positive_timer_crosscheck': None,
@@ -109,7 +128,7 @@ def capture(args):
                 frame = current_frame(log_path)
                 if frame is not None and frame >= -110:
                     press('F10'); break
-                if proc.poll() is not None: raise RuntimeError('Playback exited during startup')
+                if proc.poll() is not None: raise RuntimeError(f'Playback exited during startup ({proc.returncode}); see stdout.log')
                 time.sleep(.01)
             else:
                 raise TimeoutError('startup exceeded capture budget')
@@ -120,7 +139,7 @@ def capture(args):
             time.sleep(.08)
             if current_frame(log_path) != before_log: raise ValueError('Playback did not remain paused')
             previous_screen = screens/'000000.png'
-            cells = screenshot(previous_screen)
+            cells = screenshot(previous_screen, full=args.collect_calibration)
             if args.collect_calibration:
                 # Console values are retained as separate metadata, never used
                 # as literal UI labels. A visual annotation supplies those later.
@@ -129,7 +148,7 @@ def capture(args):
                 for i in range(12):
                     press('period'); time.sleep(.12)
                     screen = screens/f'{i+1:06d}.png'
-                    screenshot(screen)
+                    screenshot(screen, full=True)
                     anchors.append({'image': str(screen.relative_to(out)), 'console_frame': current_frame(log_path),
                         'sha256': sha256(screen)})
                 (out/'calibration-candidates.json').write_text(json.dumps({'schema': 1,
@@ -151,7 +170,7 @@ def capture(args):
                 while time.monotonic() < wait_end:
                     after = current_frame(log_path); files = dump_files(dumps)
                     if after is not None and len(files) > len(old): break
-                    if proc.poll() is not None: raise RuntimeError('Playback exited during frame step')
+                    if proc.poll() is not None: raise RuntimeError(f'Playback exited during frame step ({proc.returncode}); see stdout.log')
                     time.sleep(.01)
                 time.sleep(.035)
                 after = current_frame(log_path); files = dump_files(dumps)
@@ -168,13 +187,13 @@ def capture(args):
                 row.update(index_screen=str(previous_screen.relative_to(out)),
                     index_screen_sha256=sha256(previous_screen),
                     next_index_screen=str(screen.relative_to(out)), next_index_screen_sha256=sha256(screen),
-                    capture_image_sha256=sha256(dumps/row['capture_image']), paused_log_minus_osd=log_offset)
+                    capture_image_sha256=wait_png(dumps/row['capture_image'],min(deadline,time.monotonic()+5)), paused_log_minus_osd=log_offset)
                 steps.append(row)
                 if before >= args.first:
                     if selected_log_offset is None:
                         selected_log_offset = log_offset
                         result['paused_log_minus_osd'] = log_offset
-                    if log_offset != selected_log_offset:
+                    if log_offset != selected_log_offset and not args.per_step_log_association:
                         raise ValueError('paused console/display association drifted inside wanted interval')
                     selected.append(row)
                     if len(selected) % 20 == 0: print(f'verified signed frame {before}', flush=True)
@@ -184,6 +203,7 @@ def capture(args):
             paths = re.findall(r'^\[FILE_PATH\] (.+)$', log_path.read_text(errors='replace'), re.M)
             if not paths or any(path != str(replay) for path in paths): raise ValueError('Playback replay identity changed')
             result['capture_passed'] = True
+            result['observed_paused_log_offsets'] = sorted({r['paused_log_minus_osd'] for r in selected})
         except Exception as error:
             result['error'] = str(error)
             raise
@@ -193,6 +213,7 @@ def capture(args):
                 try: proc.wait(timeout=5)
                 except subprocess.TimeoutExpired: os.killpg(proc.pid, signal.SIGKILL); proc.wait()
             result['regenerated_replays'] = [str(p.relative_to(out)) for p in sorted((out/'regenerated').glob('*.slp'))]
+            result['process_exit_code'] = proc.returncode
             (out/'steps.json').write_text(json.dumps(steps, indent=2)+'\n')
             (out/'capture-index.json').write_text(json.dumps(selected, indent=2)+'\n')
             (out/'capture.json').write_text(json.dumps(result, indent=2)+'\n')
@@ -204,6 +225,8 @@ def main():
     for name in ('dolphin', 'iso', 'replay', 'output'): parser.add_argument('--'+name, type=Path, required=True)
     parser.add_argument('--osd-calibration', type=Path)
     parser.add_argument('--collect-calibration', action='store_true', help='retain UI screenshots for literal visual annotation; does not label gameplay')
+    parser.add_argument('--per-step-log-association', action='store_true',
+        help='permit independently checked 0/1 console lead per step; exact UI+single-PNG progression remains required')
     parser.add_argument('--first', type=int, default=-60)
     parser.add_argument('--last', type=int, default=180)
     parser.add_argument('--timeout', type=float, default=300)

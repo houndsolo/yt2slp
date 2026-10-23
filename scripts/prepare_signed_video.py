@@ -13,7 +13,7 @@ import subprocess
 import tempfile
 
 from yt2slp.benchmark import compare_posts
-from yt2slp.frame_index import GEOMETRY, assess_step, cyan_cells, decode_index
+from yt2slp.frame_index import GEOMETRY, assess_step, cyan_cells, decode_index, verify_log_policy
 from yt2slp.timer_labels import label_images, png_size
 from yt2slp.training_phase import audit_phase, frozen_phase_reference
 from yt2slp.video import ingest_video, sha256
@@ -62,8 +62,7 @@ def audit_capture(folder, replay, timer_calibration):
                 or rendered[row['next_index_screen']] != frame+1
                 or row.get('dump_pipeline_delay_swaps') != 1):
             raise ValueError('clean PNG / retained OSD screenshot identity or index differs')
-        if row.get('paused_log_minus_osd') != capture.get('paused_log_minus_osd'):
-            raise ValueError('paused log/display association drifted')
+        verify_log_policy(row,capture)
         assess_step(frame, row['next_frame_osd'], row['next_frame_log'], [row['capture_image']],
                     paused_log_minus_osd=row['paused_log_minus_osd'])
     timers = node('export-timers.cjs', replay, last)
@@ -78,6 +77,7 @@ def audit_capture(folder, replay, timer_calibration):
         'signed_interval': [first, last], 'hud_osd_disagreement_frames': disagreements,
         'osd_verified_frames': len(index), 'positive_hud_crosschecked_frames': last,
         'dump_pipeline_delay_swaps': 1, 'positive_timer_labels': timer_labels,
+        'paused_log_association': capture.get('paused_log_association','fixed'),
         'source_original_vs_official': state,
         'policy': 'exact rendered OSD per paused frame plus fixed source-audited PBO delay; independent positive HUD crosscheck; no fitted frame offset'}
 

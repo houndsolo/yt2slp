@@ -1,0 +1,11 @@
+# Official Playback and the user's ISO are mounted locally, never baked in.
+FROM yt2slp-dev:gcc14
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    xvfb xauth xdotool imagemagick fonts-dejavu-core \
+    libgtk-3-0t64 libasound2t64 libopengl0 libgl1-mesa-dri libglx-mesa0 \
+    libsm6 libusb-1.0-0 libbluetooth3 libsystemd0 libgpg-error0 \
+    librsvg2-common shared-mime-info adwaita-icon-theme gdb \
+    && rm -rf /var/lib/apt/lists/*
+ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu \
+    LIBGL_ALWAYS_SOFTWARE=1 GDK_BACKEND=x11

@@ -49,8 +49,13 @@ memorization: hold F1 is 0.0187, press/release F1 are zero, and main-stick bin
 accuracy is below an always-neutral baseline. Explicit character-to-port mapping
 handles the swapped ports; the same inference code reproduces perfect training
 metrics. The V100 collection has 2,224 settings-eligible singles, including 58
-Fox/Falco Battlefield candidates; doubles are skipped. Next is a diverse,
-separately split rendered dataset and multi-match training. The native VI input
+Fox/Falco Battlefield candidates; doubles are skipped. A server-local runner now
+implements detached preparation/training, pause/stop checkpoints and resume with
+optimizer/random state. The six-train/two-validation starter dataset is ready:
+4,448 images, 3,366 training windows and 842 validation windows. Actual detached
+CUDA start/disconnect/pause/resume/stop tests pass; the handed-over run is paused
+at step 7,691. See
+[self-service controls](training-control.md). The native VI input
 adapter remains open. Useful unseen-clip gameplay recognition,
 unknown-start recovery and general video-to-replay reconstruction remain unimplemented.
 
@@ -92,11 +97,20 @@ The next work is deliberately narrow:
    [results and commands](heldout-image-evaluation.md) distinguish this from
    generated gameplay. The phase convention is transferred from training, without
    independently reviewed target phase boundaries or a fitted validation offset.
-5. Next: build a bounded multi-match Fox/Falco Battlefield dataset from the
+5. Completed starter setup: build a bounded multi-match Fox/Falco Battlefield dataset from the
    [new replay catalog](replay-corpus.md). Freeze whole-match/date train/validation/test
    groups before labels/windows; keep this examined validation match out of unseen
    test claims. Render/audit short samples, use indexed/chunked feature loading,
    train across matches, and measure event metrics plus neutral baselines.
+   A frozen 58-match/date plan now has 34 training, 14 validation and ten test
+   candidates. Detached server-local preparation selects six training and two
+   development-validation clips; test sources remain unrendered/unlabelled.
+   The manual start/pause/resume/stop runner uses durable checkpoints, lazy
+   feature windows and a best-validation model pointer. Actual CUDA lifecycle
+   checks pass; `~/train-melee` controls the paused run without Codex or the
+   workstation. Next: train/evaluate this expanded pilot, inspect event failures,
+   expand data deliberately and keep test matches sealed until a model/protocol
+   is frozen. A longer optimizer run alone does not establish useful recognition.
 6. Measure the effective replay-control → native VI/PAD adapter, then integrate
    learned proposals with native verification and timing refinement. Audit source-code compatibility in parallel. Extend coverage and
    later handle YouTube appearance differences using measured held-out results.
@@ -349,9 +363,25 @@ to postpone measuring a narrower supported case.
   controller/account fields. Find 2,224 settings-eligible singles and 58 narrow
   Fox/Falco Battlefield candidates; skip multiplayer, CPU/followers and an oversized
   file. Preserve the original 28 tracked fixtures; ignore new bulk imports.
-- [ ] Freeze a larger whole-match/date split, render/audit a bounded sample and
-  train across matches with indexed/chunked feature access. Evaluate on separate
-  matches, retain failures and compare event/axis metrics with neutral baselines.
+- [x] Freeze a larger whole-match/date split and prepare a bounded multi-match
+  dataset with indexed feature access. Eight clips supply 4,448 images, 3,960
+  positive HUD anchors and 8,896 exactly matching original/official player-frames
+  over nine selected fields. New image/post phase is explicitly transferred;
+  independent boundary review and full-state equality remain unestablished.
+- [ ] Establish useful multi-match recognition through measured training and
+  separate validation; expand according to failures and reserve unseen testing.
+- [x] Implement server-local detached training controls, atomic checkpoint
+  generations, optimizer/sampler/random-state resume and bounded feature loading.
+  Exact CPU resumed/uninterrupted equality, save-failure recovery and split/content
+  guards pass. The V100 has official Playback, ISO, dependencies and calibrations
+  locally; workers run without networking or an attached SSH connection.
+- [x] Validate actual CUDA start/disconnect/pause/resume/stop. Pause saves at
+  3,255; resumed stop saves at 4,657; another resume/pause saves at 7,691.
+  The final container exits cleanly and frees its GPU memory. Networking is
+  disabled. `~/train-melee` operates the saved run independently of the workstation/
+  Codex; [commands and recovery](training-control.md). The final displayed
+  validation hold/press/release F1 is 0.1175/0.0513/0.0400; no useful-recognition
+  acceptance or learned replay is claimed.
 - [ ] Validate the native VI/PAD adapter and integrate useful proposals with simulation.
 - [x] Decode a short local progressive clip with original PTS/time base, dimensions,
   hashes and exact timestamps; retain variable spacing and identical adjacent PNGs.
@@ -526,7 +556,7 @@ features or prerequisites for the first short-clip reconstruction.
 
 ## Latest validation and retained evidence
 
-The latest Docker run passed **403 Python tests**, **eight optional model tests**
+The latest Docker run passed **412 Python tests**, **14 optional model/trainer tests**
 and **17 parser/preparation/export/catalog tests**. Native code/math is unchanged
 in this learning milestone; native suites were not rerun. The last recorded native
 build passed **10 host/component and 23 game-library tests**. Synthetic protocol/component tests
@@ -535,6 +565,7 @@ gameplay, recording and playback evidence.
 
 | Evidence | Result / retained location |
 | --- | --- |
+| Server-local training handover | Six training/two validation clips; detached network-disabled CUDA worker and pause/resume/stop verified; V100 `.docker-state/local/vision-control-validation/` and `vision-training/default/`; left paused at 7,691 |
 | Signed training overfit | 241 images, 211 windows; 10,000-update checkpoint and new frozen-inference regression both have 1.0 event F1/state/axis-bin accuracy; `.docker-state/local/learning-timing-v1/` and V100 `learning-heldout-v1/training-regression-score.json` |
 | Reserved-match prediction | Same frozen model, swapped ports, 422 player-frame predictions; hold F1 0.0187, press/release F1 zero; `.docker-state/local/learning-heldout-v1/score.json` on the V100 |
 | Controller prediction review | V100 `.docker-state/local/learning-heldout-v1/review/prediction-review.mkv`; 241 source-footage frames plus recorded/model controls, no generated gameplay |

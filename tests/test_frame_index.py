@@ -1,6 +1,26 @@
 """Synthetic UI cells exercise recognition/transport; no game images or SLPs."""
 import pytest
 
+from yt2slp.frame_index import verify_log_policy
+from yt2slp.frame_index import complete_png_digest
+
+
+def test_a_dump_filename_is_not_proof_its_png_write_has_finished(tmp_path):
+    path = tmp_path/'completion-marker-fixture.png'
+    prefix = b'\x89PNG\r\n\x1a\n' + b'completion-guard byte fixture; not decoded as an image'
+    path.write_bytes(prefix)
+    assert complete_png_digest(path) is None
+    path.write_bytes(prefix+b'\0\0\0\0IEND\xaeB`\x82')
+    import hashlib
+    assert complete_png_digest(path)==hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def test_console_lead_can_be_checked_per_step_without_relabelling_the_ui_clock():
+    capture = {'paused_log_association':'per-step','paused_log_minus_osd':0}
+    for offset in (0,1,0): verify_log_policy({'paused_log_minus_osd':offset},capture)
+    with pytest.raises(ValueError): verify_log_policy({'paused_log_minus_osd':2},capture)
+    with pytest.raises(ValueError): verify_log_policy({'paused_log_minus_osd':1},{'paused_log_minus_osd':0})
+
 from yt2slp.frame_index import ALPHABET, GEOMETRY, add_calibration, assess_step, cyan_cells, decode_index
 
 

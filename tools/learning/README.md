@@ -6,6 +6,13 @@ They do not replace host Python or alter game math. See the
 [remote V100 setup](../../docs/remote-training.md) for the tested CUDA lock,
 explicit device selection and actual GPU execution checks.
 
+For the server-local multi-match runner and manual **start / pause / resume /
+stop** controls, use `~/train-melee` on the V100. See the
+[training control guide](../../docs/training-control.md). Its detached workers,
+prepared feature shards and durable model/optimizer checkpoints work without
+Codex or the workstation. The older commands below reproduce the bounded pilot;
+`train_smoke.py` is not the long-running controller.
+
 The executable experiment is a **training-clip optimizer smoke test**. It cannot
 reconstruct a match, validate held-out accuracy or export a replay. Image/post
 phase remains unverified in the original positive-clock pilot; that manifest
@@ -114,8 +121,9 @@ on the training windows. Both attempts are retained. The [frozen reserved-match
 evaluation](../../docs/heldout-image-evaluation.md) now handles swapped physical
 ports and exposes failed generalization: hold/press/release F1 is 0.0187/0/0.
 The image-only training regression still scores perfectly. A source-footage plus
-controller-panel review MKV is retained on the V100. Next: build a separately
-split multi-match dataset from the [new catalog](../../docs/replay-corpus.md),
+controller-panel review MKV is retained on the V100. A six-train/two-validation
+starter dataset and [resumable server-local runner](../../docs/training-control.md)
+are now ready. Next: measure useful multi-match learning and expand the data,
 then validate native VI/PAD adaptation and genuine replay generation. Loss
 decrease or memorization does not establish those outcomes.
 
