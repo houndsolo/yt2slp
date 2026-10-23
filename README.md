@@ -166,8 +166,9 @@ This requests Fox vs. Falco on Battlefield. It checks pause stability, one-retra
 steps, matching repeated runs, and a different fighter trace from neutral input.
 Logs and traces are retained under `.docker-state/local/runs/step-*`.
 See [native stepping](docs/native-stepping.md) for the Python API, supported
-configuration, timing semantics, protocol and test scope. Stock/time/item/team
-rules retain fresh-game defaults. The user reported all stepping checks passing
+configuration, timing semantics, protocol and test scope. This default run
+retains fresh-game rules; the Python API also accepts explicit stock/countdown
+rules and physical ports, as validated in the [tournament setup probe](docs/tournament-start.md). The user reported all stepping checks passing
 with their ISO: 600 retraces advanced match frames 1 to 601. This was a local
 validation, not a game run in the cloud workspace.
 
@@ -299,7 +300,10 @@ bash scripts/docker.sh run python scripts/ingest_video.py path/to/short.mp4 \
 The supplied [tournament opening](docs/tournament-video-intake.md) has also been
 inspected and cropped with original timestamps preserved. Its Falco/Captain Falcon,
 Yoshi's Story and P2/P3 setup exposes capabilities still needed beyond the controlled
-fixtures. No reconstruction of that footage is claimed.
+fixtures. A [native setup probe](docs/tournament-start.md) now validates its stage,
+fighters, physical ports and four-stock/eight-minute rules: nine fields agree with
+official Playback across 842 player-frames. No reconstruction of that footage is
+claimed; playable pre-clock input and simultaneous-player search are next.
 
 ## Development checks
 

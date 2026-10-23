@@ -132,13 +132,16 @@ def test_invalid_run_limits(configured, frames, timeout):
     assert backend.last_run_dir is None
 
 
-def test_batch_forwards_fixed_match(configured, monkeypatch):
+@pytest.mark.parametrize('stock', [False, True])
+def test_batch_forwards_fixed_match(configured, monkeypatch, stock):
     from dataclasses import replace
-    from yt2slp.match import MatchConfig
+    from yt2slp.match import MatchConfig, StockRules
     backend, script = configured
-    backend.initialize(replace(backend.config, match=MatchConfig()))
+    backend.initialize(replace(backend.config, match=MatchConfig(stock_rules=StockRules() if stock else None)))
     def emit(command, **kwargs):
         assert command[command.index("--match") + 1] == "31 2 0 0 9 20 0 0 9"
+        if stock:assert command[command.index('--stock-rules')+1]=='480 4'
+        else:assert '--stock-rules' not in command
         Path(command[command.index("--state-digest") + 1]).write_text(digest_row())
         return subprocess.CompletedProcess(command, 0)
     monkeypatch.setattr(subprocess, "run", emit)

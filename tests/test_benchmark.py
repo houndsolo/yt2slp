@@ -27,6 +27,21 @@ def test_equal_fields_and_exact_frame_coverage_pass():
     assert not result['full_state_equality_measured'] and not result['image_equality_measured']
 
 
+def test_comparison_preserves_declared_physical_ports_without_relabelling():
+    a=document()
+    for row in a['rows']:row['player']+=1
+    assert compare_posts(a,deepcopy(a),240,241,player_indices=(1,2))['passed']
+    b=deepcopy(a);b['rows'].pop(0)
+    result=compare_posts(a,b,240,241,player_indices=(1,2))
+    assert not result['passed'] and result['missing_candidate']==[(240,1)]
+    with pytest.raises(ValueError):compare_posts(a,a,240,241)
+
+
+@pytest.mark.parametrize('ports',[(1,1),(1,4),(True,2),[1,2]])
+def test_comparison_rejects_invalid_player_mapping(ports):
+    with pytest.raises(ValueError):compare_posts(document(),document(),240,241,player_indices=ports)
+
+
 @pytest.mark.parametrize('left,right',[(0x00000000,0x80000000),(0x3f800000,0x3f800001)])
 def test_signed_zero_and_one_ulp_are_reported_without_tolerance(left,right):
     a=document();b=deepcopy(a)

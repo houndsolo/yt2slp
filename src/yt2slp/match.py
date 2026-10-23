@@ -25,25 +25,55 @@ class PlayerConfig:
 
 
 @dataclass(frozen=True)
-class MatchConfig:
-    """Two players on Battlefield (31) or Final Destination (32), external IDs.
+class StockRules:
+    """Explicit stock count and whole-minute countdown; other rules retain defaults."""
+    seconds: int = 480
+    stocks: int = 4
 
-    Remaining slots are empty. Stock/time/item/team rules retain the booted
-    game's defaults; these are not arbitrary rules or a savestate constructor.
+    def __post_init__(self) -> None:
+        _integer('seconds', self.seconds, 60, 600)
+        _integer('stocks', self.stocks, 1, 4)
+        if self.seconds % 60:raise ValueError('stock timer requires whole minutes')
+
+    def native_argument(self) -> str:
+        return f'{self.seconds} {self.stocks}'
+
+
+@dataclass(frozen=True)
+class MatchConfig:
+    """Two players on Yoshi's Story (8), Battlefield (31) or Final Destination (32).
+
+    External IDs and zero-based physical ports. Other slots are empty. Optional
+    stock rules replace only match kind, countdown and stocks; other rules retain
+    defaults. This is match setup, not a savestate constructor.
     """
     stage: int = 31
     players: tuple[PlayerConfig, PlayerConfig] = (PlayerConfig(2), PlayerConfig(20))
+    ports: tuple[int, int] = (0, 1)
+    stock_rules: StockRules | None = None
 
     def __post_init__(self) -> None:
-        _integer("stage", self.stage, 31, 32)
+        _integer("stage", self.stage, 0, 32)
+        if self.stage not in (8, 31, 32):raise ValueError('unsupported retail stage')
         if type(self.players) is not tuple or len(self.players) != 2 or any(not isinstance(p, PlayerConfig) for p in self.players):
             raise ValueError("players must be a tuple of two PlayerConfig values")
+        if type(self.ports) is not tuple or len(self.ports) != 2:
+            raise ValueError('ports must be a tuple of two distinct zero-based ports')
+        for port in self.ports:_integer('port', port, 0, 3)
+        if self.ports[0] == self.ports[1]:raise ValueError('player ports must differ')
+        if self.stock_rules is not None and not isinstance(self.stock_rules, StockRules):
+            raise ValueError('stock_rules requires StockRules or None')
 
     def native_argument(self) -> str:
         values = [self.stage]
         for p in self.players:
             values.extend((p.character, p.costume, p.cpu, p.cpu_level))
-        return " ".join(map(str, values))
+        result = " ".join(map(str, values))
+        if self.ports != (0, 1):result += f' ports {self.ports[0]} {self.ports[1]}'
+        return result
+
+    def neutral_pads(self) -> tuple['PadInput', ...]:
+        return tuple(PadInput(err=0 if i in self.ports else -1) for i in range(4))
 
 
 @dataclass(frozen=True)

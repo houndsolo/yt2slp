@@ -62,7 +62,11 @@ task have not been validated. See [README setup](../README.md) and
 
 - [x] Boot the user's retail NTSC 1.02 ISO and run bounded scripted experiments.
 - [x] Configure two players, characters, costumes, human/CPU settings and
-  Battlefield/Final Destination. Other rules retain fresh-game defaults.
+  Battlefield/Final Destination; extend to Yoshi's Story, two explicit physical
+  ports and stock/countdown rules, with a separate ISO/parser/official probe.
+  Unspecified rules retain fresh-game defaults.
+- [ ] Control the playable pre-clock opening. Current start waits for a positive
+  match counter; Slippi includes playable negative frames.
 - [x] Retain a live game stack while paused; advance one **VI retrace** per step.
   Keep the separate match-frame counter explicit and preserve ordinary PAD polling.
 - [x] Observe selected state fields without resuming; retain raw float bits.
@@ -359,9 +363,9 @@ features or prerequisites for the first short-clip reconstruction.
 
 ## Latest validation and retained evidence
 
-The latest Docker Python run passed **287 tests**. The unchanged engine/parser's
-last full component run passed **10 host/component, 23 game-library and 9
-independent parser tests**. Synthetic protocol/component tests
+The latest Docker Python run passed **307 tests**. The current native build passed
+**10 host/component and 23 game-library tests**; the unchanged independent parser's
+last component run passed **9 tests**. Synthetic protocol/component tests
 establish their tested behavior; the following local ISO runs provide separate
 gameplay, recording and playback evidence.
 
@@ -407,6 +411,10 @@ gameplay, recording and playback evidence.
 | Complete two-window workflow | All 24 accepted candidates parsed/rendered, exact ties retained; `.docker-state/local/joined-jumps-v1/result.json` and `window-*/` |
 | Joined replay and review | Two fresh boots reproduce; actual official Playback and post-selection source checks pass across 322 player-frames; `joined/trajectory-verification.json` under that workflow |
 | Joined comparison | 161-frame `joined/review/comparison.mkv`, whole-clip RGB RMSE 5.47; no visual acceptance threshold |
+| Tournament source intake | 271 cropped frames with original PTS, visible settings and individual timer readings; `.docker-state/local/youtube-OWraeXAYElQ/` |
+| Tournament setup/control probe | Yoshi's Story, Falco/Captain Falcon on P2/P3, four stocks/480 seconds; three restores and fresh branch bytes reproduce; `.docker-state/local/tournament-start-v1/probe-result.json` |
+| Tournament setup official comparison | Nine fields exact across 842 player-frames (1..421), seven observation fields exact; `official-analysis/result.json` in that probe; no source-video reconstruction claimed |
+| Default-match recording regression | New native build preserves prior two-jump replay SHA-256; `legacy-regression.json` in that probe |
 
 The selected replay in both recording runs has SHA-256
 `46b196b913b9a81bc501ddfcdd6f28c2710aabf665b0597d9059c9511e7e5dd2`.
@@ -454,11 +462,18 @@ agreement, stock/LRAS endings and retail parity remain unestablished.
 | `33af2bf` | `18ded4f` | Timed horizontal phases and movement/release/reversal evaluation |
 | `7fc16a0` | `18ded4f` | Explicit button phases, jump reconstruction and measured input ambiguity |
 | `5b557bc` | `18ded4f` | Fox short/full-hop measurement and actual official boundary comparison |
+| `12f2c0e` | `18ded4f` | Consecutive annotated windows, verified selected prefixes and a joined 161-frame replay |
+| `a0c8c6b` | `18ded4f` | Tournament footage intake with explicit crops and original timestamps |
 
 The complete timed-match follow-up pins engine `18ded4f`, published before its
 parent gitlink update. It adds the missing completion callback and recording
 status; the parent adds the complete-match experiment and stricter independent
 parser/official frame-report checks.
+
+The tournament setup follow-up pins engine `14c13ea`, published before the parent
+update. It adds Yoshi's Story, explicit physical ports and optional stock/countdown
+setup, with the [native/official probe](tournament-start.md) kept separate from
+source-video reconstruction.
 
 Changes are published to `houndsolo/yt2slp` on `main` and
 `houndsolo/melee-unlocked` on `yt2slp/linux-headless`. See Git history for the

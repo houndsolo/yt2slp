@@ -2,7 +2,7 @@
 
 `NativeLinuxBackend.start()` boots a fresh process with a fixed match and a menu
 script, then pauses at the first snapshot with VS major/minor scene `2/2`, a
-positive match-frame counter, and present fighters in slots 1 and 2. The match
+positive match-frame counter, and exactly the configured two occupied slots. The match
 countdown may still be running. `step()` resumes that same process to its next
 VI retrace. `observe()` requests the paused snapshot without advancing anything.
 Always use the context manager or call `close()` to release the child process.
@@ -27,14 +27,18 @@ with NativeLinuxBackend() as backend:
 ```
 
 Match settings use **external** `CharacterKind` and `StKind`, not the internal
-fighter/stage IDs: Fox=2, Falco=20, Battlefield=31, Final Destination=32.
+fighter/stage IDs: Captain Falcon=0, Fox=2, Falco=20, Yoshi's Story=8,
+Battlefield=31, Final Destination=32.
 The initial supported configuration is two players, retail characters 0..25,
 costumes 0..3, human/CPU selection and CPU levels 1..9. Other slots are empty.
 Python and native CLI both reject values outside this scope. The existing game
-hook applies the override at character preload and VS setup. No game ABI, math
-flags, tick constants or physics routines were changed. Stock, time, item and
-team rules retain the fresh game's defaults; arbitrary rule overrides are not
-implemented. `requested_match` in experiment output is configuration, not a
+hook applies the override at character preload and VS setup. `ports=(0, 1)`
+selects physical P1/P2 by default; two distinct zero-based ports can be supplied.
+Optional `StockRules(seconds=480, stocks=4)` selects stock mode and an explicit
+countdown (whole minutes, 60..600 seconds; 1..4 stocks). Other rules retain fresh
+menu defaults. Host API 19 appends that optional setup callback; rebuild host and
+game together. Game structures, math flags, tick constants and physics are
+unchanged. See [tournament setup](tournament-start.md) for the P2/P3 ISO probe. `requested_match` in experiment output is configuration, not a
 measurement: the selected state snapshot does not contain stage/character IDs.
 
 `RunConfig.match` also works with `run_script()`. Leaving it `None` preserves the
@@ -51,7 +55,8 @@ therefore does not make emulated time catch up on resume.
 Each step supplies all four raw PADStatus samples. They replace scripted input
 on all ports after bootstrap, and are used at the game's next ordinary PAD poll.
 They do not rewrite already sampled input or promise zero input latency. Neutral
-ports 1/2 are connected; ports 3/4 are disconnected. CPU players retain the game's
+`NEUTRAL_PADS` connects physical P1/P2 and disconnects P3/P4. For custom
+ports, use `match.neutral_pads()` and supply the desired active-port controls. CPU players retain the game's
 AI behavior. Float observations preserve their original uint32 bits.
 
 ## Local ISO validation

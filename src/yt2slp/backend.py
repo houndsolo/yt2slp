@@ -217,6 +217,8 @@ class NativeLinuxBackend:
                    "--card-dir", str(run_dir / "card"), "--state-digest", str(digest)]
         if c.match is not None:
             command += ["--match", c.match.native_argument()]
+            if c.match.stock_rules is not None:
+                command += ['--stock-rules', c.match.stock_rules.native_argument()]
         (run_dir / "config.json").write_text(json.dumps(asdict(c), default=str, indent=2) + "\n")
         try:
             with (run_dir / "host.log").open("w") as log:
@@ -261,6 +263,8 @@ class NativeLinuxBackend:
                    "--input-script", str(script.resolve()), "--card-dir", str(run_dir / "card"),
                    "--state-digest", str(run_dir / "state.csv"), "--match", c.match.native_argument(),
                    "--boot-limit", str(boot_limit)]
+        if c.match.stock_rules is not None:
+            command += ['--stock-rules', c.match.stock_rules.native_argument()]
         (run_dir / "config.json").write_text(json.dumps(asdict(c), default=str, indent=2) + "\n")
         try:
             self._session = ControlSession(command, run_dir, timeout)
@@ -268,7 +272,7 @@ class NativeLinuxBackend:
                 raise ValueError("unsupported native control protocol")
             state = self._receive_state()
             if not (state.scene_major == 2 and state.scene == 2 and state.match_frame > 0
-                    and state.fighters[0][0] and state.fighters[1][0]):
+                    and tuple(i for i, f in enumerate(state.fighters) if f[0]) == tuple(sorted(c.match.ports))):
                 raise ValueError("native control did not pause in a live VS match")
             self.observations = (state,)
             return state

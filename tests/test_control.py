@@ -7,7 +7,7 @@ import time
 import pytest
 
 from yt2slp.backend import BackendError, NativeLinuxBackend, RunConfig, UnsupportedOperation
-from yt2slp.match import MatchConfig, PlayerConfig, PadInput, NEUTRAL_PADS
+from yt2slp.match import MatchConfig, PlayerConfig, PadInput, NEUTRAL_PADS, StockRules
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -92,6 +92,46 @@ def test_invalid_pad(kwargs):
 
 def test_match_argument_uses_external_ids_and_preserves_player_settings():
     assert MatchConfig(32, (PlayerConfig(2, 1), PlayerConfig(20, 3, 1, 4))).native_argument() == "32 2 1 0 9 20 3 1 4"
+
+
+def test_tournament_ports_rules_and_connected_pad_mapping():
+    match=MatchConfig(8,(PlayerConfig(20),PlayerConfig(0)),ports=(1,2),stock_rules=StockRules())
+    assert match.native_argument()=='8 20 0 0 9 0 0 0 9 ports 1 2'
+    assert match.stock_rules.native_argument()=='480 4'
+    assert [p.err for p in match.neutral_pads()]==[-1,0,0,-1]
+    assert MatchConfig().neutral_pads()==NEUTRAL_PADS
+
+
+@pytest.mark.parametrize('kwargs',[
+    {'ports':(1,1)},{'ports':(1,4)},{'ports':(False,1)},{'ports':[1,2]},
+    {'stock_rules':{}},
+])
+def test_invalid_port_and_rule_objects(kwargs):
+    with pytest.raises(ValueError):MatchConfig(**kwargs)
+
+
+@pytest.mark.parametrize('seconds,stocks',[(479,4),(0,4),(660,4),(480,0),(480,5),(True,4)])
+def test_invalid_stock_rules(seconds,stocks):
+    with pytest.raises(ValueError):StockRules(seconds,stocks)
+
+
+def test_control_rejects_a_pause_with_players_on_different_ports(configured):
+    from dataclasses import replace
+    backend,script=configured
+    backend.initialize(replace(backend.config,match=MatchConfig(ports=(1,2))))
+    with pytest.raises(BackendError,match='live VS match'):backend.start(script,timeout=2)
+
+
+def test_control_forwards_explicit_stock_rules(configured,monkeypatch):
+    from dataclasses import replace
+    from yt2slp.native_control import ControlSession
+    backend,script=configured
+    backend.initialize(replace(backend.config,match=MatchConfig(stock_rules=StockRules(480,4))))
+    def session(command,*args):
+        assert command[command.index('--stock-rules')+1]=='480 4'
+        return ControlSession(command,*args)
+    monkeypatch.setattr('yt2slp.backend.ControlSession',session)
+    backend.start(script,timeout=2)
 
 
 @pytest.mark.parametrize("limit,timeout", [(0, 1), (2**32, 1), (True, 1), (1, 0), (1, float("nan"))])
@@ -232,7 +272,7 @@ import socket, sys
 s = socket.socket(fileno=int(sys.argv[sys.argv.index('--control-fd') + 1]))
 f = s.makefile('r')
 def send(line): s.sendall((line + '\\n').encode())
-state = 'STATE ' + ','.join(map(str, [1, 2, 2, 1, 0] + [1] * 72))
+state = 'STATE ' + ','.join(map(str, [1, 2, 2, 1, 0] + [1] * 24 + [0] * 48))
 send('MUCONTROL 2'); send(state)
 f.readline(); send('CAPTURED'); send('STATE broken' if {operation!r} == 'capture' else state)
 if {operation!r} == 'restore':

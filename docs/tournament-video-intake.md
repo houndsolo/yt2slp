@@ -74,10 +74,10 @@ images, glyphs or generated annotations are committed.
 ## Reconstruction gaps
 
 Current search assumes Fox/Falco on Battlefield, controlling one player while
-the other stays neutral. The native API allows retail characters but restricts
-stages to Battlefield/Final Destination, uses the first two slots and retains
-fresh-game rules. This source needs Yoshi's Story, the observed ports/rules and
-simultaneous player programs. Those capabilities require independent validation.
+the other stays neutral. The [native setup probe](tournament-start.md) now validates
+Yoshi's Story, Falco/Captain Falcon on P2/P3 and explicit four-stock/eight-minute
+rules with genuine recording and official Playback. Search still needs those
+settings threaded through it, pre-clock control and simultaneous player programs.
 Source/candidate geometry also differs; a future comparison transform must be
 explicit and validated.
 
