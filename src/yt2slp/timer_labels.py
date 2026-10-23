@@ -85,7 +85,7 @@ def calibrate(annotations, base):
         sources.append({'image':str(image),'timer':anchor['timer'],'sha256':hashlib.sha256(image.read_bytes()).hexdigest()})
     if set(templates['fraction'])!=set('0123456789'):raise ValueError('fraction calibration must cover all ten digits')
     return {'schema':1,'geometry':[642,528],'boxes':BOXES,'templates':templates,'sources':sources,
-            'provenance':'manually verified timer annotations on retained official captures',
+            'provenance':'manually verified timer annotations on retained images',
             'threshold':190,'max_hamming_error':0.12,'minimum_margin':0.015}
 
 

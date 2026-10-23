@@ -28,8 +28,12 @@ def assess_window(text, start, end, replay):
                 and paths and all(p == str(replay) for p in paths))
 
 
-def capture_bounds(first, last, padding, include_preroll=False):
+def capture_bounds(first, last, padding, include_preroll=False, request_start=None):
     start, end = first-padding-1, last+padding+1
+    if request_start is not None:
+        if type(request_start) is not int or request_start > start:
+            raise ValueError('explicit request start must precede the padded wanted interval')
+        start = request_start
     if padding < 0 or first > last or start < (-123 if include_preroll else 0):
         raise ValueError('invalid supported capture interval')
     return start, end
@@ -45,9 +49,10 @@ def main():
     p.add_argument('--last',type=int,default=300)
     p.add_argument('--padding',type=int,default=20)
     p.add_argument('--include-preroll',action='store_true',help='allow requests in recorded negative frames, bounded by -123')
+    p.add_argument('--request-start',type=int,help='explicit earlier render start; retains wanted comparison interval')
     p.add_argument('--timeout',type=float,default=120)
     args=p.parse_args()
-    try:start,end=capture_bounds(args.first,args.last,args.padding,args.include_preroll)
+    try:start,end=capture_bounds(args.first,args.last,args.padding,args.include_preroll,args.request_start)
     except ValueError as exc:p.error(str(exc))
     if not 0 < args.timeout < 3600:p.error('invalid capture budget')
     for path in (args.dolphin,args.iso,args.replay):

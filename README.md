@@ -302,9 +302,13 @@ inspected and cropped with original timestamps preserved. Its Falco/Captain Falc
 Yoshi's Story and P2/P3 setup exposes capabilities still needed beyond the controlled
 fixtures. A [native setup probe](docs/tournament-start.md) now validates its stage,
 fighters, physical ports and four-stock/eight-minute rules: nine fields agree with
-official Playback across 842 player-frames. No reconstruction of that footage is
-claimed. Optional [pre-clock control](docs/preroll-control.md) now covers playable
-negative frames; simultaneous-player search and source/image alignment are next.
+official Playback across 842 player-frames. Optional
+[pre-clock control](docs/preroll-control.md) covers playable negative frames.
+The [first real-opening search](docs/tournament-opening.md) now tries simultaneous
+P2/P3 programs with explicit starting platforms: 24 of 72 fit sparse manual cues.
+Its coarse selected genuine replay reproduces, parses and matches its own official
+playback over -39..18. Source-image review remains a separate gate; this does not
+establish a visually accepted reconstruction or recover the original inputs.
 
 ## Development checks
 

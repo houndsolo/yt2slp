@@ -33,14 +33,19 @@ def main():
         if digest(replay) != candidate["replay_sha256"]:
             raise ValueError("candidate replay identity mismatch")
         first, last = manifest["capture_interval"]
+        extra = []
+        if manifest.get('include_preroll'):extra.append('--include-preroll')
+        if 'capture_request_start' in manifest:extra.extend(['--request-start', str(manifest['capture_request_start'])])
         if not out.exists():
             subprocess.run(["python", str(Path(__file__).with_name("capture_benchmark.py")), "--dolphin", str(args.dolphin),
                             "--iso", str(args.iso), "--replay", str(replay), "--output", str(out),
-                            "--first", str(first), "--last", str(last), "--padding", str(manifest["capture_padding"])], check=True)
+                            "--first", str(first), "--last", str(last), "--padding", str(manifest["capture_padding"]), *extra], check=True)
         report = json.loads((out / "capture.json").read_text())
         if (not report["capture_passed"] or report["should_resync"] is not False
                 or report["source_replay_sha256"] != candidate["replay_sha256"]
-                or report["wanted_interval"] != [first, last]):
+                or report["wanted_interval"] != [first, last]
+                or report.get('include_preroll', False) != manifest.get('include_preroll', False)
+                or ('capture_request_start' in manifest and report['request_interval'][0] != manifest['capture_request_start'])):
             raise ValueError("incomplete or incompatible capture; preserve it and use a new export directory")
         completed.append(candidate["index"])
     if completed != manifest["expected_indices"]:

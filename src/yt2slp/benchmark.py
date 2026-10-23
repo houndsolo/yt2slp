@@ -2,9 +2,26 @@
 import math
 import struct
 
+from .match import match_from_document
+
 FLOAT_FIELDS = ('x', 'y', 'facing', 'percent', 'shield', 'animation')
 INTEGER_FIELDS = ('action', 'stocks', 'character')
 FIELDS = FLOAT_FIELDS + INTEGER_FIELDS
+
+
+def validate_match_settings(settings, requested):
+    """Check the parser's setup against an explicit supported countdown recipe.
+
+    Spawn points are game setup inputs, not encoded Slippi settings. Their
+    resulting state is checked separately against actual official playback.
+    """
+    match = match_from_document(requested)
+    expected = sorted(({'player': port, 'character': p.character, 'costume': p.costume, 'type': p.cpu}
+                       for port, p in zip(match.ports, match.players)), key=lambda p: p['player'])
+    if (match.stock_rules is None or settings['stage'] != match.stage or settings['players'] != expected
+            or settings['timer_type'] != 2 or settings['timer_seconds'] != match.stock_rules.seconds):
+        raise ValueError('parsed match settings differ from supported explicit countdown recipe')
+    return match
 
 
 def value(bits):

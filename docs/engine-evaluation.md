@@ -76,7 +76,7 @@ checkout; our include-path fix makes it use the same selected SDK overlay as
 the game, without changing its assertions or tested routine.
 
 [`port/runtime/abi/mu_host.h`](../third_party/melee-unlocked/port/runtime/abi/mu_host.h)
-defines C function tables, currently host API **18**, game API **6**. The exported
+defines C function tables, currently host API **20**, game API **6**. The exported
 entry point is `mu_game_entry(host, game)`. `MuGameApi.run()` owns the blocking
 game loop. `retrace()` delivers a VI interrupt within that loop: it is **not** a
 standalone function to advance one full game frame. Host polling delivers disc,

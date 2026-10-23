@@ -88,7 +88,33 @@ class PadSequence:
         return NEUTRAL_PADS
 
 
-ControllerSchedule = HorizontalSchedule | HorizontalSequence | PadSequence
+@dataclass(frozen=True)
+class PortProgram:
+    port: int
+    program: PadSequence
+
+    def __post_init__(self):
+        if type(self.port) is not int or not 0<=self.port<=3 or not isinstance(self.program,PadSequence):
+            raise ValueError('port program requires a physical port and controller phases')
+
+
+@dataclass(frozen=True)
+class TwoPlayerSequence:
+    port_programs: tuple[PortProgram,PortProgram]
+
+    def __post_init__(self):
+        if (type(self.port_programs) is not tuple or len(self.port_programs)!=2
+                or any(not isinstance(p,PortProgram) for p in self.port_programs)
+                or self.port_programs[0].port==self.port_programs[1].port):
+            raise ValueError('two distinct physical controller programs are required')
+
+    def pads(self,step):
+        result=[PadInput(err=-1) for _ in range(4)]
+        for player in self.port_programs:result[player.port]=player.program.pads(step)[0]
+        return tuple(result)
+
+
+ControllerSchedule = HorizontalSchedule | HorizontalSequence | PadSequence | TwoPlayerSequence
 
 
 def schedule_from_dict(document: dict) -> ControllerSchedule:
@@ -107,10 +133,19 @@ def schedule_from_dict(document: dict) -> ControllerSchedule:
         if any(not isinstance(p, dict) or set(p) != {"start_after", "stick_x", "stick_y", "button"} for p in phases):
             raise ValueError("controller phases require explicit start_after, stick_x, stick_y and button only")
         return PadSequence(tuple(PadPhase(**p) for p in phases))
+    if set(document)=={'port_programs'} and type(document['port_programs']) is list:
+        programs=[]
+        for player in document['port_programs']:
+            if not isinstance(player,dict) or set(player)!={'port','pad_phases'}:
+                raise ValueError('each player program requires port and pad_phases only')
+            programs.append(PortProgram(player['port'],schedule_from_dict({'pad_phases':player['pad_phases']})))
+        return TwoPlayerSequence(tuple(programs))
     raise ValueError("unsupported candidate schedule format")
 
 
 def schedule_document(schedule: ControllerSchedule) -> dict:
+    if isinstance(schedule,TwoPlayerSequence):
+        return {'port_programs':[{'port':p.port,**schedule_document(p.program)} for p in schedule.port_programs]}
     if isinstance(schedule, PadSequence):
         return {"pad_phases": [asdict(p) for p in schedule.phases]}
     if isinstance(schedule, HorizontalSequence):
@@ -129,48 +164,77 @@ def run_schedule(backend: Backend, schedule: ControllerSchedule, steps: int) -> 
     return tuple(result)
 
 
+def run_recorded_schedule(backend, schedule, steps):
+    """Keep raw observations and separately query signed game-generated replay keys."""
+    states=[backend.observe()];keys=[backend.recording_status().last_frame]
+    for index in range(steps):
+        states.append(backend.step(schedule.pads(index)))
+        key=backend.recording_status().last_frame
+        if key!=keys[-1]+1:raise ValueError('recorded frame did not advance one per VI; no frame mapping guessed')
+        keys.append(key)
+    return tuple(states),tuple(keys)
+
+
 def bounded_search(backend: Backend, samples: tuple[Sample, ...], candidates: tuple[ControllerSchedule, ...],
-                   steps: int, trials: Path) -> dict:
+                   steps: int, trials: Path, *, frame_clock='native-match',player_ports=(0,1)) -> dict:
     if type(steps) is not int or not 1 <= steps <= 600:
         raise ValueError("one search window must contain 1..600 VI steps")
     if not candidates or len(candidates) > 128 or len(set(candidates)) != len(candidates):
         raise ValueError("supply 1..128 distinct candidate schedules")
     if any(isinstance(c, (HorizontalSequence, PadSequence)) and c.phases[-1].start_after >= steps for c in candidates):
         raise ValueError("every declared phase must occur inside the search window")
+    for candidate in candidates:
+        if isinstance(candidate,TwoPlayerSequence):
+            if tuple(p.port for p in candidate.port_programs)!=player_ports:
+                raise ValueError('controller programs differ from the declared player-port order')
+            if any(p.program.phases[-1].start_after>=steps for p in candidate.port_programs):
+                raise ValueError('every player phase must occur inside the window')
+        elif player_ports!=(0,1):raise ValueError('legacy schedules control the default ports only')
+    if frame_clock not in ('native-match','slippi-replay') or any(s.frame_clock!=frame_clock for s in samples):
+        raise ValueError('timeline and search frame clocks differ')
     initial = backend.observe()
-    if any(f < initial.match_frame or f > initial.match_frame + steps for s in samples for f in s.game_frames):
+    first=initial.match_frame if frame_clock=='native-match' else backend.recording_status().last_frame
+    if any(f < first or f > first + steps for s in samples for f in s.game_frames):
         raise ValueError("timeline lies outside this search window")
+    def run(candidate):
+        return ((run_schedule(backend,candidate,steps),None) if frame_clock=='native-match'
+                else run_recorded_schedule(backend,candidate,steps))
+    def score(trace,keys):return score_timeline(samples,trace,frame_keys=keys,player_ports=player_ports)
     trials.mkdir(exist_ok=False)
     checkpoint = backend.capture()
     results = []
     selected_trace = None
     selected_index = None
+    selected_keys = None
     for index, candidate in enumerate(candidates):
         backend.restore(checkpoint)
-        trace = run_schedule(backend, candidate, steps)
-        score = score_timeline(samples, trace)
-        result = {"index": index, "schedule": schedule_document(candidate), "score": score}
+        trace,keys = run(candidate)
+        cost = score(trace,keys)
+        result = {"index": index, "schedule": schedule_document(candidate), "score": cost}
         results.append(result)
-        (trials / f"{index:03d}.json").write_text(json.dumps({**result, "states": [asdict(s) for s in trace]}, indent=2) + "\n")
-        if score["accepted"] and selected_index is None:
-            selected_index, selected_trace = index, trace
+        (trials / f"{index:03d}.json").write_text(json.dumps({**result, "states": [asdict(s) for s in trace],
+            **({'replay_frame_keys':keys} if keys is not None else {})}, indent=2) + "\n")
+        if cost["accepted"] and selected_index is None:
+            selected_index, selected_trace, selected_keys = index, trace,keys
     accepted = [r["index"] for r in results if r["score"]["accepted"]]
-    kind = "bounded-controller-search" if any(isinstance(c, PadSequence) for c in candidates) else "bounded-horizontal-search"
-    report = {"schema": 1, "kind": kind, "window": [initial.match_frame, initial.match_frame + steps],
+    kind = "bounded-controller-search" if any(isinstance(c, (PadSequence,TwoPlayerSequence)) for c in candidates) else "bounded-horizontal-search"
+    report = {"schema": 1, "kind": kind, "window": [first, first + steps],
               "candidate_count": len(candidates), "total_candidate_vi_steps": len(candidates) * steps,
               "accepted_indices": accepted, "selected_index": selected_index, "candidates": results,
               "selection_policy": "first accepted in declared candidate order; retain all accepted alternatives",
               "original_inputs_identified": False, "global_search_exhausted": False,
               "declared_grid_exhausted": True, "selected_branch_rerun_matches": None,
               "passed": False, "checkpoint_portable": False}
+    if frame_clock!='native-match' or player_ports!=(0,1):
+        report.update(frame_clock=frame_clock,player_ports=player_ports)
     # Even on failure, remove the final rejected trial from the live branch.
     backend.restore(checkpoint)
     if selected_index is not None:
-        replayed = run_schedule(backend, candidates[selected_index], steps)
-        if replayed != selected_trace:
+        replayed,keys = run(candidates[selected_index])
+        if replayed != selected_trace or keys!=selected_keys:
             raise ValueError("selected continuation did not repeat after restore")
         report["selected_schedule"] = schedule_document(candidates[selected_index])
         report["selected_branch_rerun_matches"] = True
-        report["selected_score"] = score_timeline(samples, replayed)
+        report["selected_score"] = score(replayed,keys)
         report["passed"] = report["selected_score"]["accepted"]
     return report

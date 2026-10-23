@@ -7,6 +7,7 @@ import struct
 import pytest
 
 from yt2slp.benchmark import FIELDS, FLOAT_FIELDS, compare_posts, index_rows, observation_rows
+from yt2slp.benchmark import validate_match_settings
 from yt2slp.timer_labels import encode, glyphs, recognize, summarize_labels, WIDTH, HEIGHT
 
 
@@ -18,6 +19,36 @@ def document():
     return {'schema':1,'settings':{'stage':31},'rows':[
         {'frame':frame,'player':player,'fields':{name:bits(1.0) if name in FLOAT_FIELDS else 1 for name in FIELDS}}
         for frame in (240,241) for player in (0,1)]}
+
+
+def explicit_setup():
+    return {'stage': 8, 'players': [{'character': 20}, {'character': 0}],
+            'ports': [1, 2], 'stock_rules': {'seconds': 480, 'stocks': 4}, 'spawn_points': [0, 1]}
+
+
+def setup_settings():
+    return {'stage': 8, 'seed': 1234, 'timer_type': 2, 'timer_seconds': 480,
+            'players': [{'player': 1, 'character': 20, 'costume': 0, 'type': 0},
+                        {'player': 2, 'character': 0, 'costume': 0, 'type': 0}]}
+
+
+def test_explicit_parser_setup_keeps_physical_ports_and_seed_unknown():
+    assert validate_match_settings(setup_settings(), explicit_setup()).ports == (1, 2)
+    settings = setup_settings();settings['seed'] = 999
+    assert validate_match_settings(settings, explicit_setup()).spawn_points == (0, 1)
+
+
+@pytest.mark.parametrize('field,value', [('stage', 31), ('timer_type', 0), ('timer_seconds', 120), ('players', [])])
+def test_explicit_parser_setup_rejects_different_settings(field, value):
+    settings = setup_settings();settings[field] = value
+    with pytest.raises(ValueError):validate_match_settings(settings, explicit_setup())
+
+
+def test_explicit_parser_setup_rejects_port_relabelling_and_default_rules():
+    settings = setup_settings();settings['players'][0]['player'] = 0
+    with pytest.raises(ValueError):validate_match_settings(settings, explicit_setup())
+    requested = explicit_setup();requested['stock_rules'] = None
+    with pytest.raises(ValueError):validate_match_settings(setup_settings(), requested)
 
 
 def test_equal_fields_and_exact_frame_coverage_pass():
@@ -104,6 +135,10 @@ def test_capture_reports_require_exact_requested_interval_and_file():
     assert not module.assess_window(text,219,321,Path('/wrong.slp'))
     assert module.capture_bounds(240,300,20)==(219,321)
     assert module.capture_bounds(-39,140,0,True)==(-40,141)
+    assert module.capture_bounds(1,17,0,True,-40)==(-40,18)
+    assert module.capture_bounds(1,17,0,True,-123)==(-123,18)
+    for start, early in [(1, True), (-124, True), (-40, False), (True, True)]:
+        with pytest.raises(ValueError):module.capture_bounds(1,17,0,early,start)
     negative='[FILE_PATH] /replay.slp\n'+''.join(f'[CURRENT_FRAME] {i}\n' for i in range(-40,142))
     assert module.assess_window(negative,-40,141,Path('/replay.slp'))
     for first,last,padding,early in [(-39,140,0,False),(-123,140,0,True),(-39,140,-1,True)]:

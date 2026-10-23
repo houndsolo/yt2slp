@@ -36,8 +36,11 @@ hook applies the override at character preload and VS setup. `ports=(0, 1)`
 selects physical P1/P2 by default; two distinct zero-based ports can be supplied.
 Optional `StockRules(seconds=480, stocks=4)` selects stock mode and an explicit
 countdown (whole minutes, 60..600 seconds; 1..4 stocks). Other rules retain fresh
-menu defaults. Host API 19 appends that optional setup callback; rebuild host and
-game together. Game structures, math flags, tick constants and physics are
+menu defaults. Host API 19 added that optional setup callback; API **20** also
+accepts optional `spawn_points=(0, 1)` in logical player order. These are distinct
+stage-defined start-point indices 0..3, consumed by ordinary match construction,
+not live coordinates. Omission preserves ordinary per-slot starts. Rebuild host
+and game together. Game structures, math flags, tick constants and physics are
 unchanged. See [tournament setup](tournament-start.md) for the P2/P3 ISO probe. `requested_match` in experiment output is configuration, not a
 measurement: the selected state snapshot does not contain stage/character IDs.
 

@@ -32,6 +32,7 @@ class Sample:
     game_frames: tuple[int, ...]
     alignment: Evidence
     cues: tuple[Cue, ...]
+    frame_clock: str = 'native-match'
 
 
 def evidence(raw: dict) -> Evidence:
@@ -43,6 +44,8 @@ def load_timeline(document: dict, video: dict) -> tuple[Sample, ...]:
             or video.get("schema") != 1 or video.get("kind") != "local-video"
             or document.get("video_sha256") != video.get("source_sha256")):
         raise ValueError("unsupported timeline or video identity mismatch")
+    clock=document.get('frame_clock','native-match')
+    if clock not in ('native-match','slippi-replay'):raise ValueError('unsupported timeline frame clock')
     result = []
     for raw in document["samples"]:
         index = raw["video_frame"]
@@ -54,7 +57,7 @@ def load_timeline(document: dict, video: dict) -> tuple[Sample, ...]:
         alignment = evidence(raw["alignment"])
         candidates = alignment.value
         if (not isinstance(candidates, list) or not candidates or len(candidates) > 9
-                or any(type(f) is not int or f < 1 for f in candidates)
+                or any(type(f) is not int or f < (-123 if clock=='slippi-replay' else 1) for f in candidates)
                 or candidates != sorted(set(candidates))):
             raise ValueError("alignment requires 1..9 explicit increasing game-frame candidates")
         if result and candidates[0] <= result[-1].game_frames[-1]:
@@ -79,22 +82,22 @@ def load_timeline(document: dict, video: dict) -> tuple[Sample, ...]:
                 elif any(type(v) is not str or v not in valid for v in values):
                     raise ValueError("unsupported categorical cue")
             cues.append(Cue(player, field, item_evidence))
-        result.append(Sample(index, tuple(candidates), alignment, tuple(cues)))
+        result.append(Sample(index, tuple(candidates), alignment, tuple(cues),clock))
     if not result or not any(c.evidence.value is not None for s in result for c in s.cues):
         raise ValueError("timeline needs at least one known visual cue")
     return tuple(result)
 
 
-def predicted_cue(state: Observation, cue: Cue):
+def predicted_cue(state: Observation, cue: Cue, player_ports=(0,1)):
     if state.scene_major != 2 or state.scene != 2:
         raise ValueError("simulation left supported VS scene")
-    fighter = state.fighters[cue.player]
+    fighter = state.fighters[player_ports[cue.player]]
     if len(fighter) != 12 or not fighter[0]:
         raise ValueError("missing simulated fighter")
     if cue.field == "action_group":
         return next((name for name, ids in ACTION_GROUPS.items() if fighter[2] in ids), "other")
     if cue.field == "horizontal_order":
-        other = state.fighters[1 - cue.player]
+        other = state.fighters[player_ports[1 - cue.player]]
         if len(other) != 12 or not other[0]:
             raise ValueError("missing other simulated fighter")
         x, other_x = decode_float_bits(fighter[4]), decode_float_bits(other[4])
@@ -110,12 +113,21 @@ def predicted_cue(state: Observation, cue: Cue):
     return max(0, min(999, math.floor(value)))
 
 
-def score_timeline(samples: tuple[Sample, ...], states: tuple[Observation, ...]) -> dict:
+def score_timeline(samples: tuple[Sample, ...], states: tuple[Observation, ...], *,
+                   player_ports=(0,1),frame_keys=None) -> dict:
+    if (type(player_ports) is not tuple or len(player_ports)!=2
+            or any(type(p) is not int or not 0<=p<=3 for p in player_ports) or len(set(player_ports))!=2):
+        raise ValueError('two distinct physical player ports are required')
+    clock='native-match' if frame_keys is None else 'slippi-replay'
+    if any(s.frame_clock!=clock for s in samples):raise ValueError('timeline and simulation frame clocks differ')
+    keys=tuple(s.match_frame for s in states) if frame_keys is None else tuple(frame_keys)
+    if len(keys)!=len(states) or any(type(k) is not int for k in keys):
+        raise ValueError('every observation requires its own explicit frame key')
     indexed = {}
-    for state in states:
-        if state.match_frame in indexed:
+    for key,state in zip(keys,states):
+        if key in indexed:
             raise ValueError("duplicate match-frame boundaries are unsupported in this controlled case")
-        indexed[state.match_frame] = state
+        indexed[key] = state
     results = []
     for sample in samples:
         missing = sorted(set(sample.game_frames) - indexed.keys())
@@ -125,7 +137,7 @@ def score_timeline(samples: tuple[Sample, ...], states: tuple[Observation, ...])
         possibilities = []
         for frame in sample.game_frames:
             checks = [{"player": c.player, "field": c.field, "expected": c.evidence.value,
-                       "predicted": predicted_cue(indexed[frame], c)}
+                       "predicted": predicted_cue(indexed[frame], c,player_ports)}
                       for c in sample.cues if c.evidence.value is not None]
             for check in checks:
                 check["matched"] = check["predicted"] in check["expected"]

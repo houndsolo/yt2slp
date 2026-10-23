@@ -51,6 +51,7 @@ class MatchConfig:
     players: tuple[PlayerConfig, PlayerConfig] = (PlayerConfig(2), PlayerConfig(20))
     ports: tuple[int, int] = (0, 1)
     stock_rules: StockRules | None = None
+    spawn_points: tuple[int, int] | None = None
 
     def __post_init__(self) -> None:
         _integer("stage", self.stage, 0, 32)
@@ -63,6 +64,11 @@ class MatchConfig:
         if self.ports[0] == self.ports[1]:raise ValueError('player ports must differ')
         if self.stock_rules is not None and not isinstance(self.stock_rules, StockRules):
             raise ValueError('stock_rules requires StockRules or None')
+        if self.spawn_points is not None:
+            if (type(self.spawn_points) is not tuple or len(self.spawn_points)!=2
+                    or any(type(s) is not int or not 0<=s<=3 for s in self.spawn_points)
+                    or len(set(self.spawn_points))!=2):
+                raise ValueError('spawn_points requires two distinct stage start-point indices in 0..3')
 
     def native_argument(self) -> str:
         values = [self.stage]
@@ -70,10 +76,33 @@ class MatchConfig:
             values.extend((p.character, p.costume, p.cpu, p.cpu_level))
         result = " ".join(map(str, values))
         if self.ports != (0, 1):result += f' ports {self.ports[0]} {self.ports[1]}'
+        if self.spawn_points is not None:result += f' spawns {self.spawn_points[0]} {self.spawn_points[1]}'
         return result
 
     def neutral_pads(self) -> tuple['PadInput', ...]:
         return tuple(PadInput(err=0 if i in self.ports else -1) for i in range(4))
+
+
+def match_from_document(document: dict) -> MatchConfig:
+    """Read an explicit JSON match recipe; physical ports/rule choices are required."""
+    if (not isinstance(document,dict) or not {'stage','players','ports','stock_rules'}<=set(document)
+            or not set(document)<={'stage','players','ports','stock_rules','spawn_points'}
+            or not isinstance(document['players'],list) or len(document['players'])!=2
+            or not isinstance(document['ports'],list)):
+        raise ValueError('explicit stage, two players, ports and stock_rules are required')
+    players=[]
+    for player in document['players']:
+        if (not isinstance(player,dict) or 'character' not in player
+                or not set(player)<=set(PlayerConfig.__dataclass_fields__)):
+            raise ValueError('unsupported explicit player configuration')
+        players.append(PlayerConfig(**player))
+    rules=document['stock_rules']
+    if rules is not None and (not isinstance(rules,dict) or set(rules)!={'seconds','stocks'}):
+        raise ValueError('stock rules need seconds/stocks or explicit null')
+    points=document.get('spawn_points')
+    if points is not None and not isinstance(points,list):raise ValueError('spawn_points needs a JSON array or null')
+    return MatchConfig(document['stage'],tuple(players),tuple(document['ports']),
+        None if rules is None else StockRules(**rules),None if points is None else tuple(points))
 
 
 @dataclass(frozen=True)

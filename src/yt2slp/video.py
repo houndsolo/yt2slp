@@ -9,6 +9,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import tempfile
 
 
 def sha256(path: Path) -> str:
@@ -135,4 +136,49 @@ def window_view(source: Path, output: Path, first: int, last: int) -> dict:
     document={**parent,'frames':rows,'view':{'parent_video_json_sha256':sha256(source/'video.json'),
         'parent_decode_interval':[first,last],'policy':'contiguous view; original PTS, source-relative time and image hashes retained'}}
     (output/'video.json').write_text(json.dumps(document,indent=2)+'\n')
+    return document
+
+
+def resize_view(source: Path, output: Path, width: int, height: int) -> dict:
+    """Explicit fixed Lanczos image transform; preserve every source PTS/key.
+
+    Callers choose dimensions before comparing candidates. This does not fit a
+    camera, translation, temporal offset or game-frame label.
+    """
+    source, output = source.resolve(), output.resolve()
+    parent = json.loads((source/'video.json').read_text())
+    if (parent.get('schema') != 1 or parent.get('kind') != 'local-video'
+            or not parent.get('frames') or any(type(v) is not int or not 1 <= v <= 4096 for v in (width, height))):
+        raise ValueError('invalid video view or explicit output dimensions')
+    for row in parent['frames']:
+        if sha256(source/row['image']) != row['image_sha256']:
+            raise ValueError('source image identity differs before spatial transform')
+    output.mkdir(parents=True, exist_ok=False)
+    (output/'frames').mkdir()
+    filter_text = f'scale={width}:{height}:flags=lanczos,format=rgb24'
+    with tempfile.TemporaryDirectory() as temporary:
+        inputs = Path(temporary)
+        for i, row in enumerate(parent['frames']):
+            (inputs/f'{i:06d}.png').symlink_to((source/row['image']).resolve())
+        subprocess.run(['ffmpeg', '-v', 'error', '-i', str(inputs/'%06d.png'),
+            '-vf', filter_text, '-fps_mode', 'passthrough', '-threads', '1', '-start_number', '0',
+            str(output/'frames/%06d.png')], check=True, timeout=180)
+    if len(list((output/'frames').glob('*.png'))) != len(parent['frames']):
+        raise ValueError('spatial transform changed the frame count')
+    rows = []
+    previous = None
+    for i, row in enumerate(parent['frames']):
+        image = output/'frames'/f'{i:06d}.png'
+        digest = sha256(image)
+        rows.append({**row, 'image': str(image.relative_to(output)), 'image_sha256': digest,
+            'parent_image_sha256': row['image_sha256'], 'identical_previous_decoded_png': digest == previous})
+        previous = digest
+    document = {**parent, 'frames': rows, 'width': width, 'height': height,
+        'spatial_view': {'parent_video_json_sha256': sha256(source/'video.json'),
+            'original_geometry': [parent['width'], parent['height']], 'output_geometry': [width, height],
+            'scale_xy': [str(Fraction(width, parent['width'])), str(Fraction(height, parent['height']))],
+            'ffmpeg_filter': filter_text,
+            'policy': 'explicit fixed spatial transform; original PTS, source-relative times and decode keys retained; no temporal resampling or fitted image alignment'},
+        'spatial_transform_tool': subprocess.check_output(['ffmpeg', '-version'], text=True).splitlines()[0]}
+    (output/'video.json').write_text(json.dumps(document, indent=2)+'\n')
     return document

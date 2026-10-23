@@ -1,7 +1,7 @@
 """Keep official playback, scalar agreement, timer alignment and visual error separate.
 
-Run in Docker after host capture. This fixed HUD calibration supports only the
-controlled, unpaused 642x528 case. Pixel error is diagnostic, with no pass threshold.
+Run in Docker after host capture. The fixed HUD calibration requires an explicit
+642x528 image view and unpaused countdown. Pixel error has no pass threshold.
 """
 import argparse
 import csv
@@ -12,7 +12,7 @@ import re
 import subprocess
 import tempfile
 
-from yt2slp.benchmark import compare_posts
+from yt2slp.benchmark import compare_posts, validate_match_settings
 from yt2slp.timeline import apply_manual_timer_labels, check_rendered_clock_timing, load_timeline
 from yt2slp.timer_labels import label_images
 from yt2slp.video import sha256
@@ -31,12 +31,15 @@ def main():
     parser.add_argument("--calibration", type=Path, required=True)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--manual-timers", type=Path, help="optional individually verified readings for unread source timers")
+    parser.add_argument('--timeline', type=Path, help='source annotations rebound to an explicit comparison view')
+    parser.add_argument('--source-calibration', type=Path, help='separate explicit source HUD glyph templates; same recognition thresholds')
     args = parser.parse_args()
     root, video_dir = args.run.resolve(), args.video.resolve()
     search = json.loads((root / "search-result.json").read_text())
     capture = json.loads((root / "official/capture.json").read_text())
     video = json.loads((video_dir / "video.json").read_text())
-    load_timeline(json.loads((root / "timeline.json").read_text()), video)
+    timeline_file = args.timeline or root/'timeline.json'
+    load_timeline(json.loads(timeline_file.read_text()), video)
     if (not search["passed"] or not search["parser_validated"] or not search["fresh_recording_bytes_match"]
             or not capture["capture_passed"] or capture["should_resync"] is not False
             or search["source_video_sha256"] != video["source_sha256"]
@@ -53,11 +56,16 @@ def main():
     native = export(root / "selected.slp", out / "selected-state.json")
     official = export(root / "official" / capture["regenerated_replays"][0], out / "official-state.json")
     settings = native["settings"]
-    if (settings["stage"] != 31 or [p["character"] for p in settings["players"]] != [2, 20]
+    ports = (0, 1)
+    if search.get('frame_clock') == 'slippi-replay':
+        match = validate_match_settings(settings, search['requested_match'])
+        ports = match.ports
+    elif (settings["stage"] != 31 or [p["character"] for p in settings["players"]] != [2, 20]
             or settings["timer_type"] != 2 or settings["timer_seconds"] != 120):
         raise ValueError("unsupported controlled timer case")
-    state = compare_posts(native, official, first, last)
+    state = compare_posts(native, official, first, last, player_indices=ports)
     calibration = json.loads(args.calibration.read_text())
+    source_calibration = json.loads(args.source_calibration.read_text()) if args.source_calibration else calibration
     generated = label_images(root / "official/user/Dump/Frames", calibration, native["timers"], first, last)
     (out / "reconstruction-labels.json").write_text(json.dumps(generated, indent=2) + "\n")
     with tempfile.TemporaryDirectory(dir=out) as temporary:
@@ -69,7 +77,7 @@ def main():
             if sha256(image) != row["image_sha256"]:
                 raise ValueError("source image differs from ingested identity")
             (source_frames / f"framedump_{i}.png").symlink_to(image)
-        source = label_images(source_frames, calibration, native["timers"], first, last)
+        source = label_images(source_frames, source_calibration, native["timers"], first, last)
         # Replace temporary aliases with persistent decode indices/PTS references.
         for record in source["records"]:
             index = int(Path(record["image"]).stem.split("_")[-1]) - 1
@@ -124,11 +132,12 @@ def main():
               "original_inputs_identified": False, "full_state_equality_measured": False,
               "render_vs_post_update_phase_equality_established": False,
               "identities": {str(p): sha256(p) for p in (Path(__file__), args.calibration, root / "search-result.json",
-                   root / "timeline.json", root / "official/capture.json", root / "selected.slp", video_dir / "video.json",
+                   root / "timeline.json", timeline_file, root / "official/capture.json", root / "selected.slp", video_dir / "video.json",
                    out / "selected-state.json", out / "official-state.json", out / "source-labels.json", out / "reconstruction-labels.json",
                    Path("src/yt2slp/timer_labels.py"), Path("src/yt2slp/timeline.py"), Path("tools/slippi-parser/export-state.cjs"),
                    Path("tools/slippi-parser/package-lock.json"), out / "source-automatic-labels.json")}}
     if args.manual_timers: report["identities"][str(args.manual_timers)] = sha256(args.manual_timers)
+    if args.source_calibration: report['identities'][str(args.source_calibration)] = sha256(args.source_calibration)
     if clip: report["comparison_clip_sha256"] = sha256(out / "comparison.mkv")
     (out / "review-result.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps({k: report[k] for k in ("pipeline_checks_passed", "source_vs_reconstruction_pixel_diagnostic", "visual_reconstruction_accepted")}, indent=2))

@@ -6,7 +6,7 @@ from pathlib import Path
 import re
 import subprocess
 
-from yt2slp.benchmark import compare_posts
+from yt2slp.benchmark import compare_posts, validate_match_settings
 from yt2slp.render_evidence import (crop_rgb, decode_rgb, label_source, load_regions,
                                     rank_region_scores, squared_error, translation_diagnostic)
 from yt2slp.timer_labels import label_images
@@ -38,8 +38,10 @@ def rank(args):
                   Path("src/yt2slp/benchmark.py"), Path("src/yt2slp/timer_labels.py"), Path("src/yt2slp/timeline.py"),
                   Path("tools/slippi-parser/export-state.cjs"), Path("tools/slippi-parser/package-lock.json"))}
     if args.manual_timers: identities[str(args.manual_timers)] = sha256(args.manual_timers)
+    if args.source_calibration: identities[str(args.source_calibration)] = sha256(args.source_calibration)
     try:
         calibration = json.loads(args.calibration.read_text())
+        source_calibration = json.loads(args.source_calibration.read_text()) if args.source_calibration else calibration
         first, last = population["capture_interval"]
         settings = None
         source_rgb = {}
@@ -65,16 +67,18 @@ def rank(args):
             native_file, official_file = out / f"native-{index:03d}.json", out / f"official-{index:03d}.json"
             native = export_state(replay, native_file)
             official = export_state(official_dir / capture["regenerated_replays"][0], official_file)
-            state_check = compare_posts(native, official, first, last)
+            state_check = compare_posts(native, official, first, last, player_indices=tuple(population.get('player_ports', (0, 1))))
             if not state_check["passed"]:
                 raise ValueError("native/official selected-state disagreement; no visual winner selected")
             if settings is None:
                 settings = native["settings"]
-                if (settings["stage"] != 31 or [p["character"] for p in settings["players"]] != [2, 20]
-                        or settings["timer_type"] != 2 or settings["timer_seconds"] != 120):
+                if 'requested_match' in population:
+                    validate_match_settings(settings, population['requested_match'])
+                elif (settings["stage"] != 31 or [p["character"] for p in settings["players"]] != [2, 20]
+                      or settings["timer_type"] != 2 or settings["timer_seconds"] != 120):
                     raise ValueError("unsupported unpaused timer case")
                 manual = json.loads(args.manual_timers.read_text()) if args.manual_timers else None
-                automatic, source, clock = label_source(video_dir, video, calibration, native["timers"], first, last, manual)
+                automatic, source, clock = label_source(video_dir, video, source_calibration, native["timers"], first, last, manual)
                 (out / "source-automatic-labels.json").write_text(json.dumps(automatic, indent=2) + "\n")
                 (out / "source-labels.json").write_text(json.dumps(source, indent=2) + "\n")
                 if not source["passed"] or not clock["passed"]:
@@ -202,6 +206,7 @@ def main():
     for name in ("candidates", "video", "regions", "calibration", "output"):
         score.add_argument("--"+name, type=Path, required=True)
     score.add_argument("--manual-timers", type=Path)
+    score.add_argument('--source-calibration', type=Path, help='separate explicit source HUD glyph templates; same recognition thresholds')
     check = sub.add_parser("verify")
     check.add_argument("--ranking", type=Path, required=True)
     check.add_argument("--run", type=Path, required=True)

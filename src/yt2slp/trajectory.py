@@ -8,7 +8,7 @@ import json
 import re
 
 from .match import NEUTRAL_PADS
-from .search import HorizontalSequence, PadSequence, run_schedule, schedule_from_dict
+from .search import HorizontalSequence, PadSequence, TwoPlayerSequence, run_schedule, schedule_from_dict
 from .video import sha256
 
 
@@ -35,6 +35,8 @@ def validate_segments(segments):
         schedule=schedule_from_dict(segment['schedule'])
         if isinstance(schedule,(HorizontalSequence,PadSequence)) and schedule.phases[-1].start_after>=last-first:
             raise ValueError('trajectory phase is outside its declared window')
+        if isinstance(schedule,TwoPlayerSequence) and any(p.program.phases[-1].start_after>=last-first for p in schedule.port_programs):
+            raise ValueError('player trajectory phase is outside its declared window')
         previous=last
 
 
