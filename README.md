@@ -307,8 +307,11 @@ official Playback across 842 player-frames. Optional
 The [first real-opening search](docs/tournament-opening.md) now tries simultaneous
 P2/P3 programs with explicit starting platforms: 24 of 72 fit sparse manual cues.
 Its coarse selected genuine replay reproduces, parses and matches its own official
-playback over -39..18. Source-image review remains a separate gate; this does not
-establish a visually accepted reconstruction or recover the original inputs.
+playback over -39..18. All 24 alternatives are rendered/ranked; the fresh selected
+17-frame comparison passes its pipeline checks but still has substantial motion
+and camera error (RGB RMSE 63.29/255). Two input programs produce identical
+images. This is an initial experiment, not a visually accepted reconstruction
+or recovery of the original inputs.
 
 ## Development checks
 

@@ -33,10 +33,12 @@ def main():
     parser.add_argument("--manual-timers", type=Path, help="optional individually verified readings for unread source timers")
     parser.add_argument('--timeline', type=Path, help='source annotations rebound to an explicit comparison view')
     parser.add_argument('--source-calibration', type=Path, help='separate explicit source HUD glyph templates; same recognition thresholds')
+    parser.add_argument('--capture', type=Path, help='explicit separately retained official capture directory')
     args = parser.parse_args()
     root, video_dir = args.run.resolve(), args.video.resolve()
     search = json.loads((root / "search-result.json").read_text())
-    capture = json.loads((root / "official/capture.json").read_text())
+    official_dir = args.capture.resolve() if args.capture else root/'official'
+    capture = json.loads((official_dir/'capture.json').read_text())
     video = json.loads((video_dir / "video.json").read_text())
     timeline_file = args.timeline or root/'timeline.json'
     load_timeline(json.loads(timeline_file.read_text()), video)
@@ -54,7 +56,7 @@ def main():
     out = args.output.resolve() if args.output else root / "review"
     out.mkdir(exist_ok=False)
     native = export(root / "selected.slp", out / "selected-state.json")
-    official = export(root / "official" / capture["regenerated_replays"][0], out / "official-state.json")
+    official = export(official_dir / capture["regenerated_replays"][0], out / "official-state.json")
     settings = native["settings"]
     ports = (0, 1)
     if search.get('frame_clock') == 'slippi-replay':
@@ -66,7 +68,7 @@ def main():
     state = compare_posts(native, official, first, last, player_indices=ports)
     calibration = json.loads(args.calibration.read_text())
     source_calibration = json.loads(args.source_calibration.read_text()) if args.source_calibration else calibration
-    generated = label_images(root / "official/user/Dump/Frames", calibration, native["timers"], first, last)
+    generated = label_images(official_dir / "user/Dump/Frames", calibration, native["timers"], first, last)
     (out / "reconstruction-labels.json").write_text(json.dumps(generated, indent=2) + "\n")
     with tempfile.TemporaryDirectory(dir=out) as temporary:
         temp = Path(temporary)
@@ -100,7 +102,7 @@ def main():
                 writer.writerow(["comparison_frame", "rendered_game_frame", "source_image", "reconstruction_image"])
                 for i, frame in enumerate(range(first, last + 1)):
                     left = video_dir / source["selected"][frame]
-                    right = root / "official/user/Dump/Frames" / generated["selected"][frame]
+                    right = official_dir / "user/Dump/Frames" / generated["selected"][frame]
                     (a / f"{i:06d}.png").symlink_to(left)
                     (b / f"{i:06d}.png").symlink_to(right)
                     writer.writerow([i, frame, str(left), str(right)])
@@ -132,7 +134,7 @@ def main():
               "original_inputs_identified": False, "full_state_equality_measured": False,
               "render_vs_post_update_phase_equality_established": False,
               "identities": {str(p): sha256(p) for p in (Path(__file__), args.calibration, root / "search-result.json",
-                   root / "timeline.json", timeline_file, root / "official/capture.json", root / "selected.slp", video_dir / "video.json",
+                   root / "timeline.json", timeline_file, official_dir / "capture.json", root / "selected.slp", video_dir / "video.json",
                    out / "selected-state.json", out / "official-state.json", out / "source-labels.json", out / "reconstruction-labels.json",
                    Path("src/yt2slp/timer_labels.py"), Path("src/yt2slp/timeline.py"), Path("tools/slippi-parser/export-state.cjs"),
                    Path("tools/slippi-parser/package-lock.json"), out / "source-automatic-labels.json")}}

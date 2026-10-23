@@ -23,8 +23,11 @@ A first real tournament opening now supports simultaneous P2/P3 programs,
 signed pre-clock search and explicit stage starting points. Of 72 programs,
 24 pass sparse manual damage/order cues; the coarse selected recording reproduces
 from a fresh boot, parses independently and matches its own official playback's
-nine fields over -39..18. This is a short development experiment, not an accepted
-visual reconstruction. Automatic gameplay recognition, unknown-start recovery and general
+nine fields over -39..18. All 24 alternatives are now rendered/ranked; fresh
+selected playback/review passes, with two visually indistinguishable input
+programs. Whole-frame RGB RMSE improves from 67.40 to 63.29 across 17 frames,
+leaving a large visible motion/camera mismatch. This is a short development
+experiment, not an accepted visual reconstruction. Automatic gameplay recognition, unknown-start recovery and general
 video-to-replay reconstruction remain unimplemented.
 
 Checked items below are implemented and validated within their stated scope.
@@ -58,8 +61,8 @@ has already been reconstructed.
 | 2 | Carry the real recipe and two players through search | Complete for one opening: explicit ports/rules/spawn indices, simultaneous programs, signed recording keys, checkpoint branches and exact fresh selected-history/byte reproduction. Signed multi-window joining remains open. |
 | 3 | Prepare source-only opening observations and comparison geometry | Manual cues and uncertainty frozen; timestamp-preserving crop/window plus fixed 642x528 Lanczos transform implemented. Six source-only image regions frozen; automatic timer failure retained and 17 clocks read individually. |
 | 4 | Reconstruct one short opening from the supplied footage | First bounded grid tried: ordinary slot starts reject all 72; observed left/right platform hypothesis accepts 24. RNG/codes remain unknown. This is a coarse 58-VI continuation, not visual acceptance or a whole match. |
-| 5 | Validate and review the actual reconstructed result | Coarse selected genuine replay parses, reproduces and is nine-field exact against actual official events over -39..18. Image review is next: early captures remain waiting screens; full Ready rendering from -123 produces game images. Complete-population ranking and comparison must pass separately. |
-| 6 | Expand coverage, then automate observations | Try another real segment/clip, handle drift/backtracking and measure manual-annotation bottlenecks. Build/train vision components only for measured recognition gaps. |
+| 5 | Validate and review the actual reconstructed result | Complete for the declared short grid: all 24 render/parse and match their own official fields across 816 player-frames (1..17). Ranking retains two exact ties; fresh selected official review and 17-frame comparison pass. RMSE 63.29 remains too large to claim visual acceptance. Retain failed early captures/calibrations. |
+| 6 | Improve motion fit, extend coverage, then automate observations | Next: platform-drop/fast-fall and longer movement hypotheses for this opening, then a longer annotated continuation. Preserve ties and failures. Later try another clip, handle drift/backtracking and measure recognition gaps before training. |
 
 The current seed/time-base choices are simulation hypotheses, not recovered
 source values. General starting-state/RNG recovery, camera/world-coordinate
@@ -406,7 +409,7 @@ features or prerequisites for the first short-clip reconstruction.
 
 ## Latest validation and retained evidence
 
-The latest Docker Python run passed **340 tests**. The current native build passed
+The latest Docker Python run passed **343 tests**. The current native build passed
 **10 host/component and 23 game-library tests**; the unchanged independent parser's
 last component run passed **9 tests**. Synthetic protocol/component tests
 establish their tested behavior; the following local ISO runs provide separate
@@ -417,6 +420,8 @@ gameplay, recording and playback evidence.
 | Batch and stepping | User-reported matching 3000-retrace runs; 600-step check advanced match frames 1..601 with stable pauses and input effects |
 | Checkpoint experiment | Capture 241, four continuations to 421, three successful restores; `.docker-state/local/runs/step-2o7rj74b/` |
 | First real opening | 24/72 sparse-cue-compatible programs after explicit platform setup; coarse selected recording/fresh/parser pass, nine own official fields exact across 116 player-frames (-39..18); `.docker-state/local/runs/step-ozreb1l0/official-analysis/result.json` |
+| First real-opening image review | All 24 actual renders/timer labels/own nine fields pass; two exact minima have identical 17-frame images and selected state despite different controls. Fresh selected comparison RMSE 63.29, visual acceptance false; `.docker-state/local/runs/step-g3m7lfe7/review/` and `tournament-opening-v2/ranking-ready-border-v1/verification.json` |
+| Bright-stage timer correction | Explicit opt-in border-component segmentation; source manual readings retained, thresholds unchanged. Prior 161-frame labels/records unchanged; `tournament-opening-v2/timer-legacy-regression.json` |
 | Recording and independent parser | Branch-byte comparisons and parser report; `.docker-state/local/runs/step-qa9h0_nl/` |
 | Reusable recording experiment | Same selected replay bytes and matching selected states; `.docker-state/local/runs/step-jrevwdnh/recording-result.json` |
 | Bounded official Playback 3.5.2 | Contiguous -123..422 frame reports, resync disabled; `.local/playback-full/result.json` and `stdout.log` |

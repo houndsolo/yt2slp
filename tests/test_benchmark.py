@@ -125,6 +125,40 @@ def test_ambiguous_or_bad_glyphs_stay_unknown():
     assert glyphs(bytes(20),5,4,2) is None
 
 
+def glyph_fixture(bright_background):
+    width, height = 22, 12
+    pixels = bytearray([255 if bright_background else 0]*(width*height))
+    # Two enclosed glyphs with black outlines, on either bright or dark sky.
+    for x, pattern in [(3, [(0,0),(0,1),(0,2),(0,3),(1,3),(2,3),(3,3)]),
+                       (14, [(0,0),(1,0),(2,0),(3,0),(3,1),(3,2),(3,3)])]:
+        for yy in range(1, 8):
+            for xx in range(x-1, x+5):pixels[yy*width+xx] = 0
+        for xx, yy in pattern:pixels[(yy+2)*width+x+xx] = 255
+    return bytes(pixels), width, height
+
+
+def test_declared_border_policy_removes_white_sky_without_changing_enclosed_glyphs():
+    dark, width, height = glyph_fixture(False)
+    bright, _, _ = glyph_fixture(True)
+    expected = glyphs(dark, width, height, 2)
+    assert expected is not None and expected[0] != expected[1]
+    assert glyphs(bright, width, height, 2) != expected
+    assert glyphs(bright, width, height, 2, discard_border_components=True) == expected
+    assert glyphs(dark, width, height, 2, discard_border_components=True) == expected
+
+
+def test_border_policy_does_not_invent_missing_digits():
+    bright, width, height = glyph_fixture(True)
+    assert glyphs(bright, width, height, 3, discard_border_components=True) is None
+    assert glyphs(bytes([255])*width*height, width, height, 2, discard_border_components=True) is None
+
+
+def test_unknown_timer_background_policy_is_rejected_before_calibration(tmp_path):
+    from yt2slp.timer_labels import calibrate
+    with pytest.raises(ValueError, match='background policy'):
+        calibrate({'background_policy': 'invent-missing-digits'}, tmp_path)
+
+
 def test_capture_reports_require_exact_requested_interval_and_file():
     script=Path(__file__).resolve().parents[1]/'scripts/capture_benchmark.py'
     spec=importlib.util.spec_from_file_location('capture_benchmark',script)

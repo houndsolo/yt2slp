@@ -181,7 +181,7 @@ def verify(args):
     report = {"schema": 1, "verification_checks_passed": oracle is None or oracle["passed"], "selected_replay_sha256": ranking["selected_replay_sha256"],
               "selected_schedule": ranking["selected_schedule"], "fit_video_frames": sorted(fit),
               "held_out_rgb_rmse": math.sqrt(sum(held_out)/len(held_out)), "held_out_frame_count": len(held_out),
-              "holdout_scope": "other frames of the same controlled clip; not independent-match generalization",
+              "holdout_scope": "other frames of the same source clip; not independent-match generalization",
               "whole_clip_rgb_rmse": review["source_vs_reconstruction_pixel_diagnostic"]["rgb_rmse_0_to_255"],
               "visual_accuracy_accepted": False, "absolute_acceptance_threshold": None,
               "original_inputs_identified": False, "world_positions_measured": False,

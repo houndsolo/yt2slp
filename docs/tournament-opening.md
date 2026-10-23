@@ -108,10 +108,24 @@ individually observed and identity-bound; automatic failures remain retained.
 Clean official HUD templates come from earlier independent official probes.
 Both calibrations retain the original recognition thresholds. The source-only
 glyph templates are not assumed to recognize clean official images.
-The initial clean-official calibration also fails complete timer coverage, even
+The initial clean-official calibration also failed complete timer coverage, even
 after full Ready rendering produces gameplay images. That failure is retained;
-no rendered winner or aligned comparison is accepted yet. Timer segmentation or
-individually observed official labels must be validated before continuing ranking.
+the bright sky was being chosen as a glyph component. An explicit opt-in
+`background_policy: "discard-border-components"` now removes white components
+connected to the crop edge before choosing enclosed glyphs. Legacy calibration
+behavior and confidence thresholds are preserved. The full Ready probe then has
+all 17 official timer labels with no gaps/duplicates. On the compressed source,
+seven labels are automatic and ten remain unread; the 17 individually observed
+readings provide full coverage with zero PTS/clock discrepancy. No interpolation
+or frame numbering supplies missing labels. Complete-population ranking is
+checked separately from these calibration corrections.
+
+The first coarse selected branch now has an independently timer-aligned 17-frame
+side-by-side clip (`coarse-review/comparison.mkv`) and exact native/official
+selected-field checks. Whole-frame RGB RMSE is **67.40/255**. This includes
+camera, background, HUD and compression; it is a diagnostic without an acceptance
+threshold. The large visible mismatch reinforces why cue acceptance alone is
+insufficient.
 
 The initial request beginning at replay frame 0 passed progression and event
 checks, but yielded only "Waiting for game" images. Image coverage rejected the
@@ -121,6 +135,30 @@ comparison interval 1..17. Starting at -40 also retained the waiting screen;
 starting at the first recorded frame, -123, produces actual gameplay images.
 Timer coverage remains a separate gate. Progression, usable images and likeness
 are separate.
+
+The complete 24-candidate population then passes all official timer checks and
+all nine native/official fields over 1..17: **816 player-frames** in total. The
+unchanged six-region objective selects index **8**, tied exactly with **10**.
+Equal-region RMSE falls from 91.93 (coarse index 4) to 79.56. A separate diagnostic
+finds that the two ties have all 17 official PNGs and nine exported state fields
+identical despite different genuine replay bytes. They differ in Captain's X
+hold (two/four requests); original controls are not identifiable from this view.
+
+Index 8 uses Falco X at 0, release 2, B at 12, release 13; Captain left/X at 0,
+release X at 2, release stick at 16. A new selected-only search reproduces its
+observations, signed keys and replay bytes from fresh boots. Parser and a new
+actual official capture/review pass. Selected SHA-256:
+`6357e0b8eb24f6ab8c725cc072c15e68d0971d2b0809a89fca332b14e7a477aa`.
+
+The selected 17-frame comparison has whole-frame RGB RMSE **63.29/255**, versus
+67.40 for the coarse choice. The 15 frames outside the two annotated fit frames
+have RMSE **63.21**; they are neighboring frames of this development clip, not an
+independent-match evaluation. Ranking verification passes without any source
+state oracle. Visual acceptance remains false: the source fighters descend from
+the platforms while the current minimum leaves them near the side platforms,
+with substantially different camera framing. The next grid needs hypotheses for
+platform drops/fast-falls and longer two-player movement, then a longer annotated
+continuation. Training a vision model will not repair missing input hypotheses.
 
 ## Commands and local evidence
 
@@ -159,16 +197,21 @@ Local artifacts:
 | Unusable zero-start captures and rejected rankings | `tournament-opening-v2/candidates/`, `ranking/`, `ranking-manual/`, `ranking-official-hud/` |
 | Retained failed -40-start population | `tournament-opening-v2/candidates-preroll/` |
 | Full Ready population | `tournament-opening-v2/candidates-ready/` |
+| Verified image ranking, retained tie and neighboring-frame diagnostics | `tournament-opening-v2/ranking-ready-border-v1/` |
+| Fresh selected official review and 17-frame comparison | `.docker-state/local/runs/step-g3m7lfe7/review/` |
 
-Paths in the last two rows are under `.docker-state/local/`. Source MP4 SHA-256:
+Abbreviated paths above are under `.docker-state/local/`. Source MP4 SHA-256:
 `635289c32b6c21d9b9b19ddb9933bee933cb257177565d5068b78a71b3963f80`.
 Frozen protocols bind image, code and recipe hashes; failed hypotheses are kept.
 No whole-match reconstruction, original-input recovery, source RNG recovery,
 full-state equality or absolute visual acceptance is established.
 
 The current Docker build passes 10 host/component and 23 game-library tests.
-The Python suite passes 340 tests, including signed/raw counter separation,
+The Python suite passes 343 tests, including signed/raw counter separation,
 independent controller release, failed-grid cleanup, explicit setup gates and
 fixed spatial views with preserved nonzero PTS. The unchanged pinned parser's
 last component run passed nine tests. ISO and official-image evidence is separate
 from synthetic component tests.
+The legacy 161-frame case's complete serialized timer records and selected-image
+mapping are unchanged under the default calibration policy; retained report:
+`tournament-opening-v2/timer-legacy-regression.json`.

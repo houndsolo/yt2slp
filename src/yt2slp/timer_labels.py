@@ -1,7 +1,8 @@
-"""Local HUD glyph calibration for one fixed, unpaused reference-capture case.
+"""Explicit local HUD glyph calibration for fixed 642x528 capture geometry.
 
 Calibration is manually annotated from retained images. It is not a shipped game
 font/model or a general OCR pipeline. Missing/ambiguous labels stay unknown.
+Bright-background segmentation is opt-in; legacy calibrations retain their policy.
 """
 import hashlib
 import math
@@ -30,7 +31,7 @@ def decode_region(input_path, box, sequence=False):
     return subprocess.run(command,capture_output=True,check=True).stdout
 
 
-def glyphs(pixels, width, height, count):
+def glyphs(pixels, width, height, count, *, discard_border_components=False):
     if len(pixels)!=width*height:
         raise ValueError('invalid grayscale region size')
     mask={i for i,b in enumerate(pixels) if b>=190}
@@ -43,7 +44,11 @@ def glyphs(pixels, width, height, count):
                 n=yy*width+xx
                 if 0<=xx<width and 0<=yy<height and n in mask:
                     mask.remove(n);queue.append(n)
-        if len(queue)>5:components.append(queue)
+        # Bright stages can make the white background larger than a digit. A
+        # separately declared calibration policy excludes components connected
+        # to the crop border; black glyph outlines keep enclosed digits apart.
+        border = any(i%width in (0,width-1) or i//width in (0,height-1) for i in queue)
+        if len(queue)>5 and not (discard_border_components and border):components.append(queue)
     if len(components)<count:return None
     components=sorted(sorted(components,key=len,reverse=True)[:count],key=lambda c:min(i%width for i in c))
     result=[]
@@ -69,6 +74,9 @@ def decode(text):
 
 
 def calibrate(annotations, base):
+    policy=annotations.get('background_policy','all-components')
+    if policy not in ('all-components','discard-border-components'):
+        raise ValueError('unsupported timer background policy')
     templates={name:{} for name in BOXES};sources=[]
     for anchor in annotations['anchors']:
         image=(base/anchor['image']).resolve()
@@ -76,7 +84,8 @@ def calibrate(annotations, base):
         if not re.fullmatch(r'\d{2}:\d{2}\.\d{2}',anchor['timer']):raise ValueError('invalid annotated timer')
         digits=re.sub(r'\D','',anchor['timer'])
         for name,part,count in (('main',digits[:4],4),('fraction',digits[4:],2)):
-            box=BOXES[name];found=glyphs(decode_region(image,box),box[2],box[3],count)
+            box=BOXES[name];found=glyphs(decode_region(image,box),box[2],box[3],count,
+                discard_border_components=policy=='discard-border-components')
             if found is None:raise ValueError('annotated image has no complete timer glyphs')
             for digit,bits in zip(part,found):
                 templates[name].setdefault(digit,[])
@@ -84,9 +93,11 @@ def calibrate(annotations, base):
                 if word not in templates[name][digit]:templates[name][digit].append(word)
         sources.append({'image':str(image),'timer':anchor['timer'],'sha256':hashlib.sha256(image.read_bytes()).hexdigest()})
     if set(templates['fraction'])!=set('0123456789'):raise ValueError('fraction calibration must cover all ten digits')
-    return {'schema':1,'geometry':[642,528],'boxes':BOXES,'templates':templates,'sources':sources,
+    result={'schema':1,'geometry':[642,528],'boxes':BOXES,'templates':templates,'sources':sources,
             'provenance':'manually verified timer annotations on retained images',
             'threshold':190,'max_hamming_error':0.12,'minimum_margin':0.015}
+    if policy!='all-components':result['background_policy']=policy
+    return result
 
 
 def recognize(found, templates, max_error, min_margin):
@@ -103,10 +114,12 @@ def recognize(found, templates, max_error, min_margin):
 
 
 def label_images(folder, calibration, timers, first, last):
+    policy=calibration.get('background_policy','all-components')
     if (calibration.get('schema')!=1 or calibration['geometry']!=[642,528]
             or calibration['boxes']!={k:list(v) for k,v in BOXES.items()}
             or calibration.get('threshold')!=190 or calibration.get('max_hamming_error')!=0.12
-            or calibration.get('minimum_margin')!=0.015):
+            or calibration.get('minimum_margin')!=0.015
+            or policy not in ('all-components','discard-border-components')):
         raise ValueError('unsupported calibration geometry/schema')
     files=sorted(folder.glob('framedump_*.png'),key=lambda p:int(p.stem.split('_')[-1]))
     if not files or [int(p.stem.split('_')[-1]) for p in files]!=list(range(1,len(files)+1)):
@@ -131,7 +144,8 @@ def label_images(folder, calibration, timers, first, last):
             if len(raw)!=size*len(eligible):raise ValueError('decoded PNG count/geometry mismatch')
             recognized[name]=[None]*len(files)
             for i,source_index in enumerate(eligible):
-                recognized[name][source_index]=recognize(glyphs(raw[i*size:(i+1)*size],box[2],box[3],count),
+                recognized[name][source_index]=recognize(glyphs(raw[i*size:(i+1)*size],box[2],box[3],count,
+                    discard_border_components=policy=='discard-border-components'),
                     calibration['templates'][name],calibration['max_hamming_error'],calibration['minimum_margin'])
     for path,a,b in zip(files,recognized['main'],recognized['fraction']):
         digits=a['digits']+b['digits'] if a and b else None
@@ -141,6 +155,7 @@ def label_images(folder, calibration, timers, first, last):
     summary=summarize_labels(records,first,last)
     return {'schema':1,'method':'manually calibrated rendered HUD timer; no interpolation or numbering-based labels',
             'frame_label_provenance':'inferred from captured timer using local verified calibration',
+            'background_policy':policy,
             'recognition_policy':{k:calibration[k] for k in ('threshold','max_hamming_error','minimum_margin')},
             'uncalibrated_geometry_images':len(files)-len(eligible),
             'interval':[first,last],'records':records,**summary,
