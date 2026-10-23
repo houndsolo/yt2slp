@@ -68,10 +68,19 @@ The next work is deliberately narrow:
 2. Completed: add an opt-in Slippi Game Start seed boundary. The game records the
    requested 33480, fresh reproduction and official playback pass, and default
    item-setup replay bytes remain unchanged. Motion error remains 54.02/255.
-3. Next: audit the remaining source code configuration, then add vertical/platform
-   cues and descent programs. Keep the source controls/later state out of selection.
-4. Extend the fitted interval only after motion improves; then try another
-   supplied example. YouTube fitting and model training remain later work.
+3. Next: build paired official-render/replay training data and start a small
+   temporal observation/input-proposal baseline. Manual grids tested the plumbing;
+   they cannot scale to compound sequences such as dash, short hop, laser and
+   fast-fall. Do not require a perfect manually fitted opening before learning.
+4. Verify video/replay/input timing and split whole matches/sessions before
+   training. Training replays supply controller/state labels intentionally;
+   held-out reconstruction inputs/state remain sealed during selection.
+5. Integrate multiple learned input proposals with native verification and timing
+   refinement. Audit source-code compatibility in parallel. Extend coverage and
+   later handle YouTube appearance differences using measured held-out results.
+
+The [learning plan](learning-plan.md) defines this next milestone. Training and
+automatic recognition are not implemented yet; no training run has started.
 
 Spawn policy is a required starting condition. Slippi has custom neutral-start
 codes that place the two fighters on opposite sides; ordinary SSBM uses distinct
@@ -83,8 +92,10 @@ Do not compensate for a wrong start by fitting later inputs or image transforms.
 Pause further YouTube fitting. First render one of the user-supplied replays in
 `recordings/examples/` to MP4 with official Playback, verify the actual startup
 policy/codes, and reconstruct a short segment of that standardized video.
-Keep the original replay's controls and later state out of candidate selection;
-use them only for a separate post-selection evaluation. Any supplied initial
+For held-out reconstruction cases, keep the original replay's controls and later
+state out of candidate selection; use them only for separate post-selection
+evaluation. Separate training replays provide supervised labels by design.
+Any supplied initial
 settings, seed or prefix must be explicitly declared rather than presented as
 values recovered from the MP4.
 
@@ -95,7 +106,7 @@ values recovered from the MP4.
 | 3 | Verify the standardized starting recipe | Initial-layout gate passes: explicit stage points 2/3 match seven fields at -123/-40. Opt-in API 21 Game Start seeding now records the correct 33480, with no later reset; exported setup summary matches. Remaining: full source code configuration, UCF and subsequent hidden-state/RNG equality. |
 | 4 | Reconstruct a short video-only segment | First attempt complete: 64 declared programs, two cue-compatible; both parsed/rendered. Six fixed source regions select index 48. Source controls/later state are excluded from selection. Grid still misses the observed platform descent. |
 | 5 | Validate the selected reconstruction | Fresh genuine bytes/parser/own official fields/timer alignment and 17-frame comparison pass. Post-selection source-state comparison fails; RMSE 54.02, visual acceptance false. Retain the missing automatic clock label and one literal manual reading. |
-| 6 | Improve this benchmark before expanding | Next: audit remaining supported codes, add vertical/platform constraints, and search effective descent/movement timings. The seed correction alone leaves image/motion error unchanged. Then extend the fitted interval and another example. |
+| 6 | Start the learned reconstruction baseline | Next: aligned replay/video dataset, whole-match splits, and a temporal model predicting controller distributions plus action/ground-air cues. Validate timing on compound movement; simulator refines proposals. Source-code compatibility remains a parallel validation task. |
 
 The current seed/time-base choices are simulation hypotheses, not recovered
 source values. General starting-state/RNG recovery, camera/world-coordinate
