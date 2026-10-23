@@ -1,9 +1,7 @@
 # Remote V100 training workspace
 
-Validated 2026-10-23 over user-authorized SSH. The connection target, checkout
-path and GPU UUID are in the workstation's ignored
-`.docker-state/local/remote-setup-v1/connection.json`, outside this public guide.
-SSH uses the existing key without forwarding credentials.
+Validated 2026-10-23 over SSH at `prompter@10.12.0.10`. The dedicated checkout is
+`/home/prompter/yt2slp`. SSH uses the existing key without forwarding credentials.
 In the restricted local execution environment, `ssh -F /dev/null` bypasses a
 system SSH configuration ownership error; normal host SSH configuration was not
 edited. No interactive action or extra system RAM is needed for this pilot.
@@ -12,15 +10,19 @@ edited. No interactive action or extra system RAM is needed for this pilot.
 
 | Item | Measured configuration |
 | --- | --- |
-| Training GPU | 32 GB Volta, compute capability 7.0 |
-| GPU selection | One explicit GPU UUID from the private connection profile |
+| Host | Ubuntu 26.04.1 LTS, x86-64 |
+| Training GPU | Tesla PG500-216, compute capability 7.0, 32,768 MiB reported VRAM |
+| GPU selection | Physical index 1; GPU UUID `GPU-ce8ddd39-0bf5-1021-dbe2-221ddcb9ece5` |
+| Other GPU | GT 1030 at index 0; the Docker helper selects one explicit device |
+| NVIDIA driver | 580.178.04 |
 | Host memory | About 30 GiB usable RAM plus 8 GiB swap |
 | Disk | About 707 GiB free after installation, versus 722 GiB before setup |
 | Container | Existing project Debian 13 / GCC 14 image, Python 3.13.5 |
 | Optional ML environment | `.docker-state/local/learning-cu126` on host; `/work/.local/learning-cu126` in Docker |
 | Framework | PyTorch 2.10.0+cu126, torchvision 0.25.0+cu126, CUDA 12.6, cuDNN 9.10.2 |
 
-The image build installs its own tools; ML packages live in a separate ignored virtual
+The host's Python 3.14, driver and Docker daemon were not replaced. The image
+build installs its own tools; ML packages live in a separate ignored virtual
 environment. Game rendering/ISO work remains on the Arch workstation for now;
 the remote checkout has not built the asset-backed native engine or validated
 official Playback. The existing prepared pilot images/labels and public encoder
@@ -35,9 +37,10 @@ or `torch.cuda.is_available()` result alone.
 
 ## Existing containers
 
-At the user's explicit request, the existing LLM workload was stopped and restart
-policies were set to `no` for the existing service containers. Their data and
-configuration were retained. Container names and prior states are recorded privately in
+At the user's explicit request, the running `llama-v100` container was stopped
+and restart policies were set to `no` for it and the already-stopped
+`open-webui` and `llama-ollama-1` containers. Their containers/data/configuration
+were retained. Prior states are recorded remotely in
 `.docker-state/local/remote-setup-v1/previous-containers.txt`.
 
 The V100's reported free memory increased from 8,471 MiB to **32,495 MiB**.
@@ -47,15 +50,18 @@ No matching LLM systemd service was found in the inspected system/user unit list
 
 ## Reproduce setup and GPU validation
 
-On the remote host, set `YT2SLP_REMOTE_ROOT` and `YT2SLP_GPU` from the private
-connection profile, then run from the dedicated checkout:
+Connect from the workstation:
 
 ```bash
-: "${YT2SLP_REMOTE_ROOT:?Set the remote checkout path}"
-: "${YT2SLP_GPU:?Set the training GPU UUID}"
-cd "$YT2SLP_REMOTE_ROOT"
-export YT2SLP_GPU
+ssh -F /dev/null -o BatchMode=yes prompter@10.12.0.10
+```
+
+On the remote host, from the dedicated checkout:
+
+```bash
+cd /home/prompter/yt2slp
 bash scripts/docker.sh build
+export YT2SLP_GPU=GPU-ce8ddd39-0bf5-1021-dbe2-221ddcb9ece5
 bash scripts/docker.sh run uv venv --python python3.13 .local/learning-cu126
 bash scripts/docker.sh run uv pip sync \
   --python .local/learning-cu126/bin/python tools/learning/requirements-cu126.lock \
