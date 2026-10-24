@@ -68,3 +68,19 @@ def test_corpus_controls_select_new_workers_and_keep_legacy_configuration():
         if kind=='preparation':assert '--shm-size=2g' in command
     legacy=json.loads((ROOT/'configs/vision-v100.json').read_text())
     assert 'tools/learning/train.py' in docker_command(legacy,ROOT/'configs/vision-v100.json','training')
+
+
+def test_state_experiment_uses_separate_workers_and_run_identity():
+    config=json.loads((ROOT/'configs/vision-v100-state.json').read_text());validate_config(config)
+    for kind,script in (('preparation','prepare_state.py'),('training','train_state.py'),('review','review_state.py')):
+        command=docker_command(config,ROOT/'configs/vision-v100-state.json',kind)
+        assert 'tools/learning/'+script in command
+        assert 'org.yt2slp.run='+config['run_directory'] in command
+
+
+def test_request_for_a_different_active_run_cannot_change_its_controls():
+    from manage import request
+    config=json.loads((ROOT/'configs/vision-v100-sequence.json').read_text())
+    with patch('manage.inspect',return_value={'Running':True,'RunDirectory':'another-run'}), patch('manage.atomic_json') as write:
+        with pytest.raises(ValueError,match='another run'):request(config,'pause')
+        write.assert_not_called()

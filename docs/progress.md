@@ -81,18 +81,30 @@ unestablished. A label-free two-state Viterbi decoder now enforces consistent
 button transitions without retraining; [comparison method and reviews](constrained-decoding.md).
 See [server corpus training](corpus-training.md).
 
-The current default is now a **fresh held-state sequence run**, with valid button
+The `~/train-melee` default is the **held-state sequence run**, with valid button
 transitions and digital shoulder/Z trigger coupling built into the architecture
 and training loss from step zero. It reuses the verified corpus, preserves the
 old models and runs detached on the V100 under `vision-training/sequence-v1/`.
 Digital L/R produces effective trigger 1; Z takes priority at float32 0.35, matching
 all 375 original L/R-plus-Z exceptions. Actual CUDA pause/resume/stop and two
-saved-model reviews pass with no constraint violations. The full-corpus 20,000-step
-run has started; recognition quality is still an open gate. See
+saved-model reviews pass with no constraint violations. The full-corpus run has
+completed 20,000 steps; best at 16,000 has hold/press/release F1
+0.24679/0.04117/0.01998. Recognition quality is still an open gate. See
 [sequence training and model paths](sequence-training.md).
 Its first full validation at 1,000 updates scores hold/press/release F1
 0.15673/0.01504/0.00983 with zero button/trigger violations; checkpoints are saved
-and training continues. These early results do not establish improved recognition.
+and the early values remain retained as history. Useful input recognition is not established.
+
+The [completed error report](input-error-analysis.md) reproduces all saved counts
+on 55 development clips. Two-frame timing allowances remain poor, a fixed
+training-weight threshold offset collapses recall, and a global player swap
+worsens results. A separate [matched vision pilot](vision-state-experiment.md)
+now completes 1,000 updates on 13,600 training/5,800 validation images. Fine-tuning
+the final CNN block raises paired action accuracy **26.53%→37.16%**, macro recall
+**9.97%→16.10%**, and airborne balanced accuracy **80.74%→85.87%**. Its fixed
+development gates pass; final tests remain sealed. `~/train-vision` controls this
+separate run. Carrying the learned encoder into 60 Hz constrained controller
+training is next; input F1 improvement is not yet established.
 
 Checked items below are implemented and validated within their stated scope.
 Unchecked items are remaining work. Proposed later work is a roadmap, not a
@@ -158,9 +170,11 @@ The next work is deliberately narrow:
    worsen the mean button F1. Old checkpoints and trainer contracts remain.
    Four fixed raw/constrained reviews remove all 4,554 inconsistent button/frames;
    hold F1 improves, press/release worsen. A separate held-state sequence model
-   now trains from scratch with derived edges and digital shoulder/Z coupling.
-   Its detached full-corpus run has started; evaluate it without changing old
-   checkpoint contracts or opening final-test matches.
+   completed 20k with derived edges and digital shoulder/Z coupling, but its best
+   mean event F1 is only 0.10265. Full error analysis and the paired vision pilot
+   are now complete; fine-tuning improves state recognition. Next, freeze that
+   encoder and measure a separate controller run, retaining all old contracts
+   and keeping final-test matches sealed.
 6. Completed bounded calibration: measure native request/replay timing and scalar
    PAD response, then reproduce five known-control recordings byte for byte.
    Four actual official playbacks match effective controls and nine selected state
@@ -170,8 +184,8 @@ The next work is deliberately narrow:
 7. Button bookkeeping is implemented both as a label-free old-model Viterbi path
    and as the new held-state architecture; digital shoulder/Z trigger coupling is
    enforced in the new run. Other joint analog/button proposals and alternative
-   paths remain open. Next:
-   build/smoke-test the native engine on the V100, finish the learned-input
+   paths remain open. Next: integrate the measured vision gain into controller
+   proposals, build/smoke-test the native engine on the V100, finish the learned-input
    decoder, verify compatible
    setup/codes and signed prefix/tail handling, then run image-only proposals
    through native checkpoint branches and timing refinement. Finish with actual
@@ -485,8 +499,19 @@ to postpone measuring a narrower supported case.
   560, plus two real saved-model review videos. Both constraint violation counts
   are zero; old model pointers/payloads/contracts remain unchanged. Start the
   detached full-corpus `sequence-v1` run and make it the manual controller default.
-- [ ] Complete/evaluate the new sequence run against the raw and constrained old
-  model baselines; establish useful recognition. Keep final-test matches sealed.
+- [x] Complete/evaluate the sequence run: 20k total, best at 16k with mean event
+  F1 0.10265; valid constraints do not establish correct timing or useful recognition.
+- [x] Diagnose the frozen best model over all 55 development clips. Exact counts
+  reproduce; one-to-one timing, training-only fixed threshold offsets and slot
+  swaps are diagnostics only. No fitted phase/assignment is deployed.
+- [x] Complete a matched frozen/last-block-fine-tuned vision pilot with supplied
+  identity and spatial attention: 13,600 train/5,800 validation images, 1,000 updates,
+  action accuracy 26.53%→37.16%, macro recall 9.97%→16.10%. Fixed gates pass.
+- [x] Validate matched CUDA pause at 170, resume/stop at 240, exact CPU resume,
+  fixed BN and real encoder updates; add independent `~/train-vision` controls.
+- [ ] Encode full 60 Hz views with the frozen learned encoder and evaluate a
+  separate constrained controller model. State-recognition gain is not yet an
+  input-recognition result. Keep final-test matches sealed.
 - [x] Implement server-local detached training controls, atomic checkpoint
   generations, optimizer/sampler/random-state resume and bounded feature loading.
   Exact CPU resumed/uninterrupted equality, save-failure recovery and split/content
@@ -698,10 +723,11 @@ features or prerequisites for the first short-clip reconstruction.
 
 ## Latest validation and retained evidence
 
-The latest Docker run passed **448 Python tests**, including exact Viterbi versus
+The latest Docker run passed **456 Python tests**, including exact Viterbi versus
 exhaustive search, one-frame taps, free initial/terminal states and sequence-key
-guards and the new image-seeded shoulder/Z decoder. On the V100, **28 optional
-model/trainer tests** pass (19 existing and nine new sequence cases). These include
+guards, maximum-cardinality timing matches, vision split/identity and rollout
+guards. On the V100, **34 optional model/trainer tests** pass, including six matched
+vision gradient/resume cases. These include
 exact CPU optimizer/RNG resume, multiple-clip boundaries, mirror slots, leakage
 guards, explicit roster phase-transfer scope and bulk-HUD rejection rules.
 The last independent parser run passed **17 parser/preparation/export/catalog tests**.
@@ -717,7 +743,9 @@ gameplay, recording and playback evidence.
 | Server corpus preparation validation | Four accepted clips/4,800 frames; full HUD agreement and nine original/official fields exact across 9,600 player-frames; GPU features and physical-port targets; V100 `.docker-state/local/vision-corpus-v3/preview-dataset.json`; initial parallel startup failure retained in `vision-corpus-v3-pilot/` |
 | Completed server corpus/run | 186 accepted 20-second clips/62 minutes, 114 failures excluded; 131 training clips/68 matches and 55 validation clips/29 matches; completed 200k, best at 10k with mean button F1 0.12055; V100 `.docker-state/local/vision-corpus-v3/dataset.json` and `vision-training/corpus-v3/` |
 | Constrained button reviews | Four fixed 20-second clips, 9,360 scored player-frames; inconsistent button/frames 4,554→0; hold F1 improves but press/release worsen; full MP4 decode/checkpoint preservation pass; V100 `vision-training/corpus-v3/reviews/review-1792872411936275955/`; local `.docker-state/local/constrained-reviews-v1/`; [method/results](constrained-decoding.md) |
-| Held-state sequence training | Fresh 905,028-parameter temporal model, derived edges and digital shoulder/Z trigger rules; real CUDA pause 260→resume/stop 560, two fully decoded review MP4s, zero invalid button/trigger frames; V100 `vision-training/sequence-v1-smoke/controller-validation.json`; full run started in `vision-training/sequence-v1/`; [details](sequence-training.md) |
+| Held-state sequence training | Fresh 905,028-parameter temporal model, derived edges and digital shoulder/Z trigger rules; CUDA pause 260→resume/stop 560; full run completed 20k, best mean F1 0.10265 at 16k; zero constraint violations; V100 `vision-training/sequence-v1/`; [details](sequence-training.md) |
+| Controller error analysis | Best 16k counts reproduced over 55 clips; 460 correct/16,411 false presses, two-frame press F1 0.13452, fixed weight-offset press F1 0.01194; V100 `.docker-state/local/error-analysis-sequence-v1/report.json`; [analysis](input-error-analysis.md) |
+| Matched vision pilot | 1,000 paired updates, same inputs/heads/batches; frozen/fine-tuned action accuracy 26.53%/37.16%, macro recall 9.97%/16.10%; fixed development gates pass; V100 `vision-training/state-vision-v1/experiment-result.json`; [protocol/results](vision-state-experiment.md) |
 | New trainer CUDA lifecycle | Detached start, pause at 40, resume and stop at 60; earlier 100k checkpoint pointer unchanged; V100 `.docker-state/local/vision-training/corpus-v3-smoke/controller-validation.json`; smoke model has no useful-recognition acceptance |
 | New saved-model review | Both 1,200-frame validation controller-review MP4s complete with zero worker exit; V100 `vision-training/corpus-v3-smoke/reviews/review-1792805991392523494/`; image-only predictions precede labels; no generated gameplay |
 | Full corpus preparation | Detached 300-clip batch launched with networking disabled and four cached valid shards; V100 `.docker-state/local/vision-corpus-v3/full-launch.json`; production dataset/training remain pending |

@@ -21,7 +21,7 @@ def inspect(kind):
     container = json.loads(result.stdout)[0]
     if container['Config'].get('Labels',{}).get('org.yt2slp.role')!=ROLES[kind]:
         raise ValueError('container name belongs to another application; left untouched')
-    return container['State']
+    return {**container['State'], 'RunDirectory':container['Config'].get('Labels',{}).get('org.yt2slp.run')}
 
 
 def validate_config(config):
@@ -32,6 +32,12 @@ def validate_config(config):
         # venv Python deliberately symlinks to the container's system interpreter.
         checked = Path(os.path.abspath(ROOT/path)) if key=='python' else (ROOT/path).resolve()
         if path.is_absolute() or not checked.is_relative_to(ROOT): raise ValueError(f'{key} must stay in checkout')
+    if config.get('pipeline')=='state-vision-v1':
+        for key in ('source_data_directory','encoder_weights'):
+            path=Path(config[key])
+            if path.is_absolute() or not (ROOT/path).resolve().is_relative_to(ROOT): raise ValueError(f'{key} must stay in checkout')
+        if (type(config.get('frame_stride')) is not int or not 1<=config['frame_stride']<=60
+                or not 0<config.get('encoder_learning_rate',0)<1): raise ValueError('invalid state vision sampling/learning rate')
     bounds = {'context_frames':(3,121),'batch_size':(1,256),'hidden_size':(16,512),'threads':(1,32),
         'max_steps':(1,1000000000),'checkpoint_every':(1,1000000),'evaluate_every':(1,1000000),'log_every':(1,1000000),
         'train_matches':(2,1000),'validation_matches':(1,1000),'prepare_last_frame':(180,1800)}
@@ -39,8 +45,8 @@ def validate_config(config):
         if type(config[key]) is not int or not low<=config[key]<=high: raise ValueError(f'invalid {key}')
     if config['context_frames']%2!=1 or not 0<config['learning_rate']<1 or not 0<config['gpu_memory_fraction']<=1:
         raise ValueError('invalid context, learning rate or memory cap')
-    if config.get('pipeline') not in (None,'corpus-v3','sequence-v1'): raise ValueError('unknown training pipeline')
-    if config.get('pipeline') in ('corpus-v3','sequence-v1'):
+    if config.get('pipeline') not in (None,'corpus-v3','sequence-v1','state-vision-v1'): raise ValueError('unknown training pipeline')
+    if config.get('pipeline') in ('corpus-v3','sequence-v1','state-vision-v1'):
         for key,low,high in (('preparation_workers',1,4),('minimum_free_gib',20,500),
                 ('minimum_train_matches',1,1000),('minimum_validation_matches',1,1000)):
             if type(config.get(key)) is not int or not low<=config[key]<=high: raise ValueError(f'invalid {key}')
@@ -50,15 +56,17 @@ def validate_config(config):
 
 def docker_command(config,config_path,kind,steps=None):
     image = config['training_image'] if kind=='training' else config['render_image']
-    corpus = config.get('pipeline') in ('corpus-v3','sequence-v1')
+    corpus = config.get('pipeline') in ('corpus-v3','sequence-v1','state-vision-v1')
     scripts = {'preparation':'prepare_corpus.py','training':'train_corpus.py','review':'review_corpus.py'} if corpus else {
         'preparation':'prepare_dataset.py','training':'train.py','review':'review_run.py'}
     if config.get('pipeline')=='sequence-v1': scripts.update(training='train_sequence.py',review='review_sequence.py')
+    if config.get('pipeline')=='state-vision-v1': scripts.update(preparation='prepare_state.py',training='train_state.py',review='review_state.py')
     command = ['docker','run','--detach','--name',NAMES[kind],'--init','--restart=no',
         '--shm-size='+('2g' if corpus and kind=='preparation' else '512m'),'--network=none',
         '--user',f'{os.getuid()}:{os.getgid()}', '--mount',f'type=bind,src={ROOT},dst=/work',
         '--workdir','/work','--gpus','device='+config['gpu'],
         '--label','org.yt2slp.role='+ROLES[kind],
+        '--label','org.yt2slp.run='+config['run_directory'],
         '-e','NVIDIA_DRIVER_CAPABILITIES=compute,utility','-e','PYTHONUNBUFFERED=1','-e','PYTHONPATH=/work/src',
         '-e','TORCH_HOME=/work/.docker-state/cache/torch','-e','LP_NUM_THREADS=2','-e','OMP_NUM_THREADS=2',image,config['python'],
         'tools/learning/'+scripts[kind],
@@ -78,6 +86,7 @@ def launch(config,path,kind,steps=None,best=False):
         if other and other['Running']: raise ValueError(f'wait for or stop {other_kind} before sharing its GPU/dataset')
     old = inspect(kind)
     if old and old['Running']:
+        if old.get('RunDirectory') not in (None,config['run_directory']): raise ValueError('another run is active: '+old['RunDirectory'])
         print(f'{kind} already running'); return
     if kind=='training':
         if not (ROOT/config['data_directory']/'dataset.json').is_file(): raise ValueError('dataset not ready; run prepare, then status')
@@ -89,6 +98,7 @@ def launch(config,path,kind,steps=None,best=False):
         atomic_json(run/'control.json',{'command':'run','requested_unix':time.time()})
         atomic_json(run/'launch.json',{'max_steps':steps or config['max_steps'],'requested_unix':time.time()})
     required = ('python','iso','playback','osd_calibration','timer_calibration','phase_reference','split_plan') if kind=='preparation' else ('python',)
+    if config.get('pipeline')=='state-vision-v1': required=('python','encoder_weights')
     for key in required:
         candidate = ROOT/config[key]
         if not (candidate.is_file() or (key=='python' and candidate.is_symlink())): raise ValueError(f'missing {key}; see training-control.md')
@@ -106,6 +116,8 @@ def request(config,command):
     state = inspect('training')
     if not state or not state['Running']:
         print('No training worker is running; checkpoint is retained.'); return
+    if state.get('RunDirectory') not in (None,config['run_directory']):
+        raise ValueError('another run is active; select its configuration: '+state['RunDirectory'])
     run = ROOT/config['run_directory']
     atomic_json(run/'control.json',{'command':command,'requested_unix':time.time()})
     print(f'{command} requested; waiting for checkpoint and container exit...',flush=True)
@@ -126,7 +138,8 @@ def show_status(config):
     for kind,folder,filename in (('preparation',config['data_directory'],'preparation-status.json'),
                                  ('training',config['run_directory'],'status.json')):
         state = inspect(kind); info = read_json(ROOT/folder/filename,{})
-        running = bool(state and state['Running']); label = info.get('state','not started')
+        running = bool(state and state['Running'] and state.get('RunDirectory') in (None,config['run_directory'])); label = info.get('state','not started')
+        if state and state['Running'] and not running: print('Another active '+kind+' run: '+state['RunDirectory'])
         if running and not info: label = 'starting'
         if not running and label in ('running','evaluating','loading','preparing'): label = 'interrupted'
         print(f'{kind.capitalize()}: {label} (container {"running" if running else "not running"})')
@@ -137,9 +150,13 @@ def show_status(config):
         if kind=='training' and 'step' in info:
             print(f"  Step {info['step']:,} / {info.get('max_steps',0):,}; loss {info.get('training_loss')}; {info.get('steps_per_second',0):.1f} steps/sec")
             if info.get('latest_validation'):
-                metrics = info['latest_validation']['button_metrics']
-                print('  Validation F1: '+', '.join(f"{k}={v['f1']}" for k,v in metrics.items()))
-                print(f"  Best validation event F1 mean: {info.get('best_validation_event_f1')}")
+                if 'button_metrics' in info['latest_validation']:
+                    metrics = info['latest_validation']['button_metrics']
+                    print('  Validation F1: '+', '.join(f"{k}={v['f1']}" for k,v in metrics.items()))
+                    print(f"  Best validation event F1 mean: {info.get('best_validation_event_f1')}")
+                else:
+                    for name,metrics in info['latest_validation'].items():
+                        print(f"  {name}: action accuracy={metrics['action_accuracy']:.4f}, macro recall={metrics['action_macro_recall']:.4f}, airborne balanced accuracy={metrics['airborne_balanced_accuracy']:.4f}")
                 if info['latest_validation'].get('constraint_metrics'):
                     print('  Constraint violations:',info['latest_validation']['constraint_metrics'])
         if info.get('error'): print('  '+info['error'])
@@ -168,7 +185,7 @@ def doctor(config):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command',nargs='?',choices=('start','resume','pause','stop','status','logs','prepare','stop-preparing','doctor','review'))
+    parser.add_argument('command',nargs='?',choices=('start','resume','pause','stop','status','logs','prepare','stop-preparing','doctor','review','results'))
     parser.add_argument('--config',type=Path,default=ROOT/'configs/vision-v100.json')
     parser.add_argument('--steps',type=int,help='total step limit, including previous steps')
     parser.add_argument('--follow',action='store_true',help='follow logs; Ctrl-C only closes the log viewer')
@@ -200,6 +217,9 @@ def main():
         elif args.command=='prepare': launch(config,path,'preparation')
         elif args.command in ('pause','stop'): request(config,args.command)
         elif args.command=='status': show_status(config)
+        elif args.command=='results':
+            if config.get('pipeline')!='state-vision-v1': raise ValueError('results is for the matched vision experiment; use status for controller runs')
+            subprocess.run([sys.executable,str(ROOT/'tools/learning/summarize_state.py'),'--config',str(path.relative_to(ROOT))],check=True,cwd=ROOT)
         elif args.command=='doctor': doctor(config)
         elif args.command=='review':
             request(config,'pause')

@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "kind": "matched-state-vision-experiment-plan",
+  "checkpoint_selection": "best finetuned development action macro recall; compare frozen branch at the same update",
+  "minimum_action_macro_gain": 0.02,
+  "maximum_action_accuracy_drop": 0.01,
+  "maximum_airborne_balanced_accuracy_drop": 0.01,
+  "final_test_matches_opened": 0,
+  "automatic_controller_replacement": false,
+  "next_gate": "If the state pilot passes, freeze the encoder and separately measure controller timing/F1 with all existing input constraints."
+}

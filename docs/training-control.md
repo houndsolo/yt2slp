@@ -1,11 +1,15 @@
 # Running training yourself on the V100
 
-**Current default:** `~/train-melee` selects the new
+**Current default:** `~/train-melee` selects the completed
 [held-state sequence run](sequence-training.md), with button edges derived from
 consecutive held states and digital shoulder/Z trigger constraints from the first
 training step. Models are in `vision-training/sequence-v1/checkpoints/` under
 `.docker-state/local/` on the V100. The completed independent-head corpus run is
 preserved with `--config configs/vision-v100-corpus.json`.
+The separate `~/train-vision` command controls the
+[matched frozen/fine-tuned state experiment](vision-state-experiment.md), including
+`status`, `results`, pause/resume and state-review videos. The two runs have
+separate checkpoints; wrong-run guards protect their shared GPU roles.
 [Expanded run and preparation](corpus-training.md) documents
 its 300 planned clips, physical-port player slots, audit policy and separate
 checkpoints. The original starter run below is preserved and can be selected

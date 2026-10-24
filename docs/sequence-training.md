@@ -7,6 +7,11 @@ independent-head checkpoint. The verified 186-clip corpus and frozen pretrained
 ResNet18 features are reused. The old corpus model, its metrics and its best/final
 checkpoints remain preserved.
 
+This run has now completed 20,000 updates. Best at 16,000 has
+hold/press/release F1 **0.24679/0.04117/0.01998**, mean 0.10265, with zero button
+or trigger-rule violations. The [error report](input-error-analysis.md) and
+[matched vision follow-up](vision-state-experiment.md) document the next work.
+
 ## What changed
 
 The model predicts one held-state logit per physical button. It has no independent
@@ -95,7 +100,7 @@ than every historical file. The old trained models remain in:
 ```
 
 The unchanged frozen image encoder is stored separately at
-`.docker-state/cache/torch/checkpoints/resnet18-f37072fd.pth`.
+`.docker-state/cache/torch/hub/checkpoints/resnet18-f37072fd.pth`.
 
 `~/train-melee` now selects the sequence configuration by default:
 
@@ -151,4 +156,4 @@ The full run has passed its first **1,000-step full validation**: 64,295 windows
 hold/press/release F1 **0.15673/0.01504/0.00983**, mean 0.06054. Both button and
 trigger violation counts are zero; durable latest/best checkpoint files exist.
 These early scores do not establish useful recognition or an improvement over
-the old best model. The run continues toward its 20,000-step limit.
+the old best model. The completed result is recorded at the top of this report.
