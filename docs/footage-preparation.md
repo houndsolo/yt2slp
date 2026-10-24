@@ -1,5 +1,11 @@
 # Workstation footage preparation for the expanded dataset
 
+**Superseded deployment:** the user requested direct generation on the upgraded
+V100 after connectivity returned. The current [server corpus pipeline](corpus-training.md)
+plans 300 Fox–Fox/Fox–Falco Battlefield clips. The local experiment and failed
+transfer below remain historical evidence; no workstation rendering is needed
+for the new run.
+
 The workstation can now render bounded clips from **later in a match**, using
 official Playback 3.5.2 and the same exact per-frame UI/PNG audit as the signed
 opening captures. This is footage preparation, not learned reconstruction.

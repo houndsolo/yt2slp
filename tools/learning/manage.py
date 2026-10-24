@@ -39,17 +39,26 @@ def validate_config(config):
         if type(config[key]) is not int or not low<=config[key]<=high: raise ValueError(f'invalid {key}')
     if config['context_frames']%2!=1 or not 0<config['learning_rate']<1 or not 0<config['gpu_memory_fraction']<=1:
         raise ValueError('invalid context, learning rate or memory cap')
+    if config.get('pipeline') not in (None,'corpus-v3'): raise ValueError('unknown training pipeline')
+    if config.get('pipeline')=='corpus-v3':
+        for key,low,high in (('preparation_workers',1,4),('minimum_free_gib',20,500),
+                ('minimum_train_matches',1,1000),('minimum_validation_matches',1,1000)):
+            if type(config.get(key)) is not int or not low<=config[key]<=high: raise ValueError(f'invalid {key}')
 
 
 def docker_command(config,config_path,kind,steps=None):
     image = config['training_image'] if kind=='training' else config['render_image']
-    command = ['docker','run','--detach','--name',NAMES[kind],'--init','--restart=no','--shm-size=512m','--network=none',
+    corpus = config.get('pipeline')=='corpus-v3'
+    scripts = {'preparation':'prepare_corpus.py','training':'train_corpus.py','review':'review_corpus.py'} if corpus else {
+        'preparation':'prepare_dataset.py','training':'train.py','review':'review_run.py'}
+    command = ['docker','run','--detach','--name',NAMES[kind],'--init','--restart=no',
+        '--shm-size='+('2g' if corpus and kind=='preparation' else '512m'),'--network=none',
         '--user',f'{os.getuid()}:{os.getgid()}', '--mount',f'type=bind,src={ROOT},dst=/work',
         '--workdir','/work','--gpus','device='+config['gpu'],
         '--label','org.yt2slp.role='+ROLES[kind],
         '-e','NVIDIA_DRIVER_CAPABILITIES=compute,utility','-e','PYTHONUNBUFFERED=1','-e','PYTHONPATH=/work/src',
-        '-e','TORCH_HOME=/work/.docker-state/cache/torch',image,config['python'],
-        {'preparation':'tools/learning/prepare_dataset.py','training':'tools/learning/train.py','review':'tools/learning/review_run.py'}[kind],
+        '-e','TORCH_HOME=/work/.docker-state/cache/torch','-e','LP_NUM_THREADS=2','-e','OMP_NUM_THREADS=2',image,config['python'],
+        'tools/learning/'+scripts[kind],
         '--config',str(config_path.relative_to(ROOT))]
     if steps is not None: command += ['--steps',str(steps)]
     return command
@@ -106,6 +115,7 @@ def request(config,command):
 
 
 def show_status(config):
+    print('Run:',config['run_directory'])
     for kind,folder,filename in (('preparation',config['data_directory'],'preparation-status.json'),
                                  ('training',config['run_directory'],'status.json')):
         state = inspect(kind); info = read_json(ROOT/folder/filename,{})
@@ -114,6 +124,9 @@ def show_status(config):
         if not running and label in ('running','evaluating','loading','preparing'): label = 'interrupted'
         print(f'{kind.capitalize()}: {label} (container {"running" if running else "not running"})')
         if kind=='preparation' and info.get('clip'): print(f"  Clip {info['clip']}/{info['total']}: {info['file']}")
+        if kind=='preparation' and 'accepted' in info:
+            print(f"  Finished {info['finished']}/{info['total']} clips; accepted {info['accepted']}; failed {info['failed_count']}")
+            if info.get('last_clip'): print('  Latest:',info['last_clip'])
         if kind=='training' and 'step' in info:
             print(f"  Step {info['step']:,} / {info.get('max_steps',0):,}; loss {info.get('training_loss')}; {info.get('steps_per_second',0):.1f} steps/sec")
             if info.get('latest_validation'):

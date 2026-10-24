@@ -134,7 +134,17 @@ def capture(args):
                 time.sleep(.01)
             else:
                 raise TimeoutError('startup exceeded capture budget')
-            time.sleep(.15)
+            # Parallel software renders can drain a final console frame after
+            # the pause key. Require a stable counter instead of assuming a
+            # fixed 150 ms scheduling delay. No selected frame is labelled here.
+            settled=None; stable_since=time.monotonic(); pause_deadline=min(deadline,time.monotonic()+5)
+            while time.monotonic()<pause_deadline:
+                observed=current_frame(log_path)
+                if observed!=settled: settled=observed; stable_since=time.monotonic()
+                if settled is not None and time.monotonic()-stable_since>=.3: break
+                if proc.poll() is not None: raise RuntimeError('Playback exited while pausing')
+                time.sleep(.02)
+            else: raise ValueError('Playback did not reach a stable startup pause')
             before_log = current_frame(log_path)
             if before_log is None or before_log >= args.first-5:
                 raise ValueError('startup pause left insufficient calibration/prefix frames')

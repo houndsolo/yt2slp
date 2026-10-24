@@ -57,3 +57,14 @@ def test_date_split_retains_pilot_reservations_without_reading_targets():
     result = make_plan(entries,reserved)
     assert len(result['matches'])==3
     assert [m['split'] for m in result['matches']]==['train','validation','validation']
+
+
+def test_corpus_controls_select_new_workers_and_keep_legacy_configuration():
+    config=json.loads((ROOT/'configs/vision-v100-corpus.json').read_text());validate_config(config)
+    for kind,script in (('preparation','prepare_corpus.py'),('training','train_corpus.py'),('review','review_corpus.py')):
+        command=docker_command(config,ROOT/'configs/vision-v100-corpus.json',kind)
+        assert 'tools/learning/'+script in command
+        assert '--network=none' in command and '--restart=no' in command
+        if kind=='preparation':assert '--shm-size=2g' in command
+    legacy=json.loads((ROOT/'configs/vision-v100.json').read_text())
+    assert 'tools/learning/train.py' in docker_command(legacy,ROOT/'configs/vision-v100.json','training')

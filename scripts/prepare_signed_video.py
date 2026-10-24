@@ -15,16 +15,17 @@ import tempfile
 from yt2slp.benchmark import compare_posts
 from yt2slp.frame_index import GEOMETRY, assess_step, cyan_cells, decode_index, verify_log_policy
 from yt2slp.timer_labels import label_images, png_size, add_manual_readings
-from yt2slp.training_phase import audit_phase, frozen_phase_reference
+from yt2slp.training_phase import audit_phase, frozen_phase_reference, pipeline_phase_reference
 from yt2slp.video import ingest_video, sha256
 from yt2slp.footage import capture_request_start
+from yt2slp.corpus import hud_check
 
 
 def node(tool, *args):
     return json.loads(subprocess.check_output(['node', 'tools/slippi-parser/'+tool, *map(str, args)]))
 
 
-def audit_capture(folder, replay, timer_calibration, hud_readings=None):
+def audit_capture(folder, replay, timer_calibration, hud_readings=None, hud_policy='strict'):
     capture = json.loads((folder/'capture.json').read_text())
     index = json.loads((folder/'capture-index.json').read_text())
     calibration = json.loads((folder/'osd-calibration.json').read_text())
@@ -72,16 +73,16 @@ def audit_capture(folder, replay, timer_calibration, hud_readings=None):
     timer_labels = label_images(folder/'user/Dump/Frames', json.loads(timer_calibration.read_text()), timers, timer_first, last)
     if hud_readings:
         timer_labels = add_manual_readings(timer_labels,json.loads(hud_readings.read_text()),folder/'user/Dump/Frames',timers)
-    disagreements = [r['replay_frame'] for r in index if r['replay_frame'] > 0 and
-        timer_labels['selected'].get(r['replay_frame']) != r['capture_image']]
+    hud = hud_check(index,timer_labels,hud_policy)
     if len(capture['regenerated_replays']) != 1: raise ValueError('one real regenerated replay required')
     state = compare_posts(node('export-state.cjs', replay),
         node('export-state.cjs', folder/capture['regenerated_replays'][0]), first, last)
     return capture, index, timers, {'schema': 1,
-        'passed': timer_labels['passed'] and not disagreements and state['passed'],
-        'signed_interval': [first, last], 'hud_osd_disagreement_frames': disagreements,
-        'osd_verified_frames': len(index), 'positive_hud_crosschecked_frames': last-timer_first+1,
+        'passed': hud['passed'] and state['passed'],
+        'signed_interval': [first, last], 'hud_osd_disagreement_frames': hud['disagreement_frames'],
+        'osd_verified_frames': len(index), 'positive_hud_crosschecked_frames': hud['compared'],
         'positive_hud_interval': [timer_first,last],
+        'hud_corroboration':hud,
         'dump_pipeline_delay_swaps': 1, 'positive_timer_labels': timer_labels,
         'paused_log_association': capture.get('paused_log_association','fixed'),
         'source_original_vs_official': state,
@@ -96,11 +97,13 @@ def main():
     phase_options.add_argument('--phase-observations', type=Path)
     phase_options.add_argument('--phase-reference', type=Path,
         help='apply a frozen training phase convention; does not export validation controls for phase fitting')
+    phase_options.add_argument('--pipeline-phase-reference',type=Path,help='explicit experimental same-pipeline phase transfer for the expanded roster')
+    parser.add_argument('--hud-policy',choices=('strict','corpus-v1'),default='strict')
     parser.add_argument('--hud-readings',type=Path,help='literal image-bound visual readings for unknown HUD OCR results')
     args = parser.parse_args()
     out = args.output.resolve(); out.mkdir(parents=True, exist_ok=False)
     try:
-        capture, index, timers, audit = audit_capture(args.capture, args.replay, args.timer_calibration,args.hud_readings)
+        capture, index, timers, audit = audit_capture(args.capture, args.replay, args.timer_calibration,args.hud_readings,args.hud_policy)
         (out/'frame-labels.json').write_text(json.dumps(audit, indent=2)+'\n')
         if not audit['passed']:
             raise ValueError('independent positive HUD or original/official state check failed; see retained frame-labels.json')
@@ -113,6 +116,10 @@ def main():
                 raise ValueError('manual phase observations belong to another capture')
             phase = audit_phase(observations, labels, index)
             phase_inputs = [args.phase_observations]
+        elif args.pipeline_phase_reference:
+            phase = pipeline_phase_reference(args.pipeline_phase_reference,setup,sha256(args.replay))
+            phase_inputs = [args.pipeline_phase_reference,args.pipeline_phase_reference.parent/'phase-audit.json',
+                            args.pipeline_phase_reference.parent/'frame-labels.json']
         else:
             phase = frozen_phase_reference(args.phase_reference, setup, sha256(args.replay))
             phase_inputs = [args.phase_reference, args.phase_reference.parent/'phase-audit.json',

@@ -1,5 +1,12 @@
 # V100 replay collection
 
+The latest expansion adds distinct-costume **Fox mirrors** while retaining
+Battlefield and the frozen date reservations. A fresh v3 catalog still counts
+3,326 files; the new plan has 70 training, 30 validation and 22 reserved test
+matches, with three 20-second clips planned per development match. Preparation
+runs directly on the V100. See [the current corpus run](corpus-training.md).
+The earlier narrow catalog and starter results below remain historical evidence.
+
 The user added 3,298 replays to the V100 checkout's `recordings/examples/`, for
 3,326 files including the original 28 curated fixtures. Files were inventoried
 read-only and left in place. The tracked fixtures remain tracked; new bulk `.slp`

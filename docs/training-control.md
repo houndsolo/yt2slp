@@ -1,5 +1,12 @@
 # Running training yourself on the V100
 
+**Current default:** `~/train-melee` now selects the expanded Fox–Fox/Fox–Falco
+Battlefield corpus. [Expanded run and preparation](corpus-training.md) documents
+its 300 planned clips, physical-port player slots, audit policy and separate
+checkpoints. The original starter run below is preserved and can be selected
+with `--config configs/vision-v100.json`. Its earlier metrics describe that
+experiment, rather than the new run. All preparation now runs on the V100.
+
 Everything needed by this runner lives on **the V100 server**: checkout, Docker
 images, pinned PyTorch environment, official Playback, ISO, replays, calibrations,
 prepared features, logs and checkpoints. The workstation can be shut off. Workers
@@ -62,7 +69,8 @@ The command was validated on the user-trained latest checkpoint at step 24,459:
 both 241- and 661-frame validation reviews rendered, with a clean worker exit and
 training left paused. Review creates no reconstructed gameplay or replay file.
 
-Default training is bounded at **100,000 total optimizer steps**. To change the
+The original starter configuration is bounded at **100,000 total optimizer steps**;
+the new corpus configuration uses **200,000**. To change the
 limit without resetting progress:
 
 ```bash
@@ -77,7 +85,7 @@ axis/state metrics, including neutral baselines, in the saved metrics.
 
 ## What is being trained
 
-This is the narrow **Fox/Falco Battlefield** model. A frozen pretrained ResNet18
+The original starter is the narrow **Fox/Falco Battlefield** model. A frozen pretrained ResNet18
 encodes each whole image into 3,072 spatial features. The trainable projection,
 bidirectional GRU and controller/state heads read 31-frame windows and predict
 their centers. Known character IDs map output slots to physical ports. Input

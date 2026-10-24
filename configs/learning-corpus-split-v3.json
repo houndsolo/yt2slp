@@ -1,0 +1,6122 @@
+{
+  "schema": 1,
+  "kind": "fox-corpus-split",
+  "scope": "Fox/Fox distinct costumes and Fox/Falco; Battlefield human NTSC 4-stock 8-minute singles",
+  "slot_mapping": "ascending occupied physical ports; character IDs are not unique in mirrors",
+  "frames_per_clip": 1200,
+  "clips_per_match": 3,
+  "skipped": {
+    "not_eligible_singles": 1102,
+    "other_roster": 186,
+    "other_stage": 1902,
+    "ambiguous_mirror_or_ports": 12,
+    "too_short": 2
+  },
+  "grouping": "frozen filename-date groups; player disjointness unverified",
+  "matches": [
+    {
+      "file": "recordings/examples/Game_20260131T203104.slp",
+      "replay_sha256": "00d5404f0988f236f057265d6270a79fbee4372d280a966d35ec333f8df04ea5",
+      "group": "capture-date-20260131",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9649,
+      "clips": [
+        {
+          "clip_id": "00d5404f0988f236f057265d6270a79fbee4372d280a966d35ec333f8df04ea5-1912-3111",
+          "interval": [
+            1912,
+            3111
+          ]
+        },
+        {
+          "clip_id": "00d5404f0988f236f057265d6270a79fbee4372d280a966d35ec333f8df04ea5-4346-5545",
+          "interval": [
+            4346,
+            5545
+          ]
+        },
+        {
+          "clip_id": "00d5404f0988f236f057265d6270a79fbee4372d280a966d35ec333f8df04ea5-7322-8521",
+          "interval": [
+            7322,
+            8521
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260425T023703.slp",
+      "replay_sha256": "023af3908c0f56b38bea244432f823757689ce0dd101973ed9e6697b5cdd3835",
+      "group": "capture-date-20260425",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 6509,
+      "clips": [
+        {
+          "clip_id": "023af3908c0f56b38bea244432f823757689ce0dd101973ed9e6697b5cdd3835-1113-2312",
+          "interval": [
+            1113,
+            2312
+          ]
+        },
+        {
+          "clip_id": "023af3908c0f56b38bea244432f823757689ce0dd101973ed9e6697b5cdd3835-2545-3744",
+          "interval": [
+            2545,
+            3744
+          ]
+        },
+        {
+          "clip_id": "023af3908c0f56b38bea244432f823757689ce0dd101973ed9e6697b5cdd3835-4900-6099",
+          "interval": [
+            4900,
+            6099
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260118T152354.slp",
+      "replay_sha256": "02961bef5cb6b940eeb9148fc1889e2d5dcd65d16bf09cadad487d048fd9a97d",
+      "group": "capture-date-20260118",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 6554,
+      "clips": [
+        {
+          "clip_id": "02961bef5cb6b940eeb9148fc1889e2d5dcd65d16bf09cadad487d048fd9a97d-825-2024",
+          "interval": [
+            825,
+            2024
+          ]
+        },
+        {
+          "clip_id": "02961bef5cb6b940eeb9148fc1889e2d5dcd65d16bf09cadad487d048fd9a97d-3263-4462",
+          "interval": [
+            3263,
+            4462
+          ]
+        },
+        {
+          "clip_id": "02961bef5cb6b940eeb9148fc1889e2d5dcd65d16bf09cadad487d048fd9a97d-4986-6185",
+          "interval": [
+            4986,
+            6185
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260201T085055.slp",
+      "replay_sha256": "03d57ed8afc4376b917972a4a44daf4410b7c4503acaabbb413eb039800a592f",
+      "group": "capture-date-20260201",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 4334,
+      "clips": [
+        {
+          "clip_id": "03d57ed8afc4376b917972a4a44daf4410b7c4503acaabbb413eb039800a592f-605-1804",
+          "interval": [
+            605,
+            1804
+          ]
+        },
+        {
+          "clip_id": "03d57ed8afc4376b917972a4a44daf4410b7c4503acaabbb413eb039800a592f-1808-3007",
+          "interval": [
+            1808,
+            3007
+          ]
+        },
+        {
+          "clip_id": "03d57ed8afc4376b917972a4a44daf4410b7c4503acaabbb413eb039800a592f-3015-4214",
+          "interval": [
+            3015,
+            4214
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260425T024207.slp",
+      "replay_sha256": "04f3877e9e8d946fb5644394558270f5fcac783c936e62817fb94bab6c9f9590",
+      "group": "capture-date-20260425",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 6843,
+      "clips": [
+        {
+          "clip_id": "04f3877e9e8d946fb5644394558270f5fcac783c936e62817fb94bab6c9f9590-1263-2462",
+          "interval": [
+            1263,
+            2462
+          ]
+        },
+        {
+          "clip_id": "04f3877e9e8d946fb5644394558270f5fcac783c936e62817fb94bab6c9f9590-2722-3921",
+          "interval": [
+            2722,
+            3921
+          ]
+        },
+        {
+          "clip_id": "04f3877e9e8d946fb5644394558270f5fcac783c936e62817fb94bab6c9f9590-5294-6493",
+          "interval": [
+            5294,
+            6493
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260214T221219.slp",
+      "replay_sha256": "0960df7dfb6733ff11c26eb7a53091f61d92f5b83693dd7428572ecb40f62179",
+      "group": "capture-date-20260214",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8515,
+      "clips": [
+        {
+          "clip_id": "0960df7dfb6733ff11c26eb7a53091f61d92f5b83693dd7428572ecb40f62179-925-2124",
+          "interval": [
+            925,
+            2124
+          ]
+        },
+        {
+          "clip_id": "0960df7dfb6733ff11c26eb7a53091f61d92f5b83693dd7428572ecb40f62179-3829-5028",
+          "interval": [
+            3829,
+            5028
+          ]
+        },
+        {
+          "clip_id": "0960df7dfb6733ff11c26eb7a53091f61d92f5b83693dd7428572ecb40f62179-6124-7323",
+          "interval": [
+            6124,
+            7323
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260322T162600.slp",
+      "replay_sha256": "0d42f1c8ea1a20ddb8b58bc77c1faf7d25407558b5e6c8ec6590e8cafc4a0b51",
+      "group": "capture-date-20260322",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 10531,
+      "clips": [
+        {
+          "clip_id": "0d42f1c8ea1a20ddb8b58bc77c1faf7d25407558b5e6c8ec6590e8cafc4a0b51-2137-3336",
+          "interval": [
+            2137,
+            3336
+          ]
+        },
+        {
+          "clip_id": "0d42f1c8ea1a20ddb8b58bc77c1faf7d25407558b5e6c8ec6590e8cafc4a0b51-4294-5493",
+          "interval": [
+            4294,
+            5493
+          ]
+        },
+        {
+          "clip_id": "0d42f1c8ea1a20ddb8b58bc77c1faf7d25407558b5e6c8ec6590e8cafc4a0b51-8435-9634",
+          "interval": [
+            8435,
+            9634
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260204T195532.slp",
+      "replay_sha256": "0dcf4c552762472a74d25b3d437c9037ce82caed1ef64241c8ad1a96d8bc1402",
+      "group": "capture-date-20260204",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8087,
+      "clips": [
+        {
+          "clip_id": "0dcf4c552762472a74d25b3d437c9037ce82caed1ef64241c8ad1a96d8bc1402-994-2193",
+          "interval": [
+            994,
+            2193
+          ]
+        },
+        {
+          "clip_id": "0dcf4c552762472a74d25b3d437c9037ce82caed1ef64241c8ad1a96d8bc1402-3959-5158",
+          "interval": [
+            3959,
+            5158
+          ]
+        },
+        {
+          "clip_id": "0dcf4c552762472a74d25b3d437c9037ce82caed1ef64241c8ad1a96d8bc1402-5621-6820",
+          "interval": [
+            5621,
+            6820
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260418T174847.slp",
+      "replay_sha256": "0dfa30776f78e7aed269cf768d2d94d38e5b488baf8e7ebbd3d812a52be6c010",
+      "group": "capture-date-20260418",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 6841,
+      "clips": [
+        {
+          "clip_id": "0dfa30776f78e7aed269cf768d2d94d38e5b488baf8e7ebbd3d812a52be6c010-1219-2418",
+          "interval": [
+            1219,
+            2418
+          ]
+        },
+        {
+          "clip_id": "0dfa30776f78e7aed269cf768d2d94d38e5b488baf8e7ebbd3d812a52be6c010-3012-4211",
+          "interval": [
+            3012,
+            4211
+          ]
+        },
+        {
+          "clip_id": "0dfa30776f78e7aed269cf768d2d94d38e5b488baf8e7ebbd3d812a52be6c010-4684-5883",
+          "interval": [
+            4684,
+            5883
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260211T201548.slp",
+      "replay_sha256": "10407c4e64171fcada5cea185705e06722c5a5eb848a10fe2f190b548412f1bd",
+      "group": "capture-date-20260211",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8430,
+      "clips": [
+        {
+          "clip_id": "10407c4e64171fcada5cea185705e06722c5a5eb848a10fe2f190b548412f1bd-1090-2289",
+          "interval": [
+            1090,
+            2289
+          ]
+        },
+        {
+          "clip_id": "10407c4e64171fcada5cea185705e06722c5a5eb848a10fe2f190b548412f1bd-4358-5557",
+          "interval": [
+            4358,
+            5557
+          ]
+        },
+        {
+          "clip_id": "10407c4e64171fcada5cea185705e06722c5a5eb848a10fe2f190b548412f1bd-6778-7977",
+          "interval": [
+            6778,
+            7977
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260416T170333.slp",
+      "replay_sha256": "110039f5e108e31c29faf6369f194ac8de703f05cdcd22e6895e5d55080fc4ca",
+      "group": "capture-date-20260416",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8839,
+      "clips": [
+        {
+          "clip_id": "110039f5e108e31c29faf6369f194ac8de703f05cdcd22e6895e5d55080fc4ca-1473-2672",
+          "interval": [
+            1473,
+            2672
+          ]
+        },
+        {
+          "clip_id": "110039f5e108e31c29faf6369f194ac8de703f05cdcd22e6895e5d55080fc4ca-3332-4531",
+          "interval": [
+            3332,
+            4531
+          ]
+        },
+        {
+          "clip_id": "110039f5e108e31c29faf6369f194ac8de703f05cdcd22e6895e5d55080fc4ca-6514-7713",
+          "interval": [
+            6514,
+            7713
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260316T185724.slp",
+      "replay_sha256": "115805a524335ecf76cdcc1949184cedb8d972fbfc7b9f27286c2bd73aa7b318",
+      "group": "capture-date-20260316",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9280,
+      "clips": [
+        {
+          "clip_id": "115805a524335ecf76cdcc1949184cedb8d972fbfc7b9f27286c2bd73aa7b318-1348-2547",
+          "interval": [
+            1348,
+            2547
+          ]
+        },
+        {
+          "clip_id": "115805a524335ecf76cdcc1949184cedb8d972fbfc7b9f27286c2bd73aa7b318-4615-5814",
+          "interval": [
+            4615,
+            5814
+          ]
+        },
+        {
+          "clip_id": "115805a524335ecf76cdcc1949184cedb8d972fbfc7b9f27286c2bd73aa7b318-6404-7603",
+          "interval": [
+            6404,
+            7603
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260605T213020.slp",
+      "replay_sha256": "15f4015b236ca81eff2070a3ea289ef70e928166caa761b43c5eaa11805963a2",
+      "group": "capture-date-20260605",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8680,
+      "clips": [
+        {
+          "clip_id": "15f4015b236ca81eff2070a3ea289ef70e928166caa761b43c5eaa11805963a2-1313-2512",
+          "interval": [
+            1313,
+            2512
+          ]
+        },
+        {
+          "clip_id": "15f4015b236ca81eff2070a3ea289ef70e928166caa761b43c5eaa11805963a2-4138-5337",
+          "interval": [
+            4138,
+            5337
+          ]
+        },
+        {
+          "clip_id": "15f4015b236ca81eff2070a3ea289ef70e928166caa761b43c5eaa11805963a2-6740-7939",
+          "interval": [
+            6740,
+            7939
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260117T010119.slp",
+      "replay_sha256": "180d7d80d38f2361b5d43286eb29ad7ae1658436061cffb8a98912dd5b0b9c36",
+      "group": "capture-date-20260117",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9798,
+      "clips": [
+        {
+          "clip_id": "180d7d80d38f2361b5d43286eb29ad7ae1658436061cffb8a98912dd5b0b9c36-1753-2952",
+          "interval": [
+            1753,
+            2952
+          ]
+        },
+        {
+          "clip_id": "180d7d80d38f2361b5d43286eb29ad7ae1658436061cffb8a98912dd5b0b9c36-5443-6642",
+          "interval": [
+            5443,
+            6642
+          ]
+        },
+        {
+          "clip_id": "180d7d80d38f2361b5d43286eb29ad7ae1658436061cffb8a98912dd5b0b9c36-8290-9489",
+          "interval": [
+            8290,
+            9489
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260416T175839.slp",
+      "replay_sha256": "181f413282548ad870a740b4320acaf9d1f0f7b3911b9a4482c5dc8062ff9fe5",
+      "group": "capture-date-20260416",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 12029,
+      "clips": [
+        {
+          "clip_id": "181f413282548ad870a740b4320acaf9d1f0f7b3911b9a4482c5dc8062ff9fe5-2815-4014",
+          "interval": [
+            2815,
+            4014
+          ]
+        },
+        {
+          "clip_id": "181f413282548ad870a740b4320acaf9d1f0f7b3911b9a4482c5dc8062ff9fe5-4968-6167",
+          "interval": [
+            4968,
+            6167
+          ]
+        },
+        {
+          "clip_id": "181f413282548ad870a740b4320acaf9d1f0f7b3911b9a4482c5dc8062ff9fe5-8232-9431",
+          "interval": [
+            8232,
+            9431
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260121T185408.slp",
+      "replay_sha256": "188d24d3175d4a72d45ae1a5c524e2bfd2fd25f13376faa702ca8faa8022f004",
+      "group": "capture-date-20260121",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7336,
+      "clips": [
+        {
+          "clip_id": "188d24d3175d4a72d45ae1a5c524e2bfd2fd25f13376faa702ca8faa8022f004-920-2119",
+          "interval": [
+            920,
+            2119
+          ]
+        },
+        {
+          "clip_id": "188d24d3175d4a72d45ae1a5c524e2bfd2fd25f13376faa702ca8faa8022f004-2814-4013",
+          "interval": [
+            2814,
+            4013
+          ]
+        },
+        {
+          "clip_id": "188d24d3175d4a72d45ae1a5c524e2bfd2fd25f13376faa702ca8faa8022f004-6001-7200",
+          "interval": [
+            6001,
+            7200
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260425T041216.slp",
+      "replay_sha256": "1aee15b02b13c04847b79d79b31211a38edd3b0e11a691506f6e6495014797e3",
+      "group": "capture-date-20260425",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8252,
+      "clips": [
+        {
+          "clip_id": "1aee15b02b13c04847b79d79b31211a38edd3b0e11a691506f6e6495014797e3-891-2090",
+          "interval": [
+            891,
+            2090
+          ]
+        },
+        {
+          "clip_id": "1aee15b02b13c04847b79d79b31211a38edd3b0e11a691506f6e6495014797e3-4141-5340",
+          "interval": [
+            4141,
+            5340
+          ]
+        },
+        {
+          "clip_id": "1aee15b02b13c04847b79d79b31211a38edd3b0e11a691506f6e6495014797e3-6349-7548",
+          "interval": [
+            6349,
+            7548
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260118T124750.slp",
+      "replay_sha256": "1bd37d188ca773a78d43bb451c57c082a4a25cb0bc7d1b2b63e334dc1cd3985d",
+      "group": "capture-date-20260118",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 6940,
+      "clips": [
+        {
+          "clip_id": "1bd37d188ca773a78d43bb451c57c082a4a25cb0bc7d1b2b63e334dc1cd3985d-1274-2473",
+          "interval": [
+            1274,
+            2473
+          ]
+        },
+        {
+          "clip_id": "1bd37d188ca773a78d43bb451c57c082a4a25cb0bc7d1b2b63e334dc1cd3985d-2840-4039",
+          "interval": [
+            2840,
+            4039
+          ]
+        },
+        {
+          "clip_id": "1bd37d188ca773a78d43bb451c57c082a4a25cb0bc7d1b2b63e334dc1cd3985d-5188-6387",
+          "interval": [
+            5188,
+            6387
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260214T165009.slp",
+      "replay_sha256": "1d6f1dcc1aac9b1e9615ed7a20ddedc22e89c4866ee3d6686ebf34c1cd7a66d9",
+      "group": "capture-date-20260214",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7250,
+      "clips": [
+        {
+          "clip_id": "1d6f1dcc1aac9b1e9615ed7a20ddedc22e89c4866ee3d6686ebf34c1cd7a66d9-1272-2471",
+          "interval": [
+            1272,
+            2471
+          ]
+        },
+        {
+          "clip_id": "1d6f1dcc1aac9b1e9615ed7a20ddedc22e89c4866ee3d6686ebf34c1cd7a66d9-3135-4334",
+          "interval": [
+            3135,
+            4334
+          ]
+        },
+        {
+          "clip_id": "1d6f1dcc1aac9b1e9615ed7a20ddedc22e89c4866ee3d6686ebf34c1cd7a66d9-5572-6771",
+          "interval": [
+            5572,
+            6771
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260502T180513.slp",
+      "replay_sha256": "22410f917d621c0b4e17186d4bf3641aab045336c69b0f7928b6bc0e0c28f460",
+      "group": "capture-date-20260502",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 11117,
+      "clips": [
+        {
+          "clip_id": "22410f917d621c0b4e17186d4bf3641aab045336c69b0f7928b6bc0e0c28f460-2525-3724",
+          "interval": [
+            2525,
+            3724
+          ]
+        },
+        {
+          "clip_id": "22410f917d621c0b4e17186d4bf3641aab045336c69b0f7928b6bc0e0c28f460-4179-5378",
+          "interval": [
+            4179,
+            5378
+          ]
+        },
+        {
+          "clip_id": "22410f917d621c0b4e17186d4bf3641aab045336c69b0f7928b6bc0e0c28f460-8454-9653",
+          "interval": [
+            8454,
+            9653
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260509T150602.slp",
+      "replay_sha256": "24eac09ad6f6c221683665d52a3aa3e1f91d16c10be4ee7582b905294499bf02",
+      "group": "capture-date-20260509",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9878,
+      "clips": [
+        {
+          "clip_id": "24eac09ad6f6c221683665d52a3aa3e1f91d16c10be4ee7582b905294499bf02-1454-2653",
+          "interval": [
+            1454,
+            2653
+          ]
+        },
+        {
+          "clip_id": "24eac09ad6f6c221683665d52a3aa3e1f91d16c10be4ee7582b905294499bf02-3750-4949",
+          "interval": [
+            3750,
+            4949
+          ]
+        },
+        {
+          "clip_id": "24eac09ad6f6c221683665d52a3aa3e1f91d16c10be4ee7582b905294499bf02-7190-8389",
+          "interval": [
+            7190,
+            8389
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260312T171442.slp",
+      "replay_sha256": "26513d6dd57dab01c3581e5805b37c6234360a853435fb8a16e9f29f51bfab9b",
+      "group": "capture-date-20260312",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8727,
+      "clips": [
+        {
+          "clip_id": "26513d6dd57dab01c3581e5805b37c6234360a853435fb8a16e9f29f51bfab9b-1273-2472",
+          "interval": [
+            1273,
+            2472
+          ]
+        },
+        {
+          "clip_id": "26513d6dd57dab01c3581e5805b37c6234360a853435fb8a16e9f29f51bfab9b-4614-5813",
+          "interval": [
+            4614,
+            5813
+          ]
+        },
+        {
+          "clip_id": "26513d6dd57dab01c3581e5805b37c6234360a853435fb8a16e9f29f51bfab9b-6174-7373",
+          "interval": [
+            6174,
+            7373
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260516T154144.slp",
+      "replay_sha256": "28a7b1f54a3a887157bc0e5b92b9ae88297dff36a646e9d4a5515cc93473cfdd",
+      "group": "capture-date-20260516",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7414,
+      "clips": [
+        {
+          "clip_id": "28a7b1f54a3a887157bc0e5b92b9ae88297dff36a646e9d4a5515cc93473cfdd-764-1963",
+          "interval": [
+            764,
+            1963
+          ]
+        },
+        {
+          "clip_id": "28a7b1f54a3a887157bc0e5b92b9ae88297dff36a646e9d4a5515cc93473cfdd-3699-4898",
+          "interval": [
+            3699,
+            4898
+          ]
+        },
+        {
+          "clip_id": "28a7b1f54a3a887157bc0e5b92b9ae88297dff36a646e9d4a5515cc93473cfdd-5470-6669",
+          "interval": [
+            5470,
+            6669
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260509T013524.slp",
+      "replay_sha256": "29067c869fec8c97ea7bff1287f283a27395e1c5ec921aa6062f76095074252a",
+      "group": "capture-date-20260509",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7413,
+      "clips": [
+        {
+          "clip_id": "29067c869fec8c97ea7bff1287f283a27395e1c5ec921aa6062f76095074252a-1002-2201",
+          "interval": [
+            1002,
+            2201
+          ]
+        },
+        {
+          "clip_id": "29067c869fec8c97ea7bff1287f283a27395e1c5ec921aa6062f76095074252a-3180-4379",
+          "interval": [
+            3180,
+            4379
+          ]
+        },
+        {
+          "clip_id": "29067c869fec8c97ea7bff1287f283a27395e1c5ec921aa6062f76095074252a-5877-7076",
+          "interval": [
+            5877,
+            7076
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260317T223539.slp",
+      "replay_sha256": "2ba6a8cf11fb07152ccf8904591d19f68d968eebd50bc6cf0336f4be507392c8",
+      "group": "capture-date-20260317",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 6588,
+      "clips": [
+        {
+          "clip_id": "2ba6a8cf11fb07152ccf8904591d19f68d968eebd50bc6cf0336f4be507392c8-1052-2251",
+          "interval": [
+            1052,
+            2251
+          ]
+        },
+        {
+          "clip_id": "2ba6a8cf11fb07152ccf8904591d19f68d968eebd50bc6cf0336f4be507392c8-2903-4102",
+          "interval": [
+            2903,
+            4102
+          ]
+        },
+        {
+          "clip_id": "2ba6a8cf11fb07152ccf8904591d19f68d968eebd50bc6cf0336f4be507392c8-4904-6103",
+          "interval": [
+            4904,
+            6103
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260319T180025.slp",
+      "replay_sha256": "2dec6f90a7e44532653f854774f598c379c2b2fc98584f5482882489060737e8",
+      "group": "capture-date-20260319",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8867,
+      "clips": [
+        {
+          "clip_id": "2dec6f90a7e44532653f854774f598c379c2b2fc98584f5482882489060737e8-1533-2732",
+          "interval": [
+            1533,
+            2732
+          ]
+        },
+        {
+          "clip_id": "2dec6f90a7e44532653f854774f598c379c2b2fc98584f5482882489060737e8-3483-4682",
+          "interval": [
+            3483,
+            4682
+          ]
+        },
+        {
+          "clip_id": "2dec6f90a7e44532653f854774f598c379c2b2fc98584f5482882489060737e8-7212-8411",
+          "interval": [
+            7212,
+            8411
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260312T213813.slp",
+      "replay_sha256": "2f87f7bfbc8ac565b8cc8ffb396be0380802b10a0bd76ebd080434b26c5b59e5",
+      "group": "capture-date-20260312",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 5811,
+      "clips": [
+        {
+          "clip_id": "2f87f7bfbc8ac565b8cc8ffb396be0380802b10a0bd76ebd080434b26c5b59e5-921-2120",
+          "interval": [
+            921,
+            2120
+          ]
+        },
+        {
+          "clip_id": "2f87f7bfbc8ac565b8cc8ffb396be0380802b10a0bd76ebd080434b26c5b59e5-2437-3636",
+          "interval": [
+            2437,
+            3636
+          ]
+        },
+        {
+          "clip_id": "2f87f7bfbc8ac565b8cc8ffb396be0380802b10a0bd76ebd080434b26c5b59e5-4153-5352",
+          "interval": [
+            4153,
+            5352
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260301T170708.slp",
+      "replay_sha256": "30b7f5371d7ce123d89b6ec3e59760ebb6079c8d4fbd634f5bcb2a262d58ab6b",
+      "group": "capture-date-20260301",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 10708,
+      "clips": [
+        {
+          "clip_id": "30b7f5371d7ce123d89b6ec3e59760ebb6079c8d4fbd634f5bcb2a262d58ab6b-1103-2302",
+          "interval": [
+            1103,
+            2302
+          ]
+        },
+        {
+          "clip_id": "30b7f5371d7ce123d89b6ec3e59760ebb6079c8d4fbd634f5bcb2a262d58ab6b-5328-6527",
+          "interval": [
+            5328,
+            6527
+          ]
+        },
+        {
+          "clip_id": "30b7f5371d7ce123d89b6ec3e59760ebb6079c8d4fbd634f5bcb2a262d58ab6b-7635-8834",
+          "interval": [
+            7635,
+            8834
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260623T163435.slp",
+      "replay_sha256": "35f1c56f2c5ac6ceeb74ff5144d923443bf34251d4404802408c28e577a48ae7",
+      "group": "capture-date-20260623",
+      "split": "validation",
+      "previously_examined": true,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9737,
+      "clips": [
+        {
+          "clip_id": "35f1c56f2c5ac6ceeb74ff5144d923443bf34251d4404802408c28e577a48ae7-2040-3239",
+          "interval": [
+            2040,
+            3239
+          ]
+        },
+        {
+          "clip_id": "35f1c56f2c5ac6ceeb74ff5144d923443bf34251d4404802408c28e577a48ae7-4068-5267",
+          "interval": [
+            4068,
+            5267
+          ]
+        },
+        {
+          "clip_id": "35f1c56f2c5ac6ceeb74ff5144d923443bf34251d4404802408c28e577a48ae7-7712-8911",
+          "interval": [
+            7712,
+            8911
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260516T133749.slp",
+      "replay_sha256": "373463c319e70e9af5d4eb1b0b35854a21413bb9e305a59128a38e7cb1d40907",
+      "group": "capture-date-20260516",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7600,
+      "clips": [
+        {
+          "clip_id": "373463c319e70e9af5d4eb1b0b35854a21413bb9e305a59128a38e7cb1d40907-862-2061",
+          "interval": [
+            862,
+            2061
+          ]
+        },
+        {
+          "clip_id": "373463c319e70e9af5d4eb1b0b35854a21413bb9e305a59128a38e7cb1d40907-3137-4336",
+          "interval": [
+            3137,
+            4336
+          ]
+        },
+        {
+          "clip_id": "373463c319e70e9af5d4eb1b0b35854a21413bb9e305a59128a38e7cb1d40907-5266-6465",
+          "interval": [
+            5266,
+            6465
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260131T220131.slp",
+      "replay_sha256": "3793b4898822e54b91ff5924fc5470617158bb0f6cc9d5888ddf3349a8654a43",
+      "group": "capture-date-20260131",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 11608,
+      "clips": [
+        {
+          "clip_id": "3793b4898822e54b91ff5924fc5470617158bb0f6cc9d5888ddf3349a8654a43-1410-2609",
+          "interval": [
+            1410,
+            2609
+          ]
+        },
+        {
+          "clip_id": "3793b4898822e54b91ff5924fc5470617158bb0f6cc9d5888ddf3349a8654a43-5462-6661",
+          "interval": [
+            5462,
+            6661
+          ]
+        },
+        {
+          "clip_id": "3793b4898822e54b91ff5924fc5470617158bb0f6cc9d5888ddf3349a8654a43-8960-10159",
+          "interval": [
+            8960,
+            10159
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260312T175508.slp",
+      "replay_sha256": "3a5521bd7c74d70a5b5bd81d86f84d4af1ea790ef288d659291ec7ebaeafb778",
+      "group": "capture-date-20260312",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 10782,
+      "clips": [
+        {
+          "clip_id": "3a5521bd7c74d70a5b5bd81d86f84d4af1ea790ef288d659291ec7ebaeafb778-2571-3770",
+          "interval": [
+            2571,
+            3770
+          ]
+        },
+        {
+          "clip_id": "3a5521bd7c74d70a5b5bd81d86f84d4af1ea790ef288d659291ec7ebaeafb778-4844-6043",
+          "interval": [
+            4844,
+            6043
+          ]
+        },
+        {
+          "clip_id": "3a5521bd7c74d70a5b5bd81d86f84d4af1ea790ef288d659291ec7ebaeafb778-8326-9525",
+          "interval": [
+            8326,
+            9525
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260312T220921.slp",
+      "replay_sha256": "3c52ba4a465ead9fa242b7566a89a0e2e13592154214881474e4c0427d40e575",
+      "group": "capture-date-20260312",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7551,
+      "clips": [
+        {
+          "clip_id": "3c52ba4a465ead9fa242b7566a89a0e2e13592154214881474e4c0427d40e575-604-1803",
+          "interval": [
+            604,
+            1803
+          ]
+        },
+        {
+          "clip_id": "3c52ba4a465ead9fa242b7566a89a0e2e13592154214881474e4c0427d40e575-3260-4459",
+          "interval": [
+            3260,
+            4459
+          ]
+        },
+        {
+          "clip_id": "3c52ba4a465ead9fa242b7566a89a0e2e13592154214881474e4c0427d40e575-5733-6932",
+          "interval": [
+            5733,
+            6932
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260425T032518.slp",
+      "replay_sha256": "400208cbc6f8ae2bbbc3a3ce1dda1cae28bc0e64fd88a936f195a66d13316a8b",
+      "group": "capture-date-20260425",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9334,
+      "clips": [
+        {
+          "clip_id": "400208cbc6f8ae2bbbc3a3ce1dda1cae28bc0e64fd88a936f195a66d13316a8b-1321-2520",
+          "interval": [
+            1321,
+            2520
+          ]
+        },
+        {
+          "clip_id": "400208cbc6f8ae2bbbc3a3ce1dda1cae28bc0e64fd88a936f195a66d13316a8b-5135-6334",
+          "interval": [
+            5135,
+            6334
+          ]
+        },
+        {
+          "clip_id": "400208cbc6f8ae2bbbc3a3ce1dda1cae28bc0e64fd88a936f195a66d13316a8b-7624-8823",
+          "interval": [
+            7624,
+            8823
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260201T091306.slp",
+      "replay_sha256": "421295a2c4a722da96db6109386c8095845305c47674bd7632ab5da2ace6abff",
+      "group": "capture-date-20260201",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8199,
+      "clips": [
+        {
+          "clip_id": "421295a2c4a722da96db6109386c8095845305c47674bd7632ab5da2ace6abff-821-2020",
+          "interval": [
+            821,
+            2020
+          ]
+        },
+        {
+          "clip_id": "421295a2c4a722da96db6109386c8095845305c47674bd7632ab5da2ace6abff-3247-4446",
+          "interval": [
+            3247,
+            4446
+          ]
+        },
+        {
+          "clip_id": "421295a2c4a722da96db6109386c8095845305c47674bd7632ab5da2ace6abff-6066-7265",
+          "interval": [
+            6066,
+            7265
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260117T002159.slp",
+      "replay_sha256": "42cb618d65566acbf89601030987b6ad9ea834d52f36935eb0112e35611d1573",
+      "group": "capture-date-20260117",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 12381,
+      "clips": [
+        {
+          "clip_id": "42cb618d65566acbf89601030987b6ad9ea834d52f36935eb0112e35611d1573-1813-3012",
+          "interval": [
+            1813,
+            3012
+          ]
+        },
+        {
+          "clip_id": "42cb618d65566acbf89601030987b6ad9ea834d52f36935eb0112e35611d1573-6681-7880",
+          "interval": [
+            6681,
+            7880
+          ]
+        },
+        {
+          "clip_id": "42cb618d65566acbf89601030987b6ad9ea834d52f36935eb0112e35611d1573-10251-11450",
+          "interval": [
+            10251,
+            11450
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260131T221117.slp",
+      "replay_sha256": "482d644904bf126fcdff5d66f5bec1ff81c46a58836684a80c159e85eb7e9abb",
+      "group": "capture-date-20260131",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8355,
+      "clips": [
+        {
+          "clip_id": "482d644904bf126fcdff5d66f5bec1ff81c46a58836684a80c159e85eb7e9abb-1205-2404",
+          "interval": [
+            1205,
+            2404
+          ]
+        },
+        {
+          "clip_id": "482d644904bf126fcdff5d66f5bec1ff81c46a58836684a80c159e85eb7e9abb-3958-5157",
+          "interval": [
+            3958,
+            5157
+          ]
+        },
+        {
+          "clip_id": "482d644904bf126fcdff5d66f5bec1ff81c46a58836684a80c159e85eb7e9abb-6238-7437",
+          "interval": [
+            6238,
+            7437
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260117T010623.slp",
+      "replay_sha256": "48becfb092b7a4be0787e1784910bbcfb104393f26153020e9eb907586fadb6d",
+      "group": "capture-date-20260117",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7586,
+      "clips": [
+        {
+          "clip_id": "48becfb092b7a4be0787e1784910bbcfb104393f26153020e9eb907586fadb6d-1595-2794",
+          "interval": [
+            1595,
+            2794
+          ]
+        },
+        {
+          "clip_id": "48becfb092b7a4be0787e1784910bbcfb104393f26153020e9eb907586fadb6d-3779-4978",
+          "interval": [
+            3779,
+            4978
+          ]
+        },
+        {
+          "clip_id": "48becfb092b7a4be0787e1784910bbcfb104393f26153020e9eb907586fadb6d-5955-7154",
+          "interval": [
+            5955,
+            7154
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260516T135606.slp",
+      "replay_sha256": "500b3d09e42c584d9089d8cc68b4122427a7c09525a47c4004b2077e8af1cb86",
+      "group": "capture-date-20260516",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 5387,
+      "clips": [
+        {
+          "clip_id": "500b3d09e42c584d9089d8cc68b4122427a7c09525a47c4004b2077e8af1cb86-661-1860",
+          "interval": [
+            661,
+            1860
+          ]
+        },
+        {
+          "clip_id": "500b3d09e42c584d9089d8cc68b4122427a7c09525a47c4004b2077e8af1cb86-2494-3693",
+          "interval": [
+            2494,
+            3693
+          ]
+        },
+        {
+          "clip_id": "500b3d09e42c584d9089d8cc68b4122427a7c09525a47c4004b2077e8af1cb86-3730-4929",
+          "interval": [
+            3730,
+            4929
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260511T194529.slp",
+      "replay_sha256": "501841b12b0af252fe30ab49be2fceed1e67ec46892fcbe51a9a78578653ed3a",
+      "group": "capture-date-20260511",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 11515,
+      "clips": [
+        {
+          "clip_id": "501841b12b0af252fe30ab49be2fceed1e67ec46892fcbe51a9a78578653ed3a-1615-2814",
+          "interval": [
+            1615,
+            2814
+          ]
+        },
+        {
+          "clip_id": "501841b12b0af252fe30ab49be2fceed1e67ec46892fcbe51a9a78578653ed3a-5210-6409",
+          "interval": [
+            5210,
+            6409
+          ]
+        },
+        {
+          "clip_id": "501841b12b0af252fe30ab49be2fceed1e67ec46892fcbe51a9a78578653ed3a-7968-9167",
+          "interval": [
+            7968,
+            9167
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260110T201632.slp",
+      "replay_sha256": "50bb6a4932fbb7b2c4e0f086fc9bb07e9f73b1a3ee21ff774b05adc77629f030",
+      "group": "capture-date-20260110",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9403,
+      "clips": [
+        {
+          "clip_id": "50bb6a4932fbb7b2c4e0f086fc9bb07e9f73b1a3ee21ff774b05adc77629f030-2230-3429",
+          "interval": [
+            2230,
+            3429
+          ]
+        },
+        {
+          "clip_id": "50bb6a4932fbb7b2c4e0f086fc9bb07e9f73b1a3ee21ff774b05adc77629f030-3564-4763",
+          "interval": [
+            3564,
+            4763
+          ]
+        },
+        {
+          "clip_id": "50bb6a4932fbb7b2c4e0f086fc9bb07e9f73b1a3ee21ff774b05adc77629f030-7010-8209",
+          "interval": [
+            7010,
+            8209
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260418T182146.slp",
+      "replay_sha256": "54c63df8b0378b0cde37e8abf01a7a8d3380d6265ed496588901c9ef5531c341",
+      "group": "capture-date-20260418",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9314,
+      "clips": [
+        {
+          "clip_id": "54c63df8b0378b0cde37e8abf01a7a8d3380d6265ed496588901c9ef5531c341-888-2087",
+          "interval": [
+            888,
+            2087
+          ]
+        },
+        {
+          "clip_id": "54c63df8b0378b0cde37e8abf01a7a8d3380d6265ed496588901c9ef5531c341-4081-5280",
+          "interval": [
+            4081,
+            5280
+          ]
+        },
+        {
+          "clip_id": "54c63df8b0378b0cde37e8abf01a7a8d3380d6265ed496588901c9ef5531c341-7908-9107",
+          "interval": [
+            7908,
+            9107
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260513T191440.slp",
+      "replay_sha256": "5593f2c38dd4d14797d13e758f96b248961095f3369e165527400044a9b59d67",
+      "group": "capture-date-20260513",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7302,
+      "clips": [
+        {
+          "clip_id": "5593f2c38dd4d14797d13e758f96b248961095f3369e165527400044a9b59d67-691-1890",
+          "interval": [
+            691,
+            1890
+          ]
+        },
+        {
+          "clip_id": "5593f2c38dd4d14797d13e758f96b248961095f3369e165527400044a9b59d67-3788-4987",
+          "interval": [
+            3788,
+            4987
+          ]
+        },
+        {
+          "clip_id": "5593f2c38dd4d14797d13e758f96b248961095f3369e165527400044a9b59d67-5057-6256",
+          "interval": [
+            5057,
+            6256
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260215T114130.slp",
+      "replay_sha256": "56ab28010adae8e3e434b7b82b191b9abcb7d50a655b796639741e2a283e3d5e",
+      "group": "capture-date-20260215",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8360,
+      "clips": [
+        {
+          "clip_id": "56ab28010adae8e3e434b7b82b191b9abcb7d50a655b796639741e2a283e3d5e-1792-2991",
+          "interval": [
+            1792,
+            2991
+          ]
+        },
+        {
+          "clip_id": "56ab28010adae8e3e434b7b82b191b9abcb7d50a655b796639741e2a283e3d5e-3755-4954",
+          "interval": [
+            3755,
+            4954
+          ]
+        },
+        {
+          "clip_id": "56ab28010adae8e3e434b7b82b191b9abcb7d50a655b796639741e2a283e3d5e-5963-7162",
+          "interval": [
+            5963,
+            7162
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260112T215742.slp",
+      "replay_sha256": "580948c49d3531265322f66dfb8a6043156de791dd473c79736f01843c1bbf98",
+      "group": "capture-date-20260112",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 6457,
+      "clips": [
+        {
+          "clip_id": "580948c49d3531265322f66dfb8a6043156de791dd473c79736f01843c1bbf98-1090-2289",
+          "interval": [
+            1090,
+            2289
+          ]
+        },
+        {
+          "clip_id": "580948c49d3531265322f66dfb8a6043156de791dd473c79736f01843c1bbf98-3110-4309",
+          "interval": [
+            3110,
+            4309
+          ]
+        },
+        {
+          "clip_id": "580948c49d3531265322f66dfb8a6043156de791dd473c79736f01843c1bbf98-4907-6106",
+          "interval": [
+            4907,
+            6106
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260312T185330.slp",
+      "replay_sha256": "581329b1ad77614783708d06c83d6dcecc27098979229c240e3931954b5d91fa",
+      "group": "capture-date-20260312",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9122,
+      "clips": [
+        {
+          "clip_id": "581329b1ad77614783708d06c83d6dcecc27098979229c240e3931954b5d91fa-1541-2740",
+          "interval": [
+            1541,
+            2740
+          ]
+        },
+        {
+          "clip_id": "581329b1ad77614783708d06c83d6dcecc27098979229c240e3931954b5d91fa-3563-4762",
+          "interval": [
+            3563,
+            4762
+          ]
+        },
+        {
+          "clip_id": "581329b1ad77614783708d06c83d6dcecc27098979229c240e3931954b5d91fa-7600-8799",
+          "interval": [
+            7600,
+            8799
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260312T185609.slp",
+      "replay_sha256": "5ac26b253dfbef5aef7d84cc667655d9dc0d9788ac996e12255237a28bbcc02e",
+      "group": "capture-date-20260312",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8808,
+      "clips": [
+        {
+          "clip_id": "5ac26b253dfbef5aef7d84cc667655d9dc0d9788ac996e12255237a28bbcc02e-843-2042",
+          "interval": [
+            843,
+            2042
+          ]
+        },
+        {
+          "clip_id": "5ac26b253dfbef5aef7d84cc667655d9dc0d9788ac996e12255237a28bbcc02e-3569-4768",
+          "interval": [
+            3569,
+            4768
+          ]
+        },
+        {
+          "clip_id": "5ac26b253dfbef5aef7d84cc667655d9dc0d9788ac996e12255237a28bbcc02e-6009-7208",
+          "interval": [
+            6009,
+            7208
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260117T004328.slp",
+      "replay_sha256": "5cb7c9ef014ee76de705fc808e08bf177b6828351f3d2587ee29718801d31910",
+      "group": "capture-date-20260117",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7372,
+      "clips": [
+        {
+          "clip_id": "5cb7c9ef014ee76de705fc808e08bf177b6828351f3d2587ee29718801d31910-798-1997",
+          "interval": [
+            798,
+            1997
+          ]
+        },
+        {
+          "clip_id": "5cb7c9ef014ee76de705fc808e08bf177b6828351f3d2587ee29718801d31910-3410-4609",
+          "interval": [
+            3410,
+            4609
+          ]
+        },
+        {
+          "clip_id": "5cb7c9ef014ee76de705fc808e08bf177b6828351f3d2587ee29718801d31910-5261-6460",
+          "interval": [
+            5261,
+            6460
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260510T233020.slp",
+      "replay_sha256": "5f64d5a12940b1a74e405ef70de3a92db30c0a2adfab91efb2733967e84ddd11",
+      "group": "capture-date-20260510",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 10055,
+      "clips": [
+        {
+          "clip_id": "5f64d5a12940b1a74e405ef70de3a92db30c0a2adfab91efb2733967e84ddd11-2460-3659",
+          "interval": [
+            2460,
+            3659
+          ]
+        },
+        {
+          "clip_id": "5f64d5a12940b1a74e405ef70de3a92db30c0a2adfab91efb2733967e84ddd11-3873-5072",
+          "interval": [
+            3873,
+            5072
+          ]
+        },
+        {
+          "clip_id": "5f64d5a12940b1a74e405ef70de3a92db30c0a2adfab91efb2733967e84ddd11-7003-8202",
+          "interval": [
+            7003,
+            8202
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260605T211304.slp",
+      "replay_sha256": "5f7170da0c14e65c6e7a92e89cf0f3e5dc26659edb0cb5d97313c750df6c6553",
+      "group": "capture-date-20260605",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 10654,
+      "clips": [
+        {
+          "clip_id": "5f7170da0c14e65c6e7a92e89cf0f3e5dc26659edb0cb5d97313c750df6c6553-2106-3305",
+          "interval": [
+            2106,
+            3305
+          ]
+        },
+        {
+          "clip_id": "5f7170da0c14e65c6e7a92e89cf0f3e5dc26659edb0cb5d97313c750df6c6553-5700-6899",
+          "interval": [
+            5700,
+            6899
+          ]
+        },
+        {
+          "clip_id": "5f7170da0c14e65c6e7a92e89cf0f3e5dc26659edb0cb5d97313c750df6c6553-7923-9122",
+          "interval": [
+            7923,
+            9122
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260425T034243.slp",
+      "replay_sha256": "678a0e0dac8cfb40faac98358bdc76c9136d45c58683241db6db7fe6c134e1af",
+      "group": "capture-date-20260425",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7338,
+      "clips": [
+        {
+          "clip_id": "678a0e0dac8cfb40faac98358bdc76c9136d45c58683241db6db7fe6c134e1af-878-2077",
+          "interval": [
+            878,
+            2077
+          ]
+        },
+        {
+          "clip_id": "678a0e0dac8cfb40faac98358bdc76c9136d45c58683241db6db7fe6c134e1af-3778-4977",
+          "interval": [
+            3778,
+            4977
+          ]
+        },
+        {
+          "clip_id": "678a0e0dac8cfb40faac98358bdc76c9136d45c58683241db6db7fe6c134e1af-5923-7122",
+          "interval": [
+            5923,
+            7122
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260404T224311.slp",
+      "replay_sha256": "68a4bb14a69cf6c6b2cccca2d36fbebbf0abaec4b454e268cad80282ff651c16",
+      "group": "capture-date-20260404",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9094,
+      "clips": [
+        {
+          "clip_id": "68a4bb14a69cf6c6b2cccca2d36fbebbf0abaec4b454e268cad80282ff651c16-1010-2209",
+          "interval": [
+            1010,
+            2209
+          ]
+        },
+        {
+          "clip_id": "68a4bb14a69cf6c6b2cccca2d36fbebbf0abaec4b454e268cad80282ff651c16-3737-4936",
+          "interval": [
+            3737,
+            4936
+          ]
+        },
+        {
+          "clip_id": "68a4bb14a69cf6c6b2cccca2d36fbebbf0abaec4b454e268cad80282ff651c16-6549-7748",
+          "interval": [
+            6549,
+            7748
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260414T035157.slp",
+      "replay_sha256": "6bc4105346d4fc972a8d72ec72d38cf64b80045c1d59507a6411dbb1328f9c2d",
+      "group": "capture-date-20260414",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7925,
+      "clips": [
+        {
+          "clip_id": "6bc4105346d4fc972a8d72ec72d38cf64b80045c1d59507a6411dbb1328f9c2d-1021-2220",
+          "interval": [
+            1021,
+            2220
+          ]
+        },
+        {
+          "clip_id": "6bc4105346d4fc972a8d72ec72d38cf64b80045c1d59507a6411dbb1328f9c2d-3571-4770",
+          "interval": [
+            3571,
+            4770
+          ]
+        },
+        {
+          "clip_id": "6bc4105346d4fc972a8d72ec72d38cf64b80045c1d59507a6411dbb1328f9c2d-5754-6953",
+          "interval": [
+            5754,
+            6953
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260316T171414.slp",
+      "replay_sha256": "6bde755727ede3d1fd7b4fee0b0e9f0965230da678ad9800c0a5189a6b508ad6",
+      "group": "capture-date-20260316",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 11621,
+      "clips": [
+        {
+          "clip_id": "6bde755727ede3d1fd7b4fee0b0e9f0965230da678ad9800c0a5189a6b508ad6-2634-3833",
+          "interval": [
+            2634,
+            3833
+          ]
+        },
+        {
+          "clip_id": "6bde755727ede3d1fd7b4fee0b0e9f0965230da678ad9800c0a5189a6b508ad6-4717-5916",
+          "interval": [
+            4717,
+            5916
+          ]
+        },
+        {
+          "clip_id": "6bde755727ede3d1fd7b4fee0b0e9f0965230da678ad9800c0a5189a6b508ad6-9110-10309",
+          "interval": [
+            9110,
+            10309
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260420T213133.slp",
+      "replay_sha256": "6ca3baec5a2ff7fc4d957d0499df2b03ff66f9331459bbd731d2d7bd796f5d48",
+      "group": "capture-date-20260420",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 10864,
+      "clips": [
+        {
+          "clip_id": "6ca3baec5a2ff7fc4d957d0499df2b03ff66f9331459bbd731d2d7bd796f5d48-2574-3773",
+          "interval": [
+            2574,
+            3773
+          ]
+        },
+        {
+          "clip_id": "6ca3baec5a2ff7fc4d957d0499df2b03ff66f9331459bbd731d2d7bd796f5d48-4846-6045",
+          "interval": [
+            4846,
+            6045
+          ]
+        },
+        {
+          "clip_id": "6ca3baec5a2ff7fc4d957d0499df2b03ff66f9331459bbd731d2d7bd796f5d48-8552-9751",
+          "interval": [
+            8552,
+            9751
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260201T090525.slp",
+      "replay_sha256": "6e39fabc77fa9cc6d1cb306c5bd3ecf79bd9fe2204ce67a5b2cd23595780a889",
+      "group": "capture-date-20260201",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9290,
+      "clips": [
+        {
+          "clip_id": "6e39fabc77fa9cc6d1cb306c5bd3ecf79bd9fe2204ce67a5b2cd23595780a889-2157-3356",
+          "interval": [
+            2157,
+            3356
+          ]
+        },
+        {
+          "clip_id": "6e39fabc77fa9cc6d1cb306c5bd3ecf79bd9fe2204ce67a5b2cd23595780a889-4515-5714",
+          "interval": [
+            4515,
+            5714
+          ]
+        },
+        {
+          "clip_id": "6e39fabc77fa9cc6d1cb306c5bd3ecf79bd9fe2204ce67a5b2cd23595780a889-6574-7773",
+          "interval": [
+            6574,
+            7773
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260415T192621.slp",
+      "replay_sha256": "7152aad7c99165901f4abec5c5762bed6e347aa1d7b659161aa800cae638c630",
+      "group": "capture-date-20260415",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7913,
+      "clips": [
+        {
+          "clip_id": "7152aad7c99165901f4abec5c5762bed6e347aa1d7b659161aa800cae638c630-1721-2920",
+          "interval": [
+            1721,
+            2920
+          ]
+        },
+        {
+          "clip_id": "7152aad7c99165901f4abec5c5762bed6e347aa1d7b659161aa800cae638c630-2999-4198",
+          "interval": [
+            2999,
+            4198
+          ]
+        },
+        {
+          "clip_id": "7152aad7c99165901f4abec5c5762bed6e347aa1d7b659161aa800cae638c630-5606-6805",
+          "interval": [
+            5606,
+            6805
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260112T204419.slp",
+      "replay_sha256": "74855f773a14a00f0667d0a912fd76e97acf3a487da3b5a11e56f246a468d162",
+      "group": "capture-date-20260112",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7030,
+      "clips": [
+        {
+          "clip_id": "74855f773a14a00f0667d0a912fd76e97acf3a487da3b5a11e56f246a468d162-1380-2579",
+          "interval": [
+            1380,
+            2579
+          ]
+        },
+        {
+          "clip_id": "74855f773a14a00f0667d0a912fd76e97acf3a487da3b5a11e56f246a468d162-2766-3965",
+          "interval": [
+            2766,
+            3965
+          ]
+        },
+        {
+          "clip_id": "74855f773a14a00f0667d0a912fd76e97acf3a487da3b5a11e56f246a468d162-5592-6791",
+          "interval": [
+            5592,
+            6791
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260509T151229.slp",
+      "replay_sha256": "7809ed1a85dbad38136031f7e05dcb65ed47289059e36363431f7ec44d582492",
+      "group": "capture-date-20260509",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 5782,
+      "clips": [
+        {
+          "clip_id": "7809ed1a85dbad38136031f7e05dcb65ed47289059e36363431f7ec44d582492-639-1838",
+          "interval": [
+            639,
+            1838
+          ]
+        },
+        {
+          "clip_id": "7809ed1a85dbad38136031f7e05dcb65ed47289059e36363431f7ec44d582492-2566-3765",
+          "interval": [
+            2566,
+            3765
+          ]
+        },
+        {
+          "clip_id": "7809ed1a85dbad38136031f7e05dcb65ed47289059e36363431f7ec44d582492-4008-5207",
+          "interval": [
+            4008,
+            5207
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260511T194016.slp",
+      "replay_sha256": "7927ef3cae956a4144e3c1dd22912c40f60e5d59bad4ae044e3a77e8171fe52b",
+      "group": "capture-date-20260511",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9812,
+      "clips": [
+        {
+          "clip_id": "7927ef3cae956a4144e3c1dd22912c40f60e5d59bad4ae044e3a77e8171fe52b-688-1887",
+          "interval": [
+            688,
+            1887
+          ]
+        },
+        {
+          "clip_id": "7927ef3cae956a4144e3c1dd22912c40f60e5d59bad4ae044e3a77e8171fe52b-4141-5340",
+          "interval": [
+            4141,
+            5340
+          ]
+        },
+        {
+          "clip_id": "7927ef3cae956a4144e3c1dd22912c40f60e5d59bad4ae044e3a77e8171fe52b-8243-9442",
+          "interval": [
+            8243,
+            9442
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260416T171940.slp",
+      "replay_sha256": "797b645d51c86f9e89cc7c93edf1c8cf46ef5eb1c8f6ca8060b63c7e09e287ca",
+      "group": "capture-date-20260416",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9674,
+      "clips": [
+        {
+          "clip_id": "797b645d51c86f9e89cc7c93edf1c8cf46ef5eb1c8f6ca8060b63c7e09e287ca-1288-2487",
+          "interval": [
+            1288,
+            2487
+          ]
+        },
+        {
+          "clip_id": "797b645d51c86f9e89cc7c93edf1c8cf46ef5eb1c8f6ca8060b63c7e09e287ca-4342-5541",
+          "interval": [
+            4342,
+            5541
+          ]
+        },
+        {
+          "clip_id": "797b645d51c86f9e89cc7c93edf1c8cf46ef5eb1c8f6ca8060b63c7e09e287ca-6877-8076",
+          "interval": [
+            6877,
+            8076
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260415T185537.slp",
+      "replay_sha256": "7a266e1fc5994e479af3ad2b75c3daa5fd4105d026cd00afb7244180f2ae8edf",
+      "group": "capture-date-20260415",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8185,
+      "clips": [
+        {
+          "clip_id": "7a266e1fc5994e479af3ad2b75c3daa5fd4105d026cd00afb7244180f2ae8edf-990-2189",
+          "interval": [
+            990,
+            2189
+          ]
+        },
+        {
+          "clip_id": "7a266e1fc5994e479af3ad2b75c3daa5fd4105d026cd00afb7244180f2ae8edf-4217-5416",
+          "interval": [
+            4217,
+            5416
+          ]
+        },
+        {
+          "clip_id": "7a266e1fc5994e479af3ad2b75c3daa5fd4105d026cd00afb7244180f2ae8edf-6450-7649",
+          "interval": [
+            6450,
+            7649
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260201T093615.slp",
+      "replay_sha256": "7bb0b357f4bbe56540cc4131031ab0e85b2ea22e94748e30c4353b8fae30546f",
+      "group": "capture-date-20260201",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8925,
+      "clips": [
+        {
+          "clip_id": "7bb0b357f4bbe56540cc4131031ab0e85b2ea22e94748e30c4353b8fae30546f-1677-2876",
+          "interval": [
+            1677,
+            2876
+          ]
+        },
+        {
+          "clip_id": "7bb0b357f4bbe56540cc4131031ab0e85b2ea22e94748e30c4353b8fae30546f-3903-5102",
+          "interval": [
+            3903,
+            5102
+          ]
+        },
+        {
+          "clip_id": "7bb0b357f4bbe56540cc4131031ab0e85b2ea22e94748e30c4353b8fae30546f-7048-8247",
+          "interval": [
+            7048,
+            8247
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260207T112034.slp",
+      "replay_sha256": "7c01bf656ba76abc177b776adc39f301823e3049bd377ba5dff2a9f3454b65f5",
+      "group": "capture-date-20260207",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8562,
+      "clips": [
+        {
+          "clip_id": "7c01bf656ba76abc177b776adc39f301823e3049bd377ba5dff2a9f3454b65f5-1579-2778",
+          "interval": [
+            1579,
+            2778
+          ]
+        },
+        {
+          "clip_id": "7c01bf656ba76abc177b776adc39f301823e3049bd377ba5dff2a9f3454b65f5-3643-4842",
+          "interval": [
+            3643,
+            4842
+          ]
+        },
+        {
+          "clip_id": "7c01bf656ba76abc177b776adc39f301823e3049bd377ba5dff2a9f3454b65f5-6712-7911",
+          "interval": [
+            6712,
+            7911
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260322T003350.slp",
+      "replay_sha256": "7d5246774a6914242ccb3161c78b0472b7dbd80a1499cfc8a3d14d4c3dcf2c49",
+      "group": "capture-date-20260322",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 5829,
+      "clips": [
+        {
+          "clip_id": "7d5246774a6914242ccb3161c78b0472b7dbd80a1499cfc8a3d14d4c3dcf2c49-877-2076",
+          "interval": [
+            877,
+            2076
+          ]
+        },
+        {
+          "clip_id": "7d5246774a6914242ccb3161c78b0472b7dbd80a1499cfc8a3d14d4c3dcf2c49-2782-3981",
+          "interval": [
+            2782,
+            3981
+          ]
+        },
+        {
+          "clip_id": "7d5246774a6914242ccb3161c78b0472b7dbd80a1499cfc8a3d14d4c3dcf2c49-4442-5641",
+          "interval": [
+            4442,
+            5641
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260513T180242.slp",
+      "replay_sha256": "7e7e657a886e798175458dd59bafcbef761c0f4fe632de5000860791c91a2aef",
+      "group": "capture-date-20260513",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9814,
+      "clips": [
+        {
+          "clip_id": "7e7e657a886e798175458dd59bafcbef761c0f4fe632de5000860791c91a2aef-1385-2584",
+          "interval": [
+            1385,
+            2584
+          ]
+        },
+        {
+          "clip_id": "7e7e657a886e798175458dd59bafcbef761c0f4fe632de5000860791c91a2aef-3724-4923",
+          "interval": [
+            3724,
+            4923
+          ]
+        },
+        {
+          "clip_id": "7e7e657a886e798175458dd59bafcbef761c0f4fe632de5000860791c91a2aef-7953-9152",
+          "interval": [
+            7953,
+            9152
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260516T172954.slp",
+      "replay_sha256": "7f1770b030ca8e9ecc391199d0cf119b51ae694ed1e42eb7462cf6ae0ddb300a",
+      "group": "capture-date-20260516",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9706,
+      "clips": [
+        {
+          "clip_id": "7f1770b030ca8e9ecc391199d0cf119b51ae694ed1e42eb7462cf6ae0ddb300a-1959-3158",
+          "interval": [
+            1959,
+            3158
+          ]
+        },
+        {
+          "clip_id": "7f1770b030ca8e9ecc391199d0cf119b51ae694ed1e42eb7462cf6ae0ddb300a-5229-6428",
+          "interval": [
+            5229,
+            6428
+          ]
+        },
+        {
+          "clip_id": "7f1770b030ca8e9ecc391199d0cf119b51ae694ed1e42eb7462cf6ae0ddb300a-7120-8319",
+          "interval": [
+            7120,
+            8319
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260312T162624.slp",
+      "replay_sha256": "818d33211aecf8a4278ca6ff08432e7569054c1617b83b2d6ce7c5d1d8898dbd",
+      "group": "capture-date-20260312",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8715,
+      "clips": [
+        {
+          "clip_id": "818d33211aecf8a4278ca6ff08432e7569054c1617b83b2d6ce7c5d1d8898dbd-1770-2969",
+          "interval": [
+            1770,
+            2969
+          ]
+        },
+        {
+          "clip_id": "818d33211aecf8a4278ca6ff08432e7569054c1617b83b2d6ce7c5d1d8898dbd-3504-4703",
+          "interval": [
+            3504,
+            4703
+          ]
+        },
+        {
+          "clip_id": "818d33211aecf8a4278ca6ff08432e7569054c1617b83b2d6ce7c5d1d8898dbd-7089-8288",
+          "interval": [
+            7089,
+            8288
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260508T235905.slp",
+      "replay_sha256": "8466543803e9ce2ee63472a90e1d483134cb29d5f10450bbb467734a9deda651",
+      "group": "capture-date-20260508",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 10677,
+      "clips": [
+        {
+          "clip_id": "8466543803e9ce2ee63472a90e1d483134cb29d5f10450bbb467734a9deda651-675-1874",
+          "interval": [
+            675,
+            1874
+          ]
+        },
+        {
+          "clip_id": "8466543803e9ce2ee63472a90e1d483134cb29d5f10450bbb467734a9deda651-5053-6252",
+          "interval": [
+            5053,
+            6252
+          ]
+        },
+        {
+          "clip_id": "8466543803e9ce2ee63472a90e1d483134cb29d5f10450bbb467734a9deda651-8982-10181",
+          "interval": [
+            8982,
+            10181
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260320T210955.slp",
+      "replay_sha256": "8aecb4cd3a3cf192c045f6b2a07302816a0b25754cb56e02be8d94e2d6e78ffe",
+      "group": "capture-date-20260320",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 11158,
+      "clips": [
+        {
+          "clip_id": "8aecb4cd3a3cf192c045f6b2a07302816a0b25754cb56e02be8d94e2d6e78ffe-639-1838",
+          "interval": [
+            639,
+            1838
+          ]
+        },
+        {
+          "clip_id": "8aecb4cd3a3cf192c045f6b2a07302816a0b25754cb56e02be8d94e2d6e78ffe-4970-6169",
+          "interval": [
+            4970,
+            6169
+          ]
+        },
+        {
+          "clip_id": "8aecb4cd3a3cf192c045f6b2a07302816a0b25754cb56e02be8d94e2d6e78ffe-7698-8897",
+          "interval": [
+            7698,
+            8897
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260207T113732.slp",
+      "replay_sha256": "928f458c65f9259954ba3487229d15a6d9ac12f8f595596ac34125f8fbfae59d",
+      "group": "capture-date-20260207",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 10136,
+      "clips": [
+        {
+          "clip_id": "928f458c65f9259954ba3487229d15a6d9ac12f8f595596ac34125f8fbfae59d-1114-2313",
+          "interval": [
+            1114,
+            2313
+          ]
+        },
+        {
+          "clip_id": "928f458c65f9259954ba3487229d15a6d9ac12f8f595596ac34125f8fbfae59d-4606-5805",
+          "interval": [
+            4606,
+            5805
+          ]
+        },
+        {
+          "clip_id": "928f458c65f9259954ba3487229d15a6d9ac12f8f595596ac34125f8fbfae59d-7772-8971",
+          "interval": [
+            7772,
+            8971
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260204T200022.slp",
+      "replay_sha256": "93c6b348f9cbd7ef330e088a623300748463a7bdd3a02ad972fc2407afb8f83c",
+      "group": "capture-date-20260204",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 10821,
+      "clips": [
+        {
+          "clip_id": "93c6b348f9cbd7ef330e088a623300748463a7bdd3a02ad972fc2407afb8f83c-802-2001",
+          "interval": [
+            802,
+            2001
+          ]
+        },
+        {
+          "clip_id": "93c6b348f9cbd7ef330e088a623300748463a7bdd3a02ad972fc2407afb8f83c-4585-5784",
+          "interval": [
+            4585,
+            5784
+          ]
+        },
+        {
+          "clip_id": "93c6b348f9cbd7ef330e088a623300748463a7bdd3a02ad972fc2407afb8f83c-7779-8978",
+          "interval": [
+            7779,
+            8978
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260322T012348.slp",
+      "replay_sha256": "94848d4cfc6f88dca447ce7996fe962cb344701dc92f3c359f54c6cb3ffc5289",
+      "group": "capture-date-20260322",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7321,
+      "clips": [
+        {
+          "clip_id": "94848d4cfc6f88dca447ce7996fe962cb344701dc92f3c359f54c6cb3ffc5289-653-1852",
+          "interval": [
+            653,
+            1852
+          ]
+        },
+        {
+          "clip_id": "94848d4cfc6f88dca447ce7996fe962cb344701dc92f3c359f54c6cb3ffc5289-3381-4580",
+          "interval": [
+            3381,
+            4580
+          ]
+        },
+        {
+          "clip_id": "94848d4cfc6f88dca447ce7996fe962cb344701dc92f3c359f54c6cb3ffc5289-5858-7057",
+          "interval": [
+            5858,
+            7057
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260118T151752.slp",
+      "replay_sha256": "954afbde3073410bef79cb4ece906877deac06fc4b472f8a748d15767e0ead34",
+      "group": "capture-date-20260118",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7282,
+      "clips": [
+        {
+          "clip_id": "954afbde3073410bef79cb4ece906877deac06fc4b472f8a748d15767e0ead34-811-2010",
+          "interval": [
+            811,
+            2010
+          ]
+        },
+        {
+          "clip_id": "954afbde3073410bef79cb4ece906877deac06fc4b472f8a748d15767e0ead34-3354-4553",
+          "interval": [
+            3354,
+            4553
+          ]
+        },
+        {
+          "clip_id": "954afbde3073410bef79cb4ece906877deac06fc4b472f8a748d15767e0ead34-4989-6188",
+          "interval": [
+            4989,
+            6188
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260418T180509.slp",
+      "replay_sha256": "97341ea3e873b936a9523542e99a6dac27a5048ddb1219850a07a1b34ff15992",
+      "group": "capture-date-20260418",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 5385,
+      "clips": [
+        {
+          "clip_id": "97341ea3e873b936a9523542e99a6dac27a5048ddb1219850a07a1b34ff15992-666-1865",
+          "interval": [
+            666,
+            1865
+          ]
+        },
+        {
+          "clip_id": "97341ea3e873b936a9523542e99a6dac27a5048ddb1219850a07a1b34ff15992-2407-3606",
+          "interval": [
+            2407,
+            3606
+          ]
+        },
+        {
+          "clip_id": "97341ea3e873b936a9523542e99a6dac27a5048ddb1219850a07a1b34ff15992-3805-5004",
+          "interval": [
+            3805,
+            5004
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260406T003621.slp",
+      "replay_sha256": "9b98d6df31bcf928b59136c2504e2ff0c3f336459a013fc521dd18ee0bf92982",
+      "group": "capture-date-20260406",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 11047,
+      "clips": [
+        {
+          "clip_id": "9b98d6df31bcf928b59136c2504e2ff0c3f336459a013fc521dd18ee0bf92982-1271-2470",
+          "interval": [
+            1271,
+            2470
+          ]
+        },
+        {
+          "clip_id": "9b98d6df31bcf928b59136c2504e2ff0c3f336459a013fc521dd18ee0bf92982-5176-6375",
+          "interval": [
+            5176,
+            6375
+          ]
+        },
+        {
+          "clip_id": "9b98d6df31bcf928b59136c2504e2ff0c3f336459a013fc521dd18ee0bf92982-8737-9936",
+          "interval": [
+            8737,
+            9936
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260312T184126.slp",
+      "replay_sha256": "9d7b11c6a6f433da46f4291836be076fa7bd97c9b12df629c7370bc02f71d272",
+      "group": "capture-date-20260312",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7485,
+      "clips": [
+        {
+          "clip_id": "9d7b11c6a6f433da46f4291836be076fa7bd97c9b12df629c7370bc02f71d272-1368-2567",
+          "interval": [
+            1368,
+            2567
+          ]
+        },
+        {
+          "clip_id": "9d7b11c6a6f433da46f4291836be076fa7bd97c9b12df629c7370bc02f71d272-3200-4399",
+          "interval": [
+            3200,
+            4399
+          ]
+        },
+        {
+          "clip_id": "9d7b11c6a6f433da46f4291836be076fa7bd97c9b12df629c7370bc02f71d272-6004-7203",
+          "interval": [
+            6004,
+            7203
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260111T001548.slp",
+      "replay_sha256": "9f48ea1844396013ad099d903f42a7852b4905f81c31c7aae321a5839066073c",
+      "group": "capture-date-20260111",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9587,
+      "clips": [
+        {
+          "clip_id": "9f48ea1844396013ad099d903f42a7852b4905f81c31c7aae321a5839066073c-1554-2753",
+          "interval": [
+            1554,
+            2753
+          ]
+        },
+        {
+          "clip_id": "9f48ea1844396013ad099d903f42a7852b4905f81c31c7aae321a5839066073c-5283-6482",
+          "interval": [
+            5283,
+            6482
+          ]
+        },
+        {
+          "clip_id": "9f48ea1844396013ad099d903f42a7852b4905f81c31c7aae321a5839066073c-8076-9275",
+          "interval": [
+            8076,
+            9275
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260219T200938.slp",
+      "replay_sha256": "a2fa899dadb8031d7211f7b5b4adb569d0b51b0f092e33c8f28f858b9eac9235",
+      "group": "capture-date-20260219",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8613,
+      "clips": [
+        {
+          "clip_id": "a2fa899dadb8031d7211f7b5b4adb569d0b51b0f092e33c8f28f858b9eac9235-1767-2966",
+          "interval": [
+            1767,
+            2966
+          ]
+        },
+        {
+          "clip_id": "a2fa899dadb8031d7211f7b5b4adb569d0b51b0f092e33c8f28f858b9eac9235-3627-4826",
+          "interval": [
+            3627,
+            4826
+          ]
+        },
+        {
+          "clip_id": "a2fa899dadb8031d7211f7b5b4adb569d0b51b0f092e33c8f28f858b9eac9235-6867-8066",
+          "interval": [
+            6867,
+            8066
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260312T171024.slp",
+      "replay_sha256": "a5451c283a44527e5542af0e250dcef14fed13cd096a7f2865c8c974a090586b",
+      "group": "capture-date-20260312",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 6038,
+      "clips": [
+        {
+          "clip_id": "a5451c283a44527e5542af0e250dcef14fed13cd096a7f2865c8c974a090586b-1047-2246",
+          "interval": [
+            1047,
+            2246
+          ]
+        },
+        {
+          "clip_id": "a5451c283a44527e5542af0e250dcef14fed13cd096a7f2865c8c974a090586b-2762-3961",
+          "interval": [
+            2762,
+            3961
+          ]
+        },
+        {
+          "clip_id": "a5451c283a44527e5542af0e250dcef14fed13cd096a7f2865c8c974a090586b-4162-5361",
+          "interval": [
+            4162,
+            5361
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260213T185801.slp",
+      "replay_sha256": "a600caaa5430f40b5942ec4d5169d1ed461d7514de0fd4e27d8a475ddfad5a03",
+      "group": "capture-date-20260213",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 12220,
+      "clips": [
+        {
+          "clip_id": "a600caaa5430f40b5942ec4d5169d1ed461d7514de0fd4e27d8a475ddfad5a03-832-2031",
+          "interval": [
+            832,
+            2031
+          ]
+        },
+        {
+          "clip_id": "a600caaa5430f40b5942ec4d5169d1ed461d7514de0fd4e27d8a475ddfad5a03-4666-5865",
+          "interval": [
+            4666,
+            5865
+          ]
+        },
+        {
+          "clip_id": "a600caaa5430f40b5942ec4d5169d1ed461d7514de0fd4e27d8a475ddfad5a03-9291-10490",
+          "interval": [
+            9291,
+            10490
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260217T174843.slp",
+      "replay_sha256": "a7f236dc2cc1aa46755d251fbbccc1643e5610300d9dd8d4fe11b40176ed04c1",
+      "group": "capture-date-20260217",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7378,
+      "clips": [
+        {
+          "clip_id": "a7f236dc2cc1aa46755d251fbbccc1643e5610300d9dd8d4fe11b40176ed04c1-1330-2529",
+          "interval": [
+            1330,
+            2529
+          ]
+        },
+        {
+          "clip_id": "a7f236dc2cc1aa46755d251fbbccc1643e5610300d9dd8d4fe11b40176ed04c1-3710-4909",
+          "interval": [
+            3710,
+            4909
+          ]
+        },
+        {
+          "clip_id": "a7f236dc2cc1aa46755d251fbbccc1643e5610300d9dd8d4fe11b40176ed04c1-5640-6839",
+          "interval": [
+            5640,
+            6839
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260207T122311.slp",
+      "replay_sha256": "a8634fc04aeef30e28593e39bd3bf0835461ff84b6b2c80838bd2971fca42425",
+      "group": "capture-date-20260207",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8416,
+      "clips": [
+        {
+          "clip_id": "a8634fc04aeef30e28593e39bd3bf0835461ff84b6b2c80838bd2971fca42425-1240-2439",
+          "interval": [
+            1240,
+            2439
+          ]
+        },
+        {
+          "clip_id": "a8634fc04aeef30e28593e39bd3bf0835461ff84b6b2c80838bd2971fca42425-3395-4594",
+          "interval": [
+            3395,
+            4594
+          ]
+        },
+        {
+          "clip_id": "a8634fc04aeef30e28593e39bd3bf0835461ff84b6b2c80838bd2971fca42425-6267-7466",
+          "interval": [
+            6267,
+            7466
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260118T154304.slp",
+      "replay_sha256": "ab79777d0be77660754a7573a1e98d5e5c679851a7a06b452f87972f5116d95a",
+      "group": "capture-date-20260118",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8686,
+      "clips": [
+        {
+          "clip_id": "ab79777d0be77660754a7573a1e98d5e5c679851a7a06b452f87972f5116d95a-1641-2840",
+          "interval": [
+            1641,
+            2840
+          ]
+        },
+        {
+          "clip_id": "ab79777d0be77660754a7573a1e98d5e5c679851a7a06b452f87972f5116d95a-3420-4619",
+          "interval": [
+            3420,
+            4619
+          ]
+        },
+        {
+          "clip_id": "ab79777d0be77660754a7573a1e98d5e5c679851a7a06b452f87972f5116d95a-7341-8540",
+          "interval": [
+            7341,
+            8540
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260215T113917.slp",
+      "replay_sha256": "ad44c676490e22a8ea0ac44a543eba8494ada893f3fdf9c2fd780f885d10a392",
+      "group": "capture-date-20260215",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7288,
+      "clips": [
+        {
+          "clip_id": "ad44c676490e22a8ea0ac44a543eba8494ada893f3fdf9c2fd780f885d10a392-1405-2604",
+          "interval": [
+            1405,
+            2604
+          ]
+        },
+        {
+          "clip_id": "ad44c676490e22a8ea0ac44a543eba8494ada893f3fdf9c2fd780f885d10a392-3076-4275",
+          "interval": [
+            3076,
+            4275
+          ]
+        },
+        {
+          "clip_id": "ad44c676490e22a8ea0ac44a543eba8494ada893f3fdf9c2fd780f885d10a392-4996-6195",
+          "interval": [
+            4996,
+            6195
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260201T092757.slp",
+      "replay_sha256": "ae8c75d64c61b0401cac4aac8325f2196d95003b21b52b5528b0455998fbb744",
+      "group": "capture-date-20260201",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8874,
+      "clips": [
+        {
+          "clip_id": "ae8c75d64c61b0401cac4aac8325f2196d95003b21b52b5528b0455998fbb744-1110-2309",
+          "interval": [
+            1110,
+            2309
+          ]
+        },
+        {
+          "clip_id": "ae8c75d64c61b0401cac4aac8325f2196d95003b21b52b5528b0455998fbb744-3444-4643",
+          "interval": [
+            3444,
+            4643
+          ]
+        },
+        {
+          "clip_id": "ae8c75d64c61b0401cac4aac8325f2196d95003b21b52b5528b0455998fbb744-6140-7339",
+          "interval": [
+            6140,
+            7339
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260516T153838.slp",
+      "replay_sha256": "aed129bcb5da986e5ffca7c13468a9f88dd76400918691511bc6f52e95cf8347",
+      "group": "capture-date-20260516",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 10647,
+      "clips": [
+        {
+          "clip_id": "aed129bcb5da986e5ffca7c13468a9f88dd76400918691511bc6f52e95cf8347-2039-3238",
+          "interval": [
+            2039,
+            3238
+          ]
+        },
+        {
+          "clip_id": "aed129bcb5da986e5ffca7c13468a9f88dd76400918691511bc6f52e95cf8347-4092-5291",
+          "interval": [
+            4092,
+            5291
+          ]
+        },
+        {
+          "clip_id": "aed129bcb5da986e5ffca7c13468a9f88dd76400918691511bc6f52e95cf8347-8208-9407",
+          "interval": [
+            8208,
+            9407
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260319T181100.slp",
+      "replay_sha256": "b0a63a49b506d4b5f68c4f417b299cc0bfa697ec031f310da974b2a45aefc32d",
+      "group": "capture-date-20260319",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9095,
+      "clips": [
+        {
+          "clip_id": "b0a63a49b506d4b5f68c4f417b299cc0bfa697ec031f310da974b2a45aefc32d-1816-3015",
+          "interval": [
+            1816,
+            3015
+          ]
+        },
+        {
+          "clip_id": "b0a63a49b506d4b5f68c4f417b299cc0bfa697ec031f310da974b2a45aefc32d-4136-5335",
+          "interval": [
+            4136,
+            5335
+          ]
+        },
+        {
+          "clip_id": "b0a63a49b506d4b5f68c4f417b299cc0bfa697ec031f310da974b2a45aefc32d-6879-8078",
+          "interval": [
+            6879,
+            8078
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260605T210139.slp",
+      "replay_sha256": "b1065739b6db5a9d1b4ac277e98fdf2e9ca18918b22babc46b209ca2de3e34e6",
+      "group": "capture-date-20260605",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 6245,
+      "clips": [
+        {
+          "clip_id": "b1065739b6db5a9d1b4ac277e98fdf2e9ca18918b22babc46b209ca2de3e34e6-871-2070",
+          "interval": [
+            871,
+            2070
+          ]
+        },
+        {
+          "clip_id": "b1065739b6db5a9d1b4ac277e98fdf2e9ca18918b22babc46b209ca2de3e34e6-2808-4007",
+          "interval": [
+            2808,
+            4007
+          ]
+        },
+        {
+          "clip_id": "b1065739b6db5a9d1b4ac277e98fdf2e9ca18918b22babc46b209ca2de3e34e6-4325-5524",
+          "interval": [
+            4325,
+            5524
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260418T173621.slp",
+      "replay_sha256": "b270d095f162f637191cb84806f150721d98e8f2b9ad2b51308f299815d5f0f1",
+      "group": "capture-date-20260418",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 11884,
+      "clips": [
+        {
+          "clip_id": "b270d095f162f637191cb84806f150721d98e8f2b9ad2b51308f299815d5f0f1-2302-3501",
+          "interval": [
+            2302,
+            3501
+          ]
+        },
+        {
+          "clip_id": "b270d095f162f637191cb84806f150721d98e8f2b9ad2b51308f299815d5f0f1-6112-7311",
+          "interval": [
+            6112,
+            7311
+          ]
+        },
+        {
+          "clip_id": "b270d095f162f637191cb84806f150721d98e8f2b9ad2b51308f299815d5f0f1-9095-10294",
+          "interval": [
+            9095,
+            10294
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260213T190726.slp",
+      "replay_sha256": "b961d9fd162e1051d6b6f303547a865ce7b99a1eeb75ebc631fdb72bd2a91861",
+      "group": "capture-date-20260213",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9532,
+      "clips": [
+        {
+          "clip_id": "b961d9fd162e1051d6b6f303547a865ce7b99a1eeb75ebc631fdb72bd2a91861-877-2076",
+          "interval": [
+            877,
+            2076
+          ]
+        },
+        {
+          "clip_id": "b961d9fd162e1051d6b6f303547a865ce7b99a1eeb75ebc631fdb72bd2a91861-4534-5733",
+          "interval": [
+            4534,
+            5733
+          ]
+        },
+        {
+          "clip_id": "b961d9fd162e1051d6b6f303547a865ce7b99a1eeb75ebc631fdb72bd2a91861-7842-9041",
+          "interval": [
+            7842,
+            9041
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260404T221342.slp",
+      "replay_sha256": "b9b3941bf2885656f94834c9c7a9d5538230bb4ba9d38eadaf9bd4fbb9ee70f8",
+      "group": "capture-date-20260404",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 5352,
+      "clips": [
+        {
+          "clip_id": "b9b3941bf2885656f94834c9c7a9d5538230bb4ba9d38eadaf9bd4fbb9ee70f8-786-1985",
+          "interval": [
+            786,
+            1985
+          ]
+        },
+        {
+          "clip_id": "b9b3941bf2885656f94834c9c7a9d5538230bb4ba9d38eadaf9bd4fbb9ee70f8-2260-3459",
+          "interval": [
+            2260,
+            3459
+          ]
+        },
+        {
+          "clip_id": "b9b3941bf2885656f94834c9c7a9d5538230bb4ba9d38eadaf9bd4fbb9ee70f8-3703-4902",
+          "interval": [
+            3703,
+            4902
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260519T225256.slp",
+      "replay_sha256": "b9f8efbf3f5590e7e8d0b9e8ef6788a12564f55251481a299410b2850ed3e11a",
+      "group": "capture-date-20260519",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9576,
+      "clips": [
+        {
+          "clip_id": "b9f8efbf3f5590e7e8d0b9e8ef6788a12564f55251481a299410b2850ed3e11a-2039-3238",
+          "interval": [
+            2039,
+            3238
+          ]
+        },
+        {
+          "clip_id": "b9f8efbf3f5590e7e8d0b9e8ef6788a12564f55251481a299410b2850ed3e11a-4414-5613",
+          "interval": [
+            4414,
+            5613
+          ]
+        },
+        {
+          "clip_id": "b9f8efbf3f5590e7e8d0b9e8ef6788a12564f55251481a299410b2850ed3e11a-8107-9306",
+          "interval": [
+            8107,
+            9306
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260312T214902.slp",
+      "replay_sha256": "bc3c8bedd03f8459fe657206c0d3580694eece4f1de03567644231069eff0a11",
+      "group": "capture-date-20260312",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 6061,
+      "clips": [
+        {
+          "clip_id": "bc3c8bedd03f8459fe657206c0d3580694eece4f1de03567644231069eff0a11-1093-2292",
+          "interval": [
+            1093,
+            2292
+          ]
+        },
+        {
+          "clip_id": "bc3c8bedd03f8459fe657206c0d3580694eece4f1de03567644231069eff0a11-2707-3906",
+          "interval": [
+            2707,
+            3906
+          ]
+        },
+        {
+          "clip_id": "bc3c8bedd03f8459fe657206c0d3580694eece4f1de03567644231069eff0a11-4240-5439",
+          "interval": [
+            4240,
+            5439
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260513T191850.slp",
+      "replay_sha256": "bdf96f7cda8d22f16a90d2e088f4ba68d660bcbbb5878631484e79bd28d5862a",
+      "group": "capture-date-20260513",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8809,
+      "clips": [
+        {
+          "clip_id": "bdf96f7cda8d22f16a90d2e088f4ba68d660bcbbb5878631484e79bd28d5862a-1130-2329",
+          "interval": [
+            1130,
+            2329
+          ]
+        },
+        {
+          "clip_id": "bdf96f7cda8d22f16a90d2e088f4ba68d660bcbbb5878631484e79bd28d5862a-3516-4715",
+          "interval": [
+            3516,
+            4715
+          ]
+        },
+        {
+          "clip_id": "bdf96f7cda8d22f16a90d2e088f4ba68d660bcbbb5878631484e79bd28d5862a-6728-7927",
+          "interval": [
+            6728,
+            7927
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260321T235454.slp",
+      "replay_sha256": "bf8641ec04514c918ad9739736049cbfe5aa1f47fcce1cda2ef21a7d04cd6a95",
+      "group": "capture-date-20260321",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 10674,
+      "clips": [
+        {
+          "clip_id": "bf8641ec04514c918ad9739736049cbfe5aa1f47fcce1cda2ef21a7d04cd6a95-2098-3297",
+          "interval": [
+            2098,
+            3297
+          ]
+        },
+        {
+          "clip_id": "bf8641ec04514c918ad9739736049cbfe5aa1f47fcce1cda2ef21a7d04cd6a95-5602-6801",
+          "interval": [
+            5602,
+            6801
+          ]
+        },
+        {
+          "clip_id": "bf8641ec04514c918ad9739736049cbfe5aa1f47fcce1cda2ef21a7d04cd6a95-9015-10214",
+          "interval": [
+            9015,
+            10214
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260420T221129.slp",
+      "replay_sha256": "bf96cbf6b5b1d952d61572c9bec4ff5bb3095dd4fd13456b54307b0b6baf77b1",
+      "group": "capture-date-20260420",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 10250,
+      "clips": [
+        {
+          "clip_id": "bf96cbf6b5b1d952d61572c9bec4ff5bb3095dd4fd13456b54307b0b6baf77b1-761-1960",
+          "interval": [
+            761,
+            1960
+          ]
+        },
+        {
+          "clip_id": "bf96cbf6b5b1d952d61572c9bec4ff5bb3095dd4fd13456b54307b0b6baf77b1-5502-6701",
+          "interval": [
+            5502,
+            6701
+          ]
+        },
+        {
+          "clip_id": "bf96cbf6b5b1d952d61572c9bec4ff5bb3095dd4fd13456b54307b0b6baf77b1-8418-9617",
+          "interval": [
+            8418,
+            9617
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260430T002736.slp",
+      "replay_sha256": "bfcb7ff517e38e32b2bcf8d7bcf7ff4d313975a17a3f0697402190666941d5a6",
+      "group": "capture-date-20260430",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 11392,
+      "clips": [
+        {
+          "clip_id": "bfcb7ff517e38e32b2bcf8d7bcf7ff4d313975a17a3f0697402190666941d5a6-2697-3896",
+          "interval": [
+            2697,
+            3896
+          ]
+        },
+        {
+          "clip_id": "bfcb7ff517e38e32b2bcf8d7bcf7ff4d313975a17a3f0697402190666941d5a6-6159-7358",
+          "interval": [
+            6159,
+            7358
+          ]
+        },
+        {
+          "clip_id": "bfcb7ff517e38e32b2bcf8d7bcf7ff4d313975a17a3f0697402190666941d5a6-8807-10006",
+          "interval": [
+            8807,
+            10006
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260622T203533.slp",
+      "replay_sha256": "c13e36c0f079200b6f00e2b3bef22ffe1165cde23797325218509718d794b40f",
+      "group": "capture-date-20260622",
+      "split": "train",
+      "previously_examined": true,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9438,
+      "clips": [
+        {
+          "clip_id": "c13e36c0f079200b6f00e2b3bef22ffe1165cde23797325218509718d794b40f-1787-2986",
+          "interval": [
+            1787,
+            2986
+          ]
+        },
+        {
+          "clip_id": "c13e36c0f079200b6f00e2b3bef22ffe1165cde23797325218509718d794b40f-4288-5487",
+          "interval": [
+            4288,
+            5487
+          ]
+        },
+        {
+          "clip_id": "c13e36c0f079200b6f00e2b3bef22ffe1165cde23797325218509718d794b40f-7434-8633",
+          "interval": [
+            7434,
+            8633
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260211T201117.slp",
+      "replay_sha256": "c2105f414c7c68825f3a231ff3b4853be4e49726d7f5b980004417cb37757601",
+      "group": "capture-date-20260211",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7259,
+      "clips": [
+        {
+          "clip_id": "c2105f414c7c68825f3a231ff3b4853be4e49726d7f5b980004417cb37757601-1395-2594",
+          "interval": [
+            1395,
+            2594
+          ]
+        },
+        {
+          "clip_id": "c2105f414c7c68825f3a231ff3b4853be4e49726d7f5b980004417cb37757601-3669-4868",
+          "interval": [
+            3669,
+            4868
+          ]
+        },
+        {
+          "clip_id": "c2105f414c7c68825f3a231ff3b4853be4e49726d7f5b980004417cb37757601-4985-6184",
+          "interval": [
+            4985,
+            6184
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260220T124915.slp",
+      "replay_sha256": "c82f891c6ed85e6a31e5eef3ad754daeb875b28284c722b1ee231a9ae65b1102",
+      "group": "capture-date-20260220",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 6961,
+      "clips": [
+        {
+          "clip_id": "c82f891c6ed85e6a31e5eef3ad754daeb875b28284c722b1ee231a9ae65b1102-655-1854",
+          "interval": [
+            655,
+            1854
+          ]
+        },
+        {
+          "clip_id": "c82f891c6ed85e6a31e5eef3ad754daeb875b28284c722b1ee231a9ae65b1102-3303-4502",
+          "interval": [
+            3303,
+            4502
+          ]
+        },
+        {
+          "clip_id": "c82f891c6ed85e6a31e5eef3ad754daeb875b28284c722b1ee231a9ae65b1102-5343-6542",
+          "interval": [
+            5343,
+            6542
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260317T221731.slp",
+      "replay_sha256": "c86044d111dd122845087a3bb3b819c4117648b4e9b123818503d436ba165798",
+      "group": "capture-date-20260317",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7970,
+      "clips": [
+        {
+          "clip_id": "c86044d111dd122845087a3bb3b819c4117648b4e9b123818503d436ba165798-805-2004",
+          "interval": [
+            805,
+            2004
+          ]
+        },
+        {
+          "clip_id": "c86044d111dd122845087a3bb3b819c4117648b4e9b123818503d436ba165798-3135-4334",
+          "interval": [
+            3135,
+            4334
+          ]
+        },
+        {
+          "clip_id": "c86044d111dd122845087a3bb3b819c4117648b4e9b123818503d436ba165798-6534-7733",
+          "interval": [
+            6534,
+            7733
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260509T144617.slp",
+      "replay_sha256": "c98a96681420ff4802ec06efc19d26fc8db5aaecccaddb5c0a021ef05bce09c6",
+      "group": "capture-date-20260509",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 6096,
+      "clips": [
+        {
+          "clip_id": "c98a96681420ff4802ec06efc19d26fc8db5aaecccaddb5c0a021ef05bce09c6-780-1979",
+          "interval": [
+            780,
+            1979
+          ]
+        },
+        {
+          "clip_id": "c98a96681420ff4802ec06efc19d26fc8db5aaecccaddb5c0a021ef05bce09c6-2847-4046",
+          "interval": [
+            2847,
+            4046
+          ]
+        },
+        {
+          "clip_id": "c98a96681420ff4802ec06efc19d26fc8db5aaecccaddb5c0a021ef05bce09c6-4209-5408",
+          "interval": [
+            4209,
+            5408
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260316T181257.slp",
+      "replay_sha256": "caf79bf424b115aa5735260ac4f4d8eb3191d15b2308ace499cdf6097d50d407",
+      "group": "capture-date-20260316",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9366,
+      "clips": [
+        {
+          "clip_id": "caf79bf424b115aa5735260ac4f4d8eb3191d15b2308ace499cdf6097d50d407-653-1852",
+          "interval": [
+            653,
+            1852
+          ]
+        },
+        {
+          "clip_id": "caf79bf424b115aa5735260ac4f4d8eb3191d15b2308ace499cdf6097d50d407-3569-4768",
+          "interval": [
+            3569,
+            4768
+          ]
+        },
+        {
+          "clip_id": "caf79bf424b115aa5735260ac4f4d8eb3191d15b2308ace499cdf6097d50d407-7999-9198",
+          "interval": [
+            7999,
+            9198
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260415T180517.slp",
+      "replay_sha256": "d2bdc37ed6c954da3aee631446d64d54f4459705a41877be891b10e624b3778c",
+      "group": "capture-date-20260415",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 11727,
+      "clips": [
+        {
+          "clip_id": "d2bdc37ed6c954da3aee631446d64d54f4459705a41877be891b10e624b3778c-1241-2440",
+          "interval": [
+            1241,
+            2440
+          ]
+        },
+        {
+          "clip_id": "d2bdc37ed6c954da3aee631446d64d54f4459705a41877be891b10e624b3778c-6283-7482",
+          "interval": [
+            6283,
+            7482
+          ]
+        },
+        {
+          "clip_id": "d2bdc37ed6c954da3aee631446d64d54f4459705a41877be891b10e624b3778c-10068-11267",
+          "interval": [
+            10068,
+            11267
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260215T104122.slp",
+      "replay_sha256": "d2c7e03fe3676237e34e18e8a1af48c1d9cb1ef97cce61e18352fb906738d69e",
+      "group": "capture-date-20260215",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 10187,
+      "clips": [
+        {
+          "clip_id": "d2c7e03fe3676237e34e18e8a1af48c1d9cb1ef97cce61e18352fb906738d69e-1664-2863",
+          "interval": [
+            1664,
+            2863
+          ]
+        },
+        {
+          "clip_id": "d2c7e03fe3676237e34e18e8a1af48c1d9cb1ef97cce61e18352fb906738d69e-5383-6582",
+          "interval": [
+            5383,
+            6582
+          ]
+        },
+        {
+          "clip_id": "d2c7e03fe3676237e34e18e8a1af48c1d9cb1ef97cce61e18352fb906738d69e-7644-8843",
+          "interval": [
+            7644,
+            8843
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260204T201450.slp",
+      "replay_sha256": "d6d8774822522a96ff34381a913e223014bc96eed985d866052f020e1df008ce",
+      "group": "capture-date-20260204",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 4742,
+      "clips": [
+        {
+          "clip_id": "d6d8774822522a96ff34381a913e223014bc96eed985d866052f020e1df008ce-666-1865",
+          "interval": [
+            666,
+            1865
+          ]
+        },
+        {
+          "clip_id": "d6d8774822522a96ff34381a913e223014bc96eed985d866052f020e1df008ce-2036-3235",
+          "interval": [
+            2036,
+            3235
+          ]
+        },
+        {
+          "clip_id": "d6d8774822522a96ff34381a913e223014bc96eed985d866052f020e1df008ce-3314-4513",
+          "interval": [
+            3314,
+            4513
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260322T003035.slp",
+      "replay_sha256": "d97522dc99a11b01449a9abe188a54c1134a398a4f394f577e5fe76af8707cd4",
+      "group": "capture-date-20260322",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 11239,
+      "clips": [
+        {
+          "clip_id": "d97522dc99a11b01449a9abe188a54c1134a398a4f394f577e5fe76af8707cd4-1055-2254",
+          "interval": [
+            1055,
+            2254
+          ]
+        },
+        {
+          "clip_id": "d97522dc99a11b01449a9abe188a54c1134a398a4f394f577e5fe76af8707cd4-4253-5452",
+          "interval": [
+            4253,
+            5452
+          ]
+        },
+        {
+          "clip_id": "d97522dc99a11b01449a9abe188a54c1134a398a4f394f577e5fe76af8707cd4-8691-9890",
+          "interval": [
+            8691,
+            9890
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260406T001937.slp",
+      "replay_sha256": "ddb40f1d43a712defff67250c18b0da8278535a0905d0d0671afa9bffe2958bf",
+      "group": "capture-date-20260406",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8683,
+      "clips": [
+        {
+          "clip_id": "ddb40f1d43a712defff67250c18b0da8278535a0905d0d0671afa9bffe2958bf-1891-3090",
+          "interval": [
+            1891,
+            3090
+          ]
+        },
+        {
+          "clip_id": "ddb40f1d43a712defff67250c18b0da8278535a0905d0d0671afa9bffe2958bf-3873-5072",
+          "interval": [
+            3873,
+            5072
+          ]
+        },
+        {
+          "clip_id": "ddb40f1d43a712defff67250c18b0da8278535a0905d0d0671afa9bffe2958bf-6615-7814",
+          "interval": [
+            6615,
+            7814
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260204T194221.slp",
+      "replay_sha256": "de2c9b0a0e9f7154ad2922c49fedc646e9d3792fe4bbdee96b3a336345db3311",
+      "group": "capture-date-20260204",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7214,
+      "clips": [
+        {
+          "clip_id": "de2c9b0a0e9f7154ad2922c49fedc646e9d3792fe4bbdee96b3a336345db3311-1452-2651",
+          "interval": [
+            1452,
+            2651
+          ]
+        },
+        {
+          "clip_id": "de2c9b0a0e9f7154ad2922c49fedc646e9d3792fe4bbdee96b3a336345db3311-3409-4608",
+          "interval": [
+            3409,
+            4608
+          ]
+        },
+        {
+          "clip_id": "de2c9b0a0e9f7154ad2922c49fedc646e9d3792fe4bbdee96b3a336345db3311-5779-6978",
+          "interval": [
+            5779,
+            6978
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260312T165844.slp",
+      "replay_sha256": "de9bd7e8acaf26d7c0eec027fde09c1cd7eccb4b87e5b16f09a53fa6563a2080",
+      "group": "capture-date-20260312",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 6279,
+      "clips": [
+        {
+          "clip_id": "de9bd7e8acaf26d7c0eec027fde09c1cd7eccb4b87e5b16f09a53fa6563a2080-808-2007",
+          "interval": [
+            808,
+            2007
+          ]
+        },
+        {
+          "clip_id": "de9bd7e8acaf26d7c0eec027fde09c1cd7eccb4b87e5b16f09a53fa6563a2080-2883-4082",
+          "interval": [
+            2883,
+            4082
+          ]
+        },
+        {
+          "clip_id": "de9bd7e8acaf26d7c0eec027fde09c1cd7eccb4b87e5b16f09a53fa6563a2080-4836-6035",
+          "interval": [
+            4836,
+            6035
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260217T175756.slp",
+      "replay_sha256": "e361589d61958fb661b543c6fb511dee1dd8639873478cce82d92bdcf679c0c3",
+      "group": "capture-date-20260217",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7044,
+      "clips": [
+        {
+          "clip_id": "e361589d61958fb661b543c6fb511dee1dd8639873478cce82d92bdcf679c0c3-1102-2301",
+          "interval": [
+            1102,
+            2301
+          ]
+        },
+        {
+          "clip_id": "e361589d61958fb661b543c6fb511dee1dd8639873478cce82d92bdcf679c0c3-2828-4027",
+          "interval": [
+            2828,
+            4027
+          ]
+        },
+        {
+          "clip_id": "e361589d61958fb661b543c6fb511dee1dd8639873478cce82d92bdcf679c0c3-5076-6275",
+          "interval": [
+            5076,
+            6275
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260502T174338.slp",
+      "replay_sha256": "e4a86b6393d26435c5e17d87d43c187109641d75bef166b55b6c4ed800c3cb2f",
+      "group": "capture-date-20260502",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 9221,
+      "clips": [
+        {
+          "clip_id": "e4a86b6393d26435c5e17d87d43c187109641d75bef166b55b6c4ed800c3cb2f-1662-2861",
+          "interval": [
+            1662,
+            2861
+          ]
+        },
+        {
+          "clip_id": "e4a86b6393d26435c5e17d87d43c187109641d75bef166b55b6c4ed800c3cb2f-4388-5587",
+          "interval": [
+            4388,
+            5587
+          ]
+        },
+        {
+          "clip_id": "e4a86b6393d26435c5e17d87d43c187109641d75bef166b55b6c4ed800c3cb2f-6280-7479",
+          "interval": [
+            6280,
+            7479
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260602T231309.slp",
+      "replay_sha256": "e7d6562e2ae6a85767d6a92650007dcf30b1f7fdb038021a2b20f7f4255295ab",
+      "group": "capture-date-20260602",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 7949,
+      "clips": [
+        {
+          "clip_id": "e7d6562e2ae6a85767d6a92650007dcf30b1f7fdb038021a2b20f7f4255295ab-1554-2753",
+          "interval": [
+            1554,
+            2753
+          ]
+        },
+        {
+          "clip_id": "e7d6562e2ae6a85767d6a92650007dcf30b1f7fdb038021a2b20f7f4255295ab-3625-4824",
+          "interval": [
+            3625,
+            4824
+          ]
+        },
+        {
+          "clip_id": "e7d6562e2ae6a85767d6a92650007dcf30b1f7fdb038021a2b20f7f4255295ab-5957-7156",
+          "interval": [
+            5957,
+            7156
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260516T172807.slp",
+      "replay_sha256": "e84321e7f587a392488f77e9b9d66b7352317a9d4da971c6f22995f6ccb5bfdf",
+      "group": "capture-date-20260516",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 20,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 5858,
+      "clips": [
+        {
+          "clip_id": "e84321e7f587a392488f77e9b9d66b7352317a9d4da971c6f22995f6ccb5bfdf-1058-2257",
+          "interval": [
+            1058,
+            2257
+          ]
+        },
+        {
+          "clip_id": "e84321e7f587a392488f77e9b9d66b7352317a9d4da971c6f22995f6ccb5bfdf-2640-3839",
+          "interval": [
+            2640,
+            3839
+          ]
+        },
+        {
+          "clip_id": "e84321e7f587a392488f77e9b9d66b7352317a9d4da971c6f22995f6ccb5bfdf-4072-5271",
+          "interval": [
+            4072,
+            5271
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260131T213443.slp",
+      "replay_sha256": "e99446a253206063dd21ff539659f832e0e087b8aa13dc3c04b7c5d7e5a8f7ee",
+      "group": "capture-date-20260131",
+      "split": "test",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 11533,
+      "clips": [
+        {
+          "clip_id": "e99446a253206063dd21ff539659f832e0e087b8aa13dc3c04b7c5d7e5a8f7ee-2930-4129",
+          "interval": [
+            2930,
+            4129
+          ]
+        },
+        {
+          "clip_id": "e99446a253206063dd21ff539659f832e0e087b8aa13dc3c04b7c5d7e5a8f7ee-6593-7792",
+          "interval": [
+            6593,
+            7792
+          ]
+        },
+        {
+          "clip_id": "e99446a253206063dd21ff539659f832e0e087b8aa13dc3c04b7c5d7e5a8f7ee-8853-10052",
+          "interval": [
+            8853,
+            10052
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260109T221911.slp",
+      "replay_sha256": "e9b3632ff142721c404439ef802cb2b28cf7e08def7b14dc2cc695bba8ab7f4c",
+      "group": "capture-date-20260109",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 1,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8919,
+      "clips": [
+        {
+          "clip_id": "e9b3632ff142721c404439ef802cb2b28cf7e08def7b14dc2cc695bba8ab7f4c-686-1885",
+          "interval": [
+            686,
+            1885
+          ]
+        },
+        {
+          "clip_id": "e9b3632ff142721c404439ef802cb2b28cf7e08def7b14dc2cc695bba8ab7f4c-4526-5725",
+          "interval": [
+            4526,
+            5725
+          ]
+        },
+        {
+          "clip_id": "e9b3632ff142721c404439ef802cb2b28cf7e08def7b14dc2cc695bba8ab7f4c-6105-7304",
+          "interval": [
+            6105,
+            7304
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260117T003813.slp",
+      "replay_sha256": "eaac96077bf0067a85ce64980714c9283f9ad5996d6bc0c8bc10c31f5cfb3b99",
+      "group": "capture-date-20260117",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 6680,
+      "clips": [
+        {
+          "clip_id": "eaac96077bf0067a85ce64980714c9283f9ad5996d6bc0c8bc10c31f5cfb3b99-1235-2434",
+          "interval": [
+            1235,
+            2434
+          ]
+        },
+        {
+          "clip_id": "eaac96077bf0067a85ce64980714c9283f9ad5996d6bc0c8bc10c31f5cfb3b99-3300-4499",
+          "interval": [
+            3300,
+            4499
+          ]
+        },
+        {
+          "clip_id": "eaac96077bf0067a85ce64980714c9283f9ad5996d6bc0c8bc10c31f5cfb3b99-4772-5971",
+          "interval": [
+            4772,
+            5971
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260509T000355.slp",
+      "replay_sha256": "f4b6fb3188c135a48e9c4bb26fe815ae1fc89af33d3ac5e05997988d237e8398",
+      "group": "capture-date-20260509",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 10264,
+      "clips": [
+        {
+          "clip_id": "f4b6fb3188c135a48e9c4bb26fe815ae1fc89af33d3ac5e05997988d237e8398-1345-2544",
+          "interval": [
+            1345,
+            2544
+          ]
+        },
+        {
+          "clip_id": "f4b6fb3188c135a48e9c4bb26fe815ae1fc89af33d3ac5e05997988d237e8398-3794-4993",
+          "interval": [
+            3794,
+            4993
+          ]
+        },
+        {
+          "clip_id": "f4b6fb3188c135a48e9c4bb26fe815ae1fc89af33d3ac5e05997988d237e8398-7561-8760",
+          "interval": [
+            7561,
+            8760
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260509T014548.slp",
+      "replay_sha256": "f886b77a953128ac7e618e9f77ae57fded56d544a8a5a04a83dec29ff223221c",
+      "group": "capture-date-20260509",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 3,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8593,
+      "clips": [
+        {
+          "clip_id": "f886b77a953128ac7e618e9f77ae57fded56d544a8a5a04a83dec29ff223221c-1884-3083",
+          "interval": [
+            1884,
+            3083
+          ]
+        },
+        {
+          "clip_id": "f886b77a953128ac7e618e9f77ae57fded56d544a8a5a04a83dec29ff223221c-3743-4942",
+          "interval": [
+            3743,
+            4942
+          ]
+        },
+        {
+          "clip_id": "f886b77a953128ac7e618e9f77ae57fded56d544a8a5a04a83dec29ff223221c-6720-7919",
+          "interval": [
+            6720,
+            7919
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260516T151310.slp",
+      "replay_sha256": "f8c3809f33f75133da70fc7fcccba5b806655f3c05e14329a24075d462ba3e67",
+      "group": "capture-date-20260516",
+      "split": "validation",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 2,
+          "costume": 0,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 15207,
+      "clips": [
+        {
+          "clip_id": "f8c3809f33f75133da70fc7fcccba5b806655f3c05e14329a24075d462ba3e67-1839-3038",
+          "interval": [
+            1839,
+            3038
+          ]
+        },
+        {
+          "clip_id": "f8c3809f33f75133da70fc7fcccba5b806655f3c05e14329a24075d462ba3e67-7600-8799",
+          "interval": [
+            7600,
+            8799
+          ]
+        },
+        {
+          "clip_id": "f8c3809f33f75133da70fc7fcccba5b806655f3c05e14329a24075d462ba3e67-13639-14838",
+          "interval": [
+            13639,
+            14838
+          ]
+        }
+      ]
+    },
+    {
+      "file": "recordings/examples/Game_20260121T190100.slp",
+      "replay_sha256": "fdd8455490a2ead93c0e9ba37e36001bb12ad3256824ff6a21359c1b5586abe8",
+      "group": "capture-date-20260121",
+      "split": "train",
+      "previously_examined": false,
+      "stage": 31,
+      "players": [
+        {
+          "port": 0,
+          "character": 20,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        },
+        {
+          "port": 1,
+          "character": 2,
+          "costume": 2,
+          "type": 0,
+          "stocks": 4,
+          "controller_fix": "UCF"
+        }
+      ],
+      "last_frame": 8726,
+      "clips": [
+        {
+          "clip_id": "fdd8455490a2ead93c0e9ba37e36001bb12ad3256824ff6a21359c1b5586abe8-1867-3066",
+          "interval": [
+            1867,
+            3066
+          ]
+        },
+        {
+          "clip_id": "fdd8455490a2ead93c0e9ba37e36001bb12ad3256824ff6a21359c1b5586abe8-4617-5816",
+          "interval": [
+            4617,
+            5816
+          ]
+        },
+        {
+          "clip_id": "fdd8455490a2ead93c0e9ba37e36001bb12ad3256824ff6a21359c1b5586abe8-6525-7724",
+          "interval": [
+            6525,
+            7724
+          ]
+        }
+      ]
+    }
+  ],
+  "identities": {
+    "catalog": "d080ade4cbfeca2e594b78f07257673fc53cedcafceb72021309a7b43890f22f",
+    "previous_plan": "f06b3816f2567c5c83718393d9298d5a8e09091dd3ee3e541d19cd7d5ef99513"
+  }
+}

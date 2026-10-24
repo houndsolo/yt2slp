@@ -64,14 +64,17 @@ checks across 526 player-frames. This establishes measured timing/scalar mapping
 the full learned-input decoder and simulator integration remain open. Useful unseen-clip gameplay recognition,
 unknown-start recovery and general video-to-replay reconstruction remain unimplemented.
 
-Expanded footage preparation has started on the workstation. A new 600-frame
-mid-match validation MP4 passes exact UI/PNG/HUD checks and nine original/official
-state fields across 1,200 player-frames, with two explicitly image-bound literal
-HUD readings after automatic OCR failures. A frozen batch selects 34 training/
-14 validation sources while keeping ten test sources unopened. Only two selected
-sources are local; fetching the other 46 and transferring footage back is blocked
-by V100 SSH connection failures. The expanded dataset is **not ready for training**.
-See [footage preparation](footage-preparation.md).
+Expanded footage preparation now runs **directly on the upgraded V100 server**.
+A fresh settings catalog and frozen Battlefield Fox–Fox/Fox–Falco plan select
+70 training and 30 validation matches, reserving 22 final-test matches. Three
+20-second clips per development source plan 300 clips / 100 minutes. Four actual
+clips already pass all 4,800 UI/PNG/HUD frame checks and nine original/official
+fields across 9,600 player-frames, with original controller labels and GPU
+features. A new physical-port slot convention supports distinct-costume mirrors;
+the old semantic Fox/Falco model/run is preserved. Actual CUDA start/pause at 40/
+resume/stop at 60 passes. The expanded full dataset is **not yet ready for
+training**; the full detached 300-clip preparation worker is running and must
+finish its gates. See [server corpus training](corpus-training.md).
 
 Checked items below are implemented and validated within their stated scope.
 Unchecked items are remaining work. Proposed later work is a roadmap, not a
@@ -127,11 +130,13 @@ The next work is deliberately narrow:
    mean event F1 remains 0.09576. Next: inspect event failures, expand data
    deliberately and keep test matches sealed until a model/protocol is frozen.
    A longer optimizer run alone does not establish useful recognition.
-   Expanded preparation now selects ten-second non-opening clips across all
-   train/validation sources, with a bounded local mid-match capture validated.
-   Finish fetching missing sources, local rendering/audits, SCP/hash verification
-   and GPU feature import into a separate dataset/run. V100 SSH is currently
-   unavailable; no expanded training run has started.
+   The V100 is available again with a Ryzen 7 5700X. Expanded preparation now
+   runs there, including Fox mirrors: 70 training/30 validation sources, three
+   non-overlapping 20-second clips each, 22 untouched final-test matches.
+   Four representative clips have real capture/state/label/feature validation;
+   actual new-trainer CUDA lifecycle checks pass. Finish the detached bulk
+   generation, then start/evaluate the separate corpus model. No production
+   optimizer run has started; old checkpoints and legacy trainer files remain.
 6. Completed bounded calibration: measure native request/replay timing and scalar
    PAD response, then reproduce five known-control recordings byte for byte.
    Four actual official playbacks match effective controls and nine selected state
@@ -415,11 +420,22 @@ to postpone measuring a narrower supported case.
 - [x] Add resumable workstation footage preparation with a frozen 34-train/
   14-validation selection and untouched final-test sources. Missing/failed clips
   cannot publish a complete footage manifest.
-- [ ] Obtain the remaining 46 selected replay sources, render/audit the expanded
-  clips locally, copy them to the V100 with SCP and verify hashes. SSH refused/
-  timed out during this attempt; two original pilot clips are locally prepared.
-- [ ] Import the expanded footage into a new GPU feature dataset and separate
-  training run, including all selected matches without changing frozen date splits.
+- [x] Replace the blocked workstation/SCP expansion with server-local preparation
+  at the user's request. Re-catalog all 3,326 files and freeze 70 training/30
+  validation/22 test sources for Fox mirrors and Fox–Falco on Battlefield.
+- [x] Support several bounded clips per replay and distinct-costume mirrors with
+  an explicit ascending-physical-port contract. Preserve legacy files/contracts;
+  exact CPU resume and actual new CUDA start/pause/resume/stop pass.
+- [x] Validate four actual server-local 20-second clips across both rosters and
+  both development splits: 4,800 images, nine exact state fields across 9,600
+  player-frames, full readable HUD coverage and GPU features. Record experimental
+  same-pipeline roster phase transfer separately from an independent visual audit.
+- [ ] Complete the planned 300-clip server-local render/audit/feature batch. Its
+  declared bulk HUD policy retains unreadable frames as unknown while every
+  UI/PNG step remains exact; all readable HUDs and nine state fields must agree.
+  The detached full batch has been launched after the four-clip preview passed.
+- [ ] Train/evaluate the separate physical-port corpus model after dataset gates
+  pass, preserving date reservations and keeping final-test sources sealed.
 - [x] Implement server-local detached training controls, atomic checkpoint
   generations, optimizer/sampler/random-state resume and bounded feature loading.
   Exact CPU resumed/uninterrupted equality, save-failure recovery and split/content
@@ -631,9 +647,10 @@ features or prerequisites for the first short-clip reconstruction.
 
 ## Latest validation and retained evidence
 
-The latest Docker run passed **428 Python tests**, including bounded footage
-selection and image-bound manual-HUD handling; seven optional trainer tests and eight model tests last passed during
-the preceding learning/review work and were not rerun for this adapter change.
+The latest Docker run passed **435 Python tests**. On the V100, **11 optional
+legacy/corpus trainer tests** and **eight model tests** also pass. These include
+exact CPU optimizer/RNG resume, multiple-clip boundaries, mirror slots, leakage
+guards, explicit roster phase-transfer scope and bulk-HUD rejection rules.
 The last independent parser run passed **17 parser/preparation/export/catalog tests**.
 Native code/math and model training code are unchanged in this footage milestone; native suites were not
 rerun. The last recorded native
@@ -643,6 +660,11 @@ gameplay, recording and playback evidence.
 
 | Evidence | Result / retained location |
 | --- | --- |
+| Expanded server corpus plan | Fresh 3,326-file settings inventory; Battlefield Fox–Fox/Fox–Falco 70 train/30 validation/22 reserved test; 300 planned 20-second clips; `configs/learning-corpus-split-v3.json` and V100 `.docker-state/local/replay-catalog-v3/` |
+| Server corpus preparation validation | Four accepted clips/4,800 frames; full HUD agreement and nine original/official fields exact across 9,600 player-frames; GPU features and physical-port targets; V100 `.docker-state/local/vision-corpus-v3/preview-dataset.json`; initial parallel startup failure retained in `vision-corpus-v3-pilot/` |
+| New trainer CUDA lifecycle | Detached start, pause at 40, resume and stop at 60; earlier 100k checkpoint pointer unchanged; V100 `.docker-state/local/vision-training/corpus-v3-smoke/controller-validation.json`; smoke model has no useful-recognition acceptance |
+| New saved-model review | Both 1,200-frame validation controller-review MP4s complete with zero worker exit; V100 `vision-training/corpus-v3-smoke/reviews/review-1792805991392523494/`; image-only predictions precede labels; no generated gameplay |
+| Full corpus preparation | Detached 300-clip batch launched with networking disabled and four cached valid shards; V100 `.docker-state/local/vision-corpus-v3/full-launch.json`; production dataset/training remain pending |
 | Workstation mid-match footage | 600 verified frames at 2400..2999; two literal HUD readings fill unknown OCR only; nine original/official fields exact across 1,200 player-frames; `.docker-state/local/vision-footage-v2/probe-midgame/video-manual/source.mp4`; initial automatic-HUD failure retained |
 | Expanded footage batch | Frozen 34-train/14-validation plan; two reused clips prepared, 46 sources missing locally, no complete manifest; V100 SSH unavailable; `.docker-state/local/vision-footage-v2/status.json` |
 | Completed starter training run | V100 reached configured step 100,000; latest hold/press/release F1 0.1077/0.0612/0, best mean event F1 0.09576; `.docker-state/local/vision-training/default/`; worker no longer running, no restart requested |

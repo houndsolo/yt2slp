@@ -5,6 +5,35 @@ from pathlib import Path
 from .video import sha256
 
 
+def pipeline_phase_reference(reference: Path, target_setup: dict, target_replay_sha256: str) -> dict:
+    """Declare a pipeline convention for the expanded corpus, including mirrors.
+
+    This does not claim a new independent roster-specific visual phase audit.
+    Per-frame UI/PNG checks and original/official state gates remain mandatory.
+    """
+    from .corpus import corpus_ports
+    corpus_ports(target_setup)
+    provenance = json.loads(reference.read_text())
+    original = provenance['supplied_setup']
+    # Check the original audit independently of the expanded target roster.
+    phase_path, frame_path = reference.parent/'phase-audit.json',reference.parent/'frame-labels.json'
+    phase, frame = (json.loads(p.read_text()) for p in (phase_path,frame_path))
+    if (provenance.get('passed') is not True or provenance.get('kind')!='supervised-replay-source-video'
+            or not {sha256(phase_path),sha256(frame_path)} <= set(provenance['identities'].values())
+            or phase.get('kind')!='image-post-phase-audit' or phase.get('passed') is not True
+            or phase.get('image_to_post_offset')!=0 or phase.get('matching_diagnostic_offsets')!=[0]
+            or frame.get('passed') is not True or frame.get('dump_pipeline_delay_swaps')!=1
+            or original['stage']!=31):
+        raise ValueError('audited fixed-geometry phase reference required')
+    return {'schema':1,'kind':'image-post-phase-pipeline-reference','passed':True,
+        'source_replay_sha256':target_replay_sha256,'image_to_post_offset':0,
+        'reference_replay_sha256':original['replay_sha256'],'reference_provenance_sha256':sha256(reference),
+        'reference_phase_sha256':sha256(phase_path),'target_phase_independently_reviewed':False,
+        'roster_transfer':sorted(p['character'] for p in target_setup['players'])!=sorted(p['character'] for p in original['players']),
+        'scope':'predeclared zero phase for the same fixed official UI/PNG pipeline; expanded roster transfer is experimental; no label-fitted offset',
+        'native_vi_adapter_verified':False,'full_state_image_equality_established':False}
+
+
 def frozen_phase_reference(reference: Path, target_setup: dict, target_replay_sha256: str) -> dict:
     """Apply a previously audited convention without fitting validation labels.
 

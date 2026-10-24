@@ -47,3 +47,25 @@ def test_disagreement_is_a_reported_failure_without_fitting_an_offset(evidence):
     observations['observations'][0]['airborne'] = True
     result = audit_phase(observations, labels, index)
     assert not result['passed'] and result['diagnostics']['0']['mismatches']
+
+
+def test_expanded_roster_phase_is_explicit_transfer_and_keeps_strict_reference_guard(tmp_path):
+    import json
+    from yt2slp.training_phase import frozen_phase_reference, pipeline_phase_reference
+    from yt2slp.video import sha256
+    phase=tmp_path/'phase-audit.json';frames=tmp_path/'frame-labels.json'
+    phase.write_text(json.dumps({'kind':'image-post-phase-audit','passed':True,
+        'image_to_post_offset':0,'matching_diagnostic_offsets':[0]}))
+    frames.write_text(json.dumps({'passed':True,'dump_pipeline_delay_swaps':1}))
+    reference=tmp_path/'source-provenance.json'
+    reference.write_text(json.dumps({'passed':True,'kind':'supervised-replay-source-video',
+        'supplied_setup':{'stage':31,'replay_sha256':'a'*64,'players':[{'character':2},{'character':20}]},
+        'identities':{'phase':sha256(phase),'frames':sha256(frames)}}))
+    mirror={'stage':31,'players':[{'port':0,'character':2,'costume':0},{'port':1,'character':2,'costume':1}]}
+    report=pipeline_phase_reference(reference,mirror,'b'*64)
+    assert report['passed'] and report['roster_transfer']
+    assert not report['target_phase_independently_reviewed']
+    assert report['source_replay_sha256']=='b'*64
+    with pytest.raises(ValueError):frozen_phase_reference(reference,mirror,'b'*64)
+    phase.write_text('{}')
+    with pytest.raises(ValueError):pipeline_phase_reference(reference,mirror,'b'*64)
