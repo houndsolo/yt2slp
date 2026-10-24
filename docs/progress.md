@@ -53,10 +53,13 @@ Fox/Falco Battlefield candidates; doubles are skipped. A server-local runner now
 implements detached preparation/training, pause/stop checkpoints and resume with
 optimizer/random state. The six-train/two-validation starter dataset is ready:
 4,448 images, 3,366 training windows and 842 validation windows. Actual detached
-CUDA start/disconnect/pause/resume/stop tests pass; the handed-over run is paused
-at step 7,691. See
-[self-service controls](training-control.md). The native VI input
-adapter remains open. Useful unseen-clip gameplay recognition,
+CUDA start/disconnect/pause/resume/stop tests pass; the user has since resumed
+training. Saved-checkpoint review now renders the original validation footage
+with recorded/predicted controls. See [self-service controls](training-control.md).
+The first bounded native PAD calibration also passes: 245 genuine probes,
+five byte-identical known-input inverse runs, and four actual official playback
+checks across 526 player-frames. This establishes measured timing/scalar mappings;
+the full learned-input decoder and simulator integration remain open. Useful unseen-clip gameplay recognition,
 unknown-start recovery and general video-to-replay reconstruction remain unimplemented.
 
 Checked items below are implemented and validated within their stated scope.
@@ -107,13 +110,29 @@ The next work is deliberately narrow:
    development-validation clips; test sources remain unrendered/unlabelled.
    The manual start/pause/resume/stop runner uses durable checkpoints, lazy
    feature windows and a best-validation model pointer. Actual CUDA lifecycle
-   checks pass; `~/train-melee` controls the paused run without Codex or the
+   checks pass; `~/train-melee` controls the run without Codex or the
    workstation. Next: train/evaluate this expanded pilot, inspect event failures,
    expand data deliberately and keep test matches sealed until a model/protocol
    is frozen. A longer optimizer run alone does not establish useful recognition.
-6. Measure the effective replay-control → native VI/PAD adapter, then integrate
-   learned proposals with native verification and timing refinement. Audit source-code compatibility in parallel. Extend coverage and
-   later handle YouTube appearance differences using measured held-out results.
+6. Completed bounded calibration: measure native request/replay timing and scalar
+   PAD response, then reproduce five known-control recordings byte for byte.
+   Four actual official playbacks match effective controls and nine selected state
+   fields across 526 player-frames. [Adapter evidence](native-input-adapter.md)
+   records the two-key request boundary, deadzones, unsupported combinations and
+   regenerated physical-button discrepancy. This is not learned reconstruction.
+7. Next: build/smoke-test the native engine on the V100, add the learned-input
+   decoder (including joint axes and consistent button edges), verify compatible
+   setup/codes and signed prefix/tail handling, then run image-only proposals
+   through native checkpoint branches and timing refinement. Finish with actual
+   official playback and source/reconstructed-gameplay video comparison. Audit
+   source-code compatibility in parallel; keep training running independently.
+8. Benchmark single-V100 training throughput before adding distributed training:
+   batch size, feature loading and a possible GPU-resident feature cache. A short
+   current-run sample used about 474 MiB VRAM and 22–25% GPU utilization; this is
+   a diagnostic sample, not a throughput benchmark. The current runner uses one
+   CUDA GPU. Parallel native candidate sessions use CPU/RAM; spare VRAM alone does
+   not accelerate them. Any training changes need a separate run or explicit
+   checkpoint-contract migration, without silently modifying the active run.
 
 The [learning plan](learning-plan.md) and [executable pilot](../tools/learning/README.md)
 define this milestone. The [signed training report](signed-training-data.md)
@@ -126,7 +145,8 @@ passes real GPU kernels/backpropagation and a 100-update training smoke test,
 with about 676 GiB free disk after the replay import. Existing LLM containers were stopped and restart
 policies disabled at the user's request. [Remote training](remote-training.md)
 records setup, measured results and commands. No additional DDR4 is needed for
-the exercised pilot; multi-match data/training and native input adaptation are next.
+the exercised pilot; useful multi-match recognition and learned native input
+integration remain next.
 
 Spawn policy is a required starting condition. Slippi has custom neutral-start
 codes that place the two fighters on opposite sides; ordinary SSBM uses distinct
@@ -387,7 +407,22 @@ to postpone measuring a narrower supported case.
   with original/recorded/predicted control panels. `--best` selects the best saved
   validation model. Predictions precede scoring-label reads; final-test matches
   stay sealed. MP4/MKV output remains a controller review, not generated gameplay.
-- [ ] Validate the native VI/PAD adapter and integrate useful proposals with simulation.
+- [x] Measure a bounded native VI/PAD adapter using 245 genuine recordings,
+  positive/playable-pre-clock markers and alternate physical ports. Scalar
+  lookups reject unmeasured values; five fresh inverse runs reproduce replay
+  bytes, and checkpoint branch discard retains the original recording.
+  Four actual official playbacks match effective controls and nine post fields
+  across 526 player-frames. Physical button regeneration differs and is reported
+  separately; [scope and reproduction](native-input-adapter.md).
+- [ ] Build and validate the native simulator on the V100 with GCC 14 Docker;
+  keep training independently operable and preserve the active training run.
+- [ ] Decode learned proposals into native PAD candidates: reconcile hold/edge
+  heads, measure joint stick/trigger behavior and represent unmeasured bins.
+- [ ] Verify source setup/code compatibility and signed prefix/tail timing, then
+  integrate image-only proposals with native checkpoint search/refinement.
+- [ ] Validate a selected learned replay in official Playback and render actual
+  source/reconstruction gameplay side by side; current model reviews are controls
+  over source footage.
 - [x] Decode a short local progressive clip with original PTS/time base, dimensions,
   hashes and exact timestamps; retain variable spacing and identical adjacent PNGs.
   Reject missing/substituted PTS, rotation, interlacing and changing dimensions.
@@ -561,10 +596,11 @@ features or prerequisites for the first short-clip reconstruction.
 
 ## Latest validation and retained evidence
 
-The latest Docker run passed **413 Python tests**; seven optional trainer tests
-pass, alongside the unchanged eight model tests last exercised in the handover.
+The latest Docker run passed **423 Python tests**, including ten new adapter
+checks; seven optional trainer tests and eight model tests last passed during
+the preceding learning/review work and were not rerun for this adapter change.
 The last independent parser run passed **17 parser/preparation/export/catalog tests**.
-Native code/math is unchanged in this learning milestone; native suites were not
+Native code/math is unchanged in this adapter milestone; native suites were not
 rerun. The last recorded native
 build passed **10 host/component and 23 game-library tests**. Synthetic protocol/component tests
 establish their tested behavior; the following local ISO runs provide separate
@@ -572,8 +608,10 @@ gameplay, recording and playback evidence.
 
 | Evidence | Result / retained location |
 | --- | --- |
+| Native PAD calibration | 245 real probe recordings; request boundary → replay key +2 in measured channels/ports; five fresh inverse replay bytes exact; discarded branches excluded; `.docker-state/local/native-pad-calibration-v5/` |
+| Native inverse official playback | Playback 3.5.2, resync disabled; markers, short/full hop and playable pre-clock checks match six effective control fields and nine post fields across 526 player-frames; physical-button diagnostic mismatches retained; `.docker-state/local/native-pad-official-v1/*v5-verification.json` |
 | Saved-model review | Paused current run at 24,459; immutable checkpoint produces both validation MP4/MKV reviews (241 and 661 frames) with original footage and recorded/predicted controls; `vision-training/default/reviews/` on V100; review worker exits zero with networking disabled; generated gameplay remains pending |
-| Server-local training handover | Six training/two validation clips; detached network-disabled CUDA worker and pause/resume/stop verified; V100 `.docker-state/local/vision-control-validation/` and `vision-training/default/`; left paused at 7,691 |
+| Server-local training handover | Six training/two validation clips; detached network-disabled CUDA worker and pause/resume/stop verified; V100 `.docker-state/local/vision-control-validation/` and `vision-training/default/`; initially handed over paused at 7,691, user subsequently resumed |
 | Signed training overfit | 241 images, 211 windows; 10,000-update checkpoint and new frozen-inference regression both have 1.0 event F1/state/axis-bin accuracy; `.docker-state/local/learning-timing-v1/` and V100 `learning-heldout-v1/training-regression-score.json` |
 | Reserved-match prediction | Same frozen model, swapped ports, 422 player-frame predictions; hold F1 0.0187, press/release F1 zero; `.docker-state/local/learning-heldout-v1/score.json` on the V100 |
 | Controller prediction review | V100 `.docker-state/local/learning-heldout-v1/review/prediction-review.mkv`; 241 source-footage frames plus recorded/model controls, no generated gameplay |
