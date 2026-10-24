@@ -65,6 +65,9 @@ def score_predictions(predictions: dict, labels: dict) -> dict:
         'training_regression': predictions['training_regression'], 'player_frames': len(rows),
         'prediction_interval': [first, last], 'slot_ports': predictions['slot_ports'],
         'button_metrics': buttons, 'axis_metrics': axes, 'state_metrics': state,
-        'policy': 'post-prediction labels only; exact signed frame and physical port; masks exclude unknowns; fixed zero-logit threshold and phase; no lag search or retraining',
+        'button_decoding': predictions.get('button_decoder', {}).get('method', 'independent-zero-logit'),
+        'policy': ('post-prediction labels only; exact signed frame and physical port; masks exclude unknowns; '
+            + ('declared label-free button sequence decoder; fixed phase; ' if predictions.get('button_decoder')
+               else 'fixed zero-logit threshold and phase; ') + 'no lag search or retraining'),
         'native_vi_adapter_verified': False, 'generated_replay_validated': False,
         'generalization_established': False}

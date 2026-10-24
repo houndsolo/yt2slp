@@ -31,6 +31,15 @@ def test_scores_exact_keys_events_and_axes(artifacts):
     assert not report['generated_replay_validated']
 
 
+def test_declares_sequence_decoding_without_claiming_zero_logit_threshold(artifacts):
+    predictions, labels = artifacts
+    predictions['button_decoder'] = {'method': 'two-state-viterbi-v1'}
+    report = score_predictions(predictions, labels)
+    assert report['button_decoding'] == 'two-state-viterbi-v1'
+    assert 'zero-logit' not in report['policy']
+    assert 'label-free button sequence decoder' in report['policy']
+
+
 def test_unknowns_are_excluded_and_neutral_predictions_miss_events(artifacts):
     predictions, labels = deepcopy(artifacts)
     labels['rows'][0]['physical']['mask']['buttons'] = False

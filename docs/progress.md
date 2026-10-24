@@ -68,13 +68,18 @@ Expanded footage preparation now runs **directly on the upgraded V100 server**.
 A fresh settings catalog and frozen Battlefield Fox–Fox/Fox–Falco plan select
 70 training and 30 validation matches, reserving 22 final-test matches. Three
 20-second clips per development source plan 300 clips / 100 minutes. Four actual
-clips already pass all 4,800 UI/PNG/HUD frame checks and nine original/official
+pilot clips passed all 4,800 UI/PNG/HUD frame checks and nine original/official
 fields across 9,600 player-frames, with original controller labels and GPU
 features. A new physical-port slot convention supports distinct-costume mirrors;
 the old semantic Fox/Falco model/run is preserved. Actual CUDA start/pause at 40/
-resume/stop at 60 passes. The expanded full dataset is **not yet ready for
-training**; the full detached 300-clip preparation worker is running and must
-finish its gates. See [server corpus training](corpus-training.md).
+resume/stop at 60 passes. The full batch is now complete: **186 accepted clips /
+62 minutes**, with 114 failed clips retained/excluded. It supplies 131 training
+clips from 68 matches and 55 validation clips from 29 matches. The separate corpus
+model completed 200,000 updates. Its best full-validation mean button F1 is
+0.12055 at step 10,000; the final mean is 0.11077, so useful recognition remains
+unestablished. A label-free two-state Viterbi decoder now enforces consistent
+button transitions without retraining; [comparison method and reviews](constrained-decoding.md).
+See [server corpus training](corpus-training.md).
 
 Checked items below are implemented and validated within their stated scope.
 Unchecked items are remaining work. Proposed later work is a roadmap, not a
@@ -134,17 +139,22 @@ The next work is deliberately narrow:
    runs there, including Fox mirrors: 70 training/30 validation sources, three
    non-overlapping 20-second clips each, 22 untouched final-test matches.
    Four representative clips have real capture/state/label/feature validation;
-   actual new-trainer CUDA lifecycle checks pass. Finish the detached bulk
-   generation, then start/evaluate the separate corpus model. No production
-   optimizer run has started; old checkpoints and legacy trainer files remain.
+   actual new-trainer CUDA lifecycle checks pass. The bulk generation finished
+   with 186 accepted/114 excluded clips; the separate corpus run completed
+   200,000 steps. Its best validation checkpoint is at 10,000; later updates
+   worsen the mean button F1. Old checkpoints and trainer contracts remain.
+   Compare raw and constrained decoding before a separate transition-aware
+   fine-tune; never silently change the saved run's objective or contract.
 6. Completed bounded calibration: measure native request/replay timing and scalar
    PAD response, then reproduce five known-control recordings byte for byte.
    Four actual official playbacks match effective controls and nine selected state
    fields across 526 player-frames. [Adapter evidence](native-input-adapter.md)
    records the two-key request boundary, deadzones, unsupported combinations and
    regenerated physical-button discrepancy. This is not learned reconstruction.
-7. Next: build/smoke-test the native engine on the V100, add the learned-input
-   decoder (including joint axes and consistent button edges), verify compatible
+7. Button bookkeeping is implemented as a label-free two-state Viterbi path;
+   joint analog/button proposals and alternative paths remain open. Next:
+   build/smoke-test the native engine on the V100, finish the learned-input
+   decoder, verify compatible
    setup/codes and signed prefix/tail handling, then run image-only proposals
    through native checkpoint branches and timing refinement. Finish with actual
    official playback and source/reconstructed-gameplay video comparison. Audit
@@ -430,12 +440,27 @@ to postpone measuring a narrower supported case.
   both development splits: 4,800 images, nine exact state fields across 9,600
   player-frames, full readable HUD coverage and GPU features. Record experimental
   same-pipeline roster phase transfer separately from an independent visual audit.
-- [ ] Complete the planned 300-clip server-local render/audit/feature batch. Its
+- [x] Complete the planned 300-clip server-local render/audit/feature batch. Its
   declared bulk HUD policy retains unreadable frames as unknown while every
   UI/PNG step remains exact; all readable HUDs and nine state fields must agree.
-  The detached full batch has been launched after the four-clip preview passed.
-- [ ] Train/evaluate the separate physical-port corpus model after dataset gates
+  All attempts finished: 186 accepted clips (131 train/55 validation), 114 failed
+  clips retained/excluded. Dataset gates passed; 22 final-test matches stay sealed.
+- [x] Train/evaluate the separate physical-port corpus model after dataset gates
   pass, preserving date reservations and keeping final-test sources sealed.
+  The run completed 200,000 steps; best mean button F1 is 0.12055 at 10,000 and
+  final mean is 0.11077. Recognition acceptance remains a separate open gate.
+- [x] Add label-free consistent button decoding over whole prediction clips.
+  Two-state Viterbi combines fixed equal hold/press/release head scores; unknown
+  initial state, single-frame taps and simultaneous buttons are supported. Raw
+  logits/axes/state remain unchanged; no retraining or label-fitted priors.
+- [x] Render four fixed validation comparisons from the preserved best 10k
+  checkpoint. All 4,554 inconsistent button/frames become valid; hold F1 rises
+  0.25453→0.27164, press falls 0.07364→0.06349 and release falls 0.05679→0.01354.
+  These are review-sample metrics, not full validation or final-test acceptance.
+  All four MP4s fully decode, checkpoint pointers/payloads/contracts are unchanged,
+  and workstation copies are in `.docker-state/local/constrained-reviews-v1/`.
+- [ ] Measure a separately versioned transition-aware fine-tune against raw and
+  constrained checkpoint baselines. Keep final-test matches sealed.
 - [x] Implement server-local detached training controls, atomic checkpoint
   generations, optimizer/sampler/random-state resume and bounded feature loading.
   Exact CPU resumed/uninterrupted equality, save-failure recovery and split/content
@@ -647,12 +672,14 @@ features or prerequisites for the first short-clip reconstruction.
 
 ## Latest validation and retained evidence
 
-The latest Docker run passed **435 Python tests**. On the V100, **11 optional
+The latest Docker run passed **444 Python tests**, including exact Viterbi versus
+exhaustive search, one-frame taps, free initial/terminal states and sequence-key
+guards. On the V100, **11 optional
 legacy/corpus trainer tests** and **eight model tests** also pass. These include
 exact CPU optimizer/RNG resume, multiple-clip boundaries, mirror slots, leakage
 guards, explicit roster phase-transfer scope and bulk-HUD rejection rules.
 The last independent parser run passed **17 parser/preparation/export/catalog tests**.
-Native code/math and model training code are unchanged in this footage milestone; native suites were not
+Native code/math and model training code are unchanged in this decoding milestone; native suites were not
 rerun. The last recorded native
 build passed **10 host/component and 23 game-library tests**. Synthetic protocol/component tests
 establish their tested behavior; the following local ISO runs provide separate
@@ -662,6 +689,8 @@ gameplay, recording and playback evidence.
 | --- | --- |
 | Expanded server corpus plan | Fresh 3,326-file settings inventory; Battlefield Fox–Fox/Fox–Falco 70 train/30 validation/22 reserved test; 300 planned 20-second clips; `configs/learning-corpus-split-v3.json` and V100 `.docker-state/local/replay-catalog-v3/` |
 | Server corpus preparation validation | Four accepted clips/4,800 frames; full HUD agreement and nine original/official fields exact across 9,600 player-frames; GPU features and physical-port targets; V100 `.docker-state/local/vision-corpus-v3/preview-dataset.json`; initial parallel startup failure retained in `vision-corpus-v3-pilot/` |
+| Completed server corpus/run | 186 accepted 20-second clips/62 minutes, 114 failures excluded; 131 training clips/68 matches and 55 validation clips/29 matches; completed 200k, best at 10k with mean button F1 0.12055; V100 `.docker-state/local/vision-corpus-v3/dataset.json` and `vision-training/corpus-v3/` |
+| Constrained button reviews | Four fixed 20-second clips, 9,360 scored player-frames; inconsistent button/frames 4,554→0; hold F1 improves but press/release worsen; full MP4 decode/checkpoint preservation pass; V100 `vision-training/corpus-v3/reviews/review-1792872411936275955/`; local `.docker-state/local/constrained-reviews-v1/`; [method/results](constrained-decoding.md) |
 | New trainer CUDA lifecycle | Detached start, pause at 40, resume and stop at 60; earlier 100k checkpoint pointer unchanged; V100 `.docker-state/local/vision-training/corpus-v3-smoke/controller-validation.json`; smoke model has no useful-recognition acceptance |
 | New saved-model review | Both 1,200-frame validation controller-review MP4s complete with zero worker exit; V100 `vision-training/corpus-v3-smoke/reviews/review-1792805991392523494/`; image-only predictions precede labels; no generated gameplay |
 | Full corpus preparation | Detached 300-clip batch launched with networking disabled and four cached valid shards; V100 `.docker-state/local/vision-corpus-v3/full-launch.json`; production dataset/training remain pending |

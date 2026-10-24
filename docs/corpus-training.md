@@ -120,7 +120,10 @@ Its original trainer/data/model files are unchanged so its contracts remain vali
 Review pauses active training and renders a fixed balanced sample of up to four
 validation clips. Image-only predictions are frozen before scoring labels are
 read. These MP4/MKV files compare original footage with recorded/predicted
-controls; they still contain no reconstructed gameplay. Test sources stay sealed.
+controls; they still contain no reconstructed gameplay. Corpus reviews now show
+recorded/raw/constrained button columns and save separate metrics for each model
+output. [Constrained decoding](constrained-decoding.md) explains the fixed,
+label-free Viterbi method. Test sources stay sealed.
 
 The old run remains available explicitly:
 
@@ -146,10 +149,16 @@ Paths on the V100:
 
 ## Setup validation and current handover
 
-The full 300-clip preparation worker has been launched detached on the V100.
-It reuses four audited feature shards and continues with the remaining clips.
-The complete production dataset is not yet published and production training
-has not started. Use `status` and preparation logs; start training after `ready`.
+The full 300-clip preparation finished with **186 accepted/114 failed clips**.
+The published dataset contains 62 minutes: 131 training clips from 68 matches,
+55 validation clips from 29 matches, 153,270 training windows and 64,350 validation
+windows. Failed attempts remain excluded. The 22 final-test matches stay sealed.
+
+The production run completed **200,000 updates**, about 20 updates/second. Its best
+mean full-validation button F1 is **0.12055 at 10,000**, versus 0.11077 at the final
+step. Best hold/press/release F1 is 0.23627/0.07520/0.05018; final values are
+0.23491/0.05846/0.03895. More updates did not improve this metric. Both best/final
+checkpoints and old runs remain preserved; useful recognition is unestablished.
 
 Actual setup checks passed:
 
