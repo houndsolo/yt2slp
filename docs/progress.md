@@ -53,8 +53,10 @@ Fox/Falco Battlefield candidates; doubles are skipped. A server-local runner now
 implements detached preparation/training, pause/stop checkpoints and resume with
 optimizer/random state. The six-train/two-validation starter dataset is ready:
 4,448 images, 3,366 training windows and 842 validation windows. Actual detached
-CUDA start/disconnect/pause/resume/stop tests pass; the user has since resumed
-training. Saved-checkpoint review now renders the original validation footage
+CUDA start/disconnect/pause/resume/stop tests pass; the user's resumed run has now
+completed its configured 100,000 updates at about 42 updates/second. Latest
+validation hold/press/release F1 is 0.1077/0.0612/0, despite low training loss;
+useful recognition is still unestablished. Saved-checkpoint review renders the original validation footage
 with recorded/predicted controls. See [self-service controls](training-control.md).
 The first bounded native PAD calibration also passes: 245 genuine probes,
 five byte-identical known-input inverse runs, and four actual official playback
@@ -111,9 +113,11 @@ The next work is deliberately narrow:
    The manual start/pause/resume/stop runner uses durable checkpoints, lazy
    feature windows and a best-validation model pointer. Actual CUDA lifecycle
    checks pass; `~/train-melee` controls the run without Codex or the
-   workstation. Next: train/evaluate this expanded pilot, inspect event failures,
-   expand data deliberately and keep test matches sealed until a model/protocol
-   is frozen. A longer optimizer run alone does not establish useful recognition.
+   workstation. The first 100,000-update run has completed, with low training
+   loss but latest validation hold/press/release F1 of 0.1077/0.0612/0; its best
+   mean event F1 remains 0.09576. Next: inspect event failures, expand data
+   deliberately and keep test matches sealed until a model/protocol is frozen.
+   A longer optimizer run alone does not establish useful recognition.
 6. Completed bounded calibration: measure native request/replay timing and scalar
    PAD response, then reproduce five known-control recordings byte for byte.
    Four actual official playbacks match effective controls and nine selected state
@@ -125,14 +129,14 @@ The next work is deliberately narrow:
    setup/codes and signed prefix/tail handling, then run image-only proposals
    through native checkpoint branches and timing refinement. Finish with actual
    official playback and source/reconstructed-gameplay video comparison. Audit
-   source-code compatibility in parallel; keep training running independently.
+   source-code compatibility in parallel; preserve independent training controls.
 8. Benchmark single-V100 training throughput before adding distributed training:
    batch size, feature loading and a possible GPU-resident feature cache. A short
    current-run sample used about 474 MiB VRAM and 22–25% GPU utilization; this is
    a diagnostic sample, not a throughput benchmark. The current runner uses one
    CUDA GPU. Parallel native candidate sessions use CPU/RAM; spare VRAM alone does
    not accelerate them. Any training changes need a separate run or explicit
-   checkpoint-contract migration, without silently modifying the active run.
+   checkpoint-contract migration, without silently changing saved-run contracts.
 
 The [learning plan](learning-plan.md) and [executable pilot](../tools/learning/README.md)
 define this milestone. The [signed training report](signed-training-data.md)
@@ -399,7 +403,7 @@ to postpone measuring a narrower supported case.
   3,255; resumed stop saves at 4,657; another resume/pause saves at 7,691.
   The final container exits cleanly and frees its GPU memory. Networking is
   disabled. `~/train-melee` operates the saved run independently of the workstation/
-  Codex; [commands and recovery](training-control.md). The final displayed
+   Codex; [commands and recovery](training-control.md). The handover's displayed
   validation hold/press/release F1 is 0.1175/0.0513/0.0400; no useful-recognition
   acceptance or learned replay is claimed.
 - [x] Add self-service saved-model review: `~/train-melee review` automatically
@@ -407,6 +411,11 @@ to postpone measuring a narrower supported case.
   with original/recorded/predicted control panels. `--best` selects the best saved
   validation model. Predictions precede scoring-label reads; final-test matches
   stay sealed. MP4/MKV output remains a controller review, not generated gameplay.
+- [x] Complete the first starter multi-match run at 100,000 updates. Read-only
+  server status reports loss 0.00135 and about 42 updates/second; latest validation
+  hold/press/release F1 is 0.1077/0.0612/0 and best mean event F1 is 0.09576.
+  The worker has exited normally; checkpoints and a completed validation review
+  remain on the server. This does not satisfy useful-recognition acceptance.
 - [x] Measure a bounded native VI/PAD adapter using 245 genuine recordings,
   positive/playable-pre-clock markers and alternate physical ports. Scalar
   lookups reject unmeasured values; five fresh inverse runs reproduce replay
@@ -608,6 +617,7 @@ gameplay, recording and playback evidence.
 
 | Evidence | Result / retained location |
 | --- | --- |
+| Completed starter training run | V100 reached configured step 100,000; latest hold/press/release F1 0.1077/0.0612/0, best mean event F1 0.09576; `.docker-state/local/vision-training/default/`; worker no longer running, no restart requested |
 | Native PAD calibration | 245 real probe recordings; request boundary → replay key +2 in measured channels/ports; five fresh inverse replay bytes exact; discarded branches excluded; `.docker-state/local/native-pad-calibration-v5/` |
 | Native inverse official playback | Playback 3.5.2, resync disabled; markers, short/full hop and playable pre-clock checks match six effective control fields and nine post fields across 526 player-frames; physical-button diagnostic mismatches retained; `.docker-state/local/native-pad-official-v1/*v5-verification.json` |
 | Saved-model review | Paused current run at 24,459; immutable checkpoint produces both validation MP4/MKV reviews (241 and 661 frames) with original footage and recorded/predicted controls; `vision-training/default/reviews/` on V100; review worker exits zero with networking disabled; generated gameplay remains pending |
