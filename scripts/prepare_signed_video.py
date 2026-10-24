@@ -14,16 +14,17 @@ import tempfile
 
 from yt2slp.benchmark import compare_posts
 from yt2slp.frame_index import GEOMETRY, assess_step, cyan_cells, decode_index, verify_log_policy
-from yt2slp.timer_labels import label_images, png_size
+from yt2slp.timer_labels import label_images, png_size, add_manual_readings
 from yt2slp.training_phase import audit_phase, frozen_phase_reference
 from yt2slp.video import ingest_video, sha256
+from yt2slp.footage import capture_request_start
 
 
 def node(tool, *args):
     return json.loads(subprocess.check_output(['node', 'tools/slippi-parser/'+tool, *map(str, args)]))
 
 
-def audit_capture(folder, replay, timer_calibration):
+def audit_capture(folder, replay, timer_calibration, hud_readings=None):
     capture = json.loads((folder/'capture.json').read_text())
     index = json.loads((folder/'capture-index.json').read_text())
     calibration = json.loads((folder/'osd-calibration.json').read_text())
@@ -32,7 +33,8 @@ def audit_capture(folder, replay, timer_calibration):
             or capture.get('source_replay_sha256') != sha256(replay)):
         raise ValueError('successful identity-bound official stepped capture required')
     first, last = capture['wanted_interval']
-    if not -80 <= first < 0 < last <= 1800 or [r['replay_frame'] for r in index] != list(range(first, last+1)):
+    if (capture['request_interval'] != [capture_request_start(first,last),last+3]
+            or [r['replay_frame'] for r in index] != list(range(first, last+1))):
         raise ValueError('incomplete or unsupported signed capture interval')
     screens = sorted((folder/'screens').glob('*.png'))
     if [p.name for p in screens] != [f'{i:06d}.png' for i in range(len(screens))]:
@@ -66,7 +68,10 @@ def audit_capture(folder, replay, timer_calibration):
         assess_step(frame, row['next_frame_osd'], row['next_frame_log'], [row['capture_image']],
                     paused_log_minus_osd=row['paused_log_minus_osd'])
     timers = node('export-timers.cjs', replay, last)
-    timer_labels = label_images(folder/'user/Dump/Frames', json.loads(timer_calibration.read_text()), timers, 1, last)
+    timer_first = max(1,first)
+    timer_labels = label_images(folder/'user/Dump/Frames', json.loads(timer_calibration.read_text()), timers, timer_first, last)
+    if hud_readings:
+        timer_labels = add_manual_readings(timer_labels,json.loads(hud_readings.read_text()),folder/'user/Dump/Frames',timers)
     disagreements = [r['replay_frame'] for r in index if r['replay_frame'] > 0 and
         timer_labels['selected'].get(r['replay_frame']) != r['capture_image']]
     if len(capture['regenerated_replays']) != 1: raise ValueError('one real regenerated replay required')
@@ -75,7 +80,8 @@ def audit_capture(folder, replay, timer_calibration):
     return capture, index, timers, {'schema': 1,
         'passed': timer_labels['passed'] and not disagreements and state['passed'],
         'signed_interval': [first, last], 'hud_osd_disagreement_frames': disagreements,
-        'osd_verified_frames': len(index), 'positive_hud_crosschecked_frames': last,
+        'osd_verified_frames': len(index), 'positive_hud_crosschecked_frames': last-timer_first+1,
+        'positive_hud_interval': [timer_first,last],
         'dump_pipeline_delay_swaps': 1, 'positive_timer_labels': timer_labels,
         'paused_log_association': capture.get('paused_log_association','fixed'),
         'source_original_vs_official': state,
@@ -90,10 +96,11 @@ def main():
     phase_options.add_argument('--phase-observations', type=Path)
     phase_options.add_argument('--phase-reference', type=Path,
         help='apply a frozen training phase convention; does not export validation controls for phase fitting')
+    parser.add_argument('--hud-readings',type=Path,help='literal image-bound visual readings for unknown HUD OCR results')
     args = parser.parse_args()
     out = args.output.resolve(); out.mkdir(parents=True, exist_ok=False)
     try:
-        capture, index, timers, audit = audit_capture(args.capture, args.replay, args.timer_calibration)
+        capture, index, timers, audit = audit_capture(args.capture, args.replay, args.timer_calibration,args.hud_readings)
         (out/'frame-labels.json').write_text(json.dumps(audit, indent=2)+'\n')
         if not audit['passed']:
             raise ValueError('independent positive HUD or original/official state check failed; see retained frame-labels.json')
@@ -137,7 +144,7 @@ def main():
             'policy': 'audited source preparation; phase method explicitly recorded; clean frames only, UI frame IDs never enter network features; native VI adapter remains separate',
             'identities': {str(p): sha256(p) for p in (Path(__file__), args.replay,
                 args.capture/'capture.json', args.capture/'capture-index.json', args.capture/'osd-calibration.json',
-                args.timer_calibration, *phase_inputs, out/'frame-labels.json', out/'phase-audit.json',
+                args.timer_calibration, *([args.hud_readings] if args.hud_readings else []), *phase_inputs, out/'frame-labels.json', out/'phase-audit.json',
                 out/'capture-index.json', out/'ingested/video.json', Path('src/yt2slp/frame_index.py'),
                 Path('src/yt2slp/training_phase.py'))}}
         (out/'source-provenance.json').write_text(json.dumps(report, indent=2)+'\n')

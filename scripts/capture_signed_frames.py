@@ -18,6 +18,7 @@ from PIL import Image, ImageGrab, features
 
 from capture_benchmark import sha256
 from yt2slp.frame_index import assess_step, cyan_cells, decode_index, complete_png_digest
+from yt2slp.footage import capture_request_start
 
 
 def current_frame(log):
@@ -61,6 +62,7 @@ def wait_png(path,deadline):
 
 
 def capture(args):
+    request_start = capture_request_start(args.first, args.last)
     exe, iso, replay = (p.resolve() for p in (args.dolphin, args.iso, args.replay))
     version = subprocess.run([str(exe), '--version'], capture_output=True, text=True, timeout=20)
     if version.stdout.strip() != '3.5.2':
@@ -83,7 +85,7 @@ def capture(args):
         'AspectRatio = 3\nInternalResolutionFrameDumps = True\nShowFPS = False\n')
     request = out/'request.json'
     request.write_text(json.dumps({'mode': 'normal', 'replay': str(replay), 'commandId': 'yt2slp-signed-labels-v1',
-        'startFrame': -123, 'endFrame': args.last+3, 'shouldResync': False,
+        'startFrame': request_start, 'endFrame': args.last+3, 'shouldResync': False,
         'rollbackDisplayMethod': 'off'}, indent=2)+'\n')
     command = [str(exe), '--exec='+str(iso), '--slippi-input='+str(request), '--user='+str(user), '--batch', '--cout']
     log_path = out/'stdout.log'; steps = []; selected = []
@@ -112,7 +114,7 @@ def capture(args):
         'ui_screenshot_backend': 'Pillow XCB' if features.check_feature('xcb') else 'ImageMagick',
         'paused_log_association': 'per-step' if args.per_step_log_association else 'fixed',
         'png_completion_guard': 'IEND-before-hash-v1',
-        'request_interval': [-123, args.last+3], 'should_resync': False, 'command': command,
+        'request_interval': [request_start, args.last+3], 'should_resync': False, 'command': command,
         'identities': identities,
         'image_post_phase_verified': False, 'positive_timer_crosscheck': None,
         'label_policy': 'paused single-VI advances; exact cyan OSD glyphs plus logged frame; clean PNG uses audited one-swap OGL PBO delay, requiring independent positive HUD crosscheck'}
@@ -126,7 +128,7 @@ def capture(args):
                 if windows.returncode == 0:
                     subprocess.run(['xdotool', 'windowfocus', windows.stdout.splitlines()[-1]], check=True)
                 frame = current_frame(log_path)
-                if frame is not None and frame >= -110:
+                if frame is not None and frame >= request_start+13:
                     press('F10'); break
                 if proc.poll() is not None: raise RuntimeError(f'Playback exited during startup ({proc.returncode}); see stdout.log')
                 time.sleep(.01)
@@ -233,8 +235,9 @@ def main():
     args = parser.parse_args()
     if (args.osd_calibration is None) == (not args.collect_calibration):
         parser.error('choose an existing OSD calibration or --collect-calibration')
-    if not -80 <= args.first < 0 < args.last <= 1800 or not 0 < args.timeout < 3600:
-        parser.error('supported signed interval and capture budget required')
+    try: capture_request_start(args.first, args.last)
+    except ValueError as error: parser.error(str(error))
+    if not 0 < args.timeout < 3600: parser.error('capture budget must be between 0 and 3600 seconds')
     for name in ('xdotool', 'import'):
         if not shutil.which(name): parser.error('missing host tool: '+name)
     capture(args)

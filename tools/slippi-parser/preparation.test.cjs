@@ -35,7 +35,10 @@ test('timer lookup uses settings without input/state exports and rejects invalid
   const tool=path.join(__dirname,'export-timers.cjs');
   const table=JSON.parse(execFileSync(process.execPath,[tool,replay,'2'],{encoding:'utf8',stdio:['ignore','pipe','pipe']}));
   assert.deepEqual(table,{'0':'08:00.00','1':'07:59.99','2':'07:59.98'});
-  for (const bound of ['-1','1.5','1801']) {
+  const midgame=JSON.parse(execFileSync(process.execPath,[tool,replay,'3000'],{encoding:'utf8',stdio:['ignore','pipe','pipe']}));
+  assert.equal(midgame['2400'],'07:20.00');
+  assert.equal(midgame['3000'],'07:10.00');
+  for (const bound of ['-1','1.5','28801']) {
     assert.throws(()=>execFileSync(process.execPath,[tool,replay,bound],{stdio:'pipe'}));
   }
 });

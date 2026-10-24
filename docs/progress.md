@@ -64,6 +64,15 @@ checks across 526 player-frames. This establishes measured timing/scalar mapping
 the full learned-input decoder and simulator integration remain open. Useful unseen-clip gameplay recognition,
 unknown-start recovery and general video-to-replay reconstruction remain unimplemented.
 
+Expanded footage preparation has started on the workstation. A new 600-frame
+mid-match validation MP4 passes exact UI/PNG/HUD checks and nine original/official
+state fields across 1,200 player-frames, with two explicitly image-bound literal
+HUD readings after automatic OCR failures. A frozen batch selects 34 training/
+14 validation sources while keeping ten test sources unopened. Only two selected
+sources are local; fetching the other 46 and transferring footage back is blocked
+by V100 SSH connection failures. The expanded dataset is **not ready for training**.
+See [footage preparation](footage-preparation.md).
+
 Checked items below are implemented and validated within their stated scope.
 Unchecked items are remaining work. Proposed later work is a roadmap, not a
 promise that its design or acceptance thresholds have already been settled.
@@ -118,6 +127,11 @@ The next work is deliberately narrow:
    mean event F1 remains 0.09576. Next: inspect event failures, expand data
    deliberately and keep test matches sealed until a model/protocol is frozen.
    A longer optimizer run alone does not establish useful recognition.
+   Expanded preparation now selects ten-second non-opening clips across all
+   train/validation sources, with a bounded local mid-match capture validated.
+   Finish fetching missing sources, local rendering/audits, SCP/hash verification
+   and GPU feature import into a separate dataset/run. V100 SSH is currently
+   unavailable; no expanded training run has started.
 6. Completed bounded calibration: measure native request/replay timing and scalar
    PAD response, then reproduce five known-control recordings byte for byte.
    Four actual official playbacks match effective controls and nine selected state
@@ -394,6 +408,18 @@ to postpone measuring a narrower supported case.
   independent boundary review and full-state equality remain unestablished.
 - [ ] Establish useful multi-match recognition through measured training and
   separate validation; expand according to failures and reserve unseen testing.
+- [x] Extend exact official UI/PNG capture to bounded positive mid-match intervals.
+  One 600-frame validation MP4 passes the full HUD audit (two explicit literal
+  visual readings retained after OCR failures), nine state fields across 1,200
+  player-frames and a checksum-bound image-only view.
+- [x] Add resumable workstation footage preparation with a frozen 34-train/
+  14-validation selection and untouched final-test sources. Missing/failed clips
+  cannot publish a complete footage manifest.
+- [ ] Obtain the remaining 46 selected replay sources, render/audit the expanded
+  clips locally, copy them to the V100 with SCP and verify hashes. SSH refused/
+  timed out during this attempt; two original pilot clips are locally prepared.
+- [ ] Import the expanded footage into a new GPU feature dataset and separate
+  training run, including all selected matches without changing frozen date splits.
 - [x] Implement server-local detached training controls, atomic checkpoint
   generations, optimizer/sampler/random-state resume and bounded feature loading.
   Exact CPU resumed/uninterrupted equality, save-failure recovery and split/content
@@ -605,11 +631,11 @@ features or prerequisites for the first short-clip reconstruction.
 
 ## Latest validation and retained evidence
 
-The latest Docker run passed **423 Python tests**, including ten new adapter
-checks; seven optional trainer tests and eight model tests last passed during
+The latest Docker run passed **428 Python tests**, including bounded footage
+selection and image-bound manual-HUD handling; seven optional trainer tests and eight model tests last passed during
 the preceding learning/review work and were not rerun for this adapter change.
 The last independent parser run passed **17 parser/preparation/export/catalog tests**.
-Native code/math is unchanged in this adapter milestone; native suites were not
+Native code/math and model training code are unchanged in this footage milestone; native suites were not
 rerun. The last recorded native
 build passed **10 host/component and 23 game-library tests**. Synthetic protocol/component tests
 establish their tested behavior; the following local ISO runs provide separate
@@ -617,6 +643,8 @@ gameplay, recording and playback evidence.
 
 | Evidence | Result / retained location |
 | --- | --- |
+| Workstation mid-match footage | 600 verified frames at 2400..2999; two literal HUD readings fill unknown OCR only; nine original/official fields exact across 1,200 player-frames; `.docker-state/local/vision-footage-v2/probe-midgame/video-manual/source.mp4`; initial automatic-HUD failure retained |
+| Expanded footage batch | Frozen 34-train/14-validation plan; two reused clips prepared, 46 sources missing locally, no complete manifest; V100 SSH unavailable; `.docker-state/local/vision-footage-v2/status.json` |
 | Completed starter training run | V100 reached configured step 100,000; latest hold/press/release F1 0.1077/0.0612/0, best mean event F1 0.09576; `.docker-state/local/vision-training/default/`; worker no longer running, no restart requested |
 | Native PAD calibration | 245 real probe recordings; request boundary → replay key +2 in measured channels/ports; five fresh inverse replay bytes exact; discarded branches excluded; `.docker-state/local/native-pad-calibration-v5/` |
 | Native inverse official playback | Playback 3.5.2, resync disabled; markers, short/full hop and playable pre-clock checks match six effective control fields and nine post fields across 526 player-frames; physical-button diagnostic mismatches retained; `.docker-state/local/native-pad-official-v1/*v5-verification.json` |

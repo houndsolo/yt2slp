@@ -5,6 +5,7 @@ font/model or a general OCR pipeline. Missing/ambiguous labels stay unknown.
 Bright-background segmentation is opt-in; legacy calibrations retain their policy.
 """
 import hashlib
+import copy
 import math
 import re
 import struct
@@ -174,3 +175,35 @@ def summarize_labels(records, first, last):
     missing=sorted(set(range(first,last+1))-selected.keys())
     return {'selected':selected,'missing_frames':missing,'duplicate_frames':duplicates,
             'chronological':order_ok,'passed':not missing and not duplicates and order_ok}
+
+
+def add_manual_readings(labels, readings, folder, timers):
+    """Fill unreadable OCR results with literal, image-bound visual readings.
+
+    Never replace an automatic reading or infer a timer from an adjacent frame,
+    PNG number or console counter. Preserve the automatic failure summary.
+    """
+    if readings.get('schema')!=1 or readings.get('kind')!='manual-rendered-timer-readings':
+        raise ValueError('versioned literal HUD readings required')
+    result = copy.deepcopy(labels)
+    keyed = {r['image']:r for r in result['records']}
+    lookup = {re.sub(r'\D','',timer):int(frame) for frame,timer in timers.items()}
+    if len(lookup)!=len(timers): raise ValueError('timer lookup is ambiguous')
+    seen = set()
+    for reading in readings['readings']:
+        name = reading['image']; path = folder/name
+        if (name in seen or Path(name).name!=name or name not in keyed
+                or not re.fullmatch(r'\d{2}:\d{2}\.\d{2}',reading['timer']) or not reading.get('note','').strip()
+                or png_size(path)!=[642,528] or hashlib.sha256(path.read_bytes()).hexdigest()!=reading['image_sha256']):
+            raise ValueError('duplicate, invalid or unbound literal HUD reading')
+        seen.add(name); row = keyed[name]
+        if row['timer_digits'] is not None or row['frame'] is not None:
+            raise ValueError('manual reading cannot override recognized HUD evidence')
+        digits = re.sub(r'\D','',reading['timer'])
+        if digits not in lookup: raise ValueError('literal timer outside supplied settings lookup')
+        row.update(timer_digits=digits,frame=lookup[digits],manual_reading=reading)
+    result['automatic_summary'] = {k:labels[k] for k in ('missing_frames','duplicate_frames','chronological','passed')}
+    result['manual_reading_count'] = len(seen)
+    result.update(summarize_labels(result['records'],*labels['interval']))
+    result['method'] += '; explicit literal visual readings for otherwise unknown HUDs'
+    return result
