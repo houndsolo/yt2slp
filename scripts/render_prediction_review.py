@@ -74,10 +74,14 @@ def main():
                 b = f"{guess['axes'][axis]:+.3f}" if guess else '--'
                 lines += [f'{axis:9} {a:14} / {b}'+(' (raw = constrained)' if raw else '')]
             lines += ['']
-        constrained = bool(predictions.get('button_decoder'))
+        method = predictions.get('button_decoder', {}).get('method')
+        seed = method == 'held-state-difference-v1'
         lines += [('Buttons: < > v ^ Z R L A B X Y S; dot = released.' if raw else 'Model scores are uncalibrated.'),
-            'Viterbi: valid button transitions; scores uncalibrated.' if constrained else 'Hold/press/release heads are independent.',
-            f"First/last {predictions.get('context_frames', 31)//2} frames supply temporal context."]
+            ('Edges derived from consecutive held states.' if seed else
+             'Viterbi: valid button transitions; scores uncalibrated.' if method else 'Hold/press/release heads are independent.')]
+        if seed: lines += ['Trigger: digital L/R = 1; Z overrides to 0.35.']
+        half = predictions.get('context_frames', 31)//2
+        lines += [f"Context: first {predictions.get('leading_context_frames', half)}, last {predictions.get('trailing_context_frames', half)} frames."]
         ImageDraw.Draw(canvas).multiline_text((x, 12), '\n'.join(lines), font=font, fill='#e2ecf5', spacing=2)
         canvas.save(frames/f"{frame['index']:06d}.png")
     movie = args.output/'prediction-review.mkv'

@@ -1,5 +1,10 @@
 # Expanded server-local Fox training run
 
+This independent-head run has completed. The current default is the separate
+[held-state sequence training run](sequence-training.md), reusing this verified
+dataset with constraints built into its model and training loss. Select this
+preserved run with `--config configs/vision-v100-corpus.json`.
+
 The new `corpus-v3` pipeline runs completely on `prompter@10.12.0.10`.
 The Ryzen 7 5700X has eight physical cores/16 threads, 32 GB system RAM and the
 32 GB V100. At setup, about 668 GiB disk was free. Footage, audits, feature
@@ -100,8 +105,9 @@ Its original trainer/data/model files are unchanged so its contracts remain vali
 
 ## Self-service commands
 
-`~/train-melee` now selects
-[`configs/vision-v100-corpus.json`](../configs/vision-v100-corpus.json) by default:
+These commands describe the preserved corpus run. Add
+`--config configs/vision-v100-corpus.json` to select it; the current default is
+the sequence run linked above:
 
 ```bash
 ~/train-melee status

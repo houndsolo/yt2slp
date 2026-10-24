@@ -39,18 +39,21 @@ def validate_config(config):
         if type(config[key]) is not int or not low<=config[key]<=high: raise ValueError(f'invalid {key}')
     if config['context_frames']%2!=1 or not 0<config['learning_rate']<1 or not 0<config['gpu_memory_fraction']<=1:
         raise ValueError('invalid context, learning rate or memory cap')
-    if config.get('pipeline') not in (None,'corpus-v3'): raise ValueError('unknown training pipeline')
-    if config.get('pipeline')=='corpus-v3':
+    if config.get('pipeline') not in (None,'corpus-v3','sequence-v1'): raise ValueError('unknown training pipeline')
+    if config.get('pipeline') in ('corpus-v3','sequence-v1'):
         for key,low,high in (('preparation_workers',1,4),('minimum_free_gib',20,500),
                 ('minimum_train_matches',1,1000),('minimum_validation_matches',1,1000)):
             if type(config.get(key)) is not int or not low<=config[key]<=high: raise ValueError(f'invalid {key}')
+    if config.get('pipeline')=='sequence-v1' and (type(config.get('sequence_frames')) is not int or not 2<=config['sequence_frames']<=64):
+        raise ValueError('sequence_frames must be 2..64')
 
 
 def docker_command(config,config_path,kind,steps=None):
     image = config['training_image'] if kind=='training' else config['render_image']
-    corpus = config.get('pipeline')=='corpus-v3'
+    corpus = config.get('pipeline') in ('corpus-v3','sequence-v1')
     scripts = {'preparation':'prepare_corpus.py','training':'train_corpus.py','review':'review_corpus.py'} if corpus else {
         'preparation':'prepare_dataset.py','training':'train.py','review':'review_run.py'}
+    if config.get('pipeline')=='sequence-v1': scripts.update(training='train_sequence.py',review='review_sequence.py')
     command = ['docker','run','--detach','--name',NAMES[kind],'--init','--restart=no',
         '--shm-size='+('2g' if corpus and kind=='preparation' else '512m'),'--network=none',
         '--user',f'{os.getuid()}:{os.getgid()}', '--mount',f'type=bind,src={ROOT},dst=/work',
@@ -65,6 +68,10 @@ def docker_command(config,config_path,kind,steps=None):
 
 
 def launch(config,path,kind,steps=None,best=False):
+    if kind=='preparation' and config.get('pipeline')=='sequence-v1':
+        if not (ROOT/config['data_directory']/'dataset.json').is_file(): raise ValueError('prepared corpus missing; see sequence-training.md')
+        print('This run reuses the immutable prepared corpus; use a new data/run directory for footage expansion.')
+        return
     for other_kind in NAMES:
         if other_kind==kind: continue
         other = inspect(other_kind)
@@ -133,6 +140,8 @@ def show_status(config):
                 metrics = info['latest_validation']['button_metrics']
                 print('  Validation F1: '+', '.join(f"{k}={v['f1']}" for k,v in metrics.items()))
                 print(f"  Best validation event F1 mean: {info.get('best_validation_event_f1')}")
+                if info['latest_validation'].get('constraint_metrics'):
+                    print('  Constraint violations:',info['latest_validation']['constraint_metrics'])
         if info.get('error'): print('  '+info['error'])
     pointer = read_json(ROOT/config['run_directory']/'latest.json')
     if pointer: print(f"Latest checkpoint (step {pointer['step']:,}):",str(ROOT/config['run_directory']/pointer['file']))

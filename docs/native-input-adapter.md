@@ -51,9 +51,13 @@ target. The sweep has no realization in stick bins 7/9 or analog-trigger bins
 1..4. Missing bins raise an error; they are not silently mapped to zero. This is
 coverage of this sweep, not a proof about every joint input/code configuration.
 
-Digital L/R each force effective trigger 1 and a derived `0x80000000` bit.
+In the individual-button probes, digital L/R each force effective trigger 1 and
+a derived `0x80000000` bit.
 Z produces effective `0x80000110` and trigger about 0.35: copying effective
 button bits directly into physical PAD buttons would therefore be wrong.
+The expanded original-label audit confirms Z takes priority when combined with
+L/R; see [sequence training](sequence-training.md). This is separate from a
+native inverse calibration for compound controls.
 Simultaneous diagonal axes, C-stick combinations and digital/analog shoulder
 composition still need joint calibration and a wider decoder.
 

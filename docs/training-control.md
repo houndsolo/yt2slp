@@ -1,7 +1,12 @@
 # Running training yourself on the V100
 
-**Current default:** `~/train-melee` now selects the expanded Fox–Fox/Fox–Falco
-Battlefield corpus. [Expanded run and preparation](corpus-training.md) documents
+**Current default:** `~/train-melee` selects the new
+[held-state sequence run](sequence-training.md), with button edges derived from
+consecutive held states and digital shoulder/Z trigger constraints from the first
+training step. Models are in `vision-training/sequence-v1/checkpoints/` under
+`.docker-state/local/` on the V100. The completed independent-head corpus run is
+preserved with `--config configs/vision-v100-corpus.json`.
+[Expanded run and preparation](corpus-training.md) documents
 its 300 planned clips, physical-port player slots, audit policy and separate
 checkpoints. The original starter run below is preserved and can be selected
 with `--config configs/vision-v100.json`. Its earlier metrics describe that

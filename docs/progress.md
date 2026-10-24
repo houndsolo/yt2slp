@@ -81,6 +81,19 @@ unestablished. A label-free two-state Viterbi decoder now enforces consistent
 button transitions without retraining; [comparison method and reviews](constrained-decoding.md).
 See [server corpus training](corpus-training.md).
 
+The current default is now a **fresh held-state sequence run**, with valid button
+transitions and digital shoulder/Z trigger coupling built into the architecture
+and training loss from step zero. It reuses the verified corpus, preserves the
+old models and runs detached on the V100 under `vision-training/sequence-v1/`.
+Digital L/R produces effective trigger 1; Z takes priority at float32 0.35, matching
+all 375 original L/R-plus-Z exceptions. Actual CUDA pause/resume/stop and two
+saved-model reviews pass with no constraint violations. The full-corpus 20,000-step
+run has started; recognition quality is still an open gate. See
+[sequence training and model paths](sequence-training.md).
+Its first full validation at 1,000 updates scores hold/press/release F1
+0.15673/0.01504/0.00983 with zero button/trigger violations; checkpoints are saved
+and training continues. These early results do not establish improved recognition.
+
 Checked items below are implemented and validated within their stated scope.
 Unchecked items are remaining work. Proposed later work is a roadmap, not a
 promise that its design or acceptance thresholds have already been settled.
@@ -143,16 +156,21 @@ The next work is deliberately narrow:
    with 186 accepted/114 excluded clips; the separate corpus run completed
    200,000 steps. Its best validation checkpoint is at 10,000; later updates
    worsen the mean button F1. Old checkpoints and trainer contracts remain.
-   Compare raw and constrained decoding before a separate transition-aware
-   fine-tune; never silently change the saved run's objective or contract.
+   Four fixed raw/constrained reviews remove all 4,554 inconsistent button/frames;
+   hold F1 improves, press/release worsen. A separate held-state sequence model
+   now trains from scratch with derived edges and digital shoulder/Z coupling.
+   Its detached full-corpus run has started; evaluate it without changing old
+   checkpoint contracts or opening final-test matches.
 6. Completed bounded calibration: measure native request/replay timing and scalar
    PAD response, then reproduce five known-control recordings byte for byte.
    Four actual official playbacks match effective controls and nine selected state
    fields across 526 player-frames. [Adapter evidence](native-input-adapter.md)
    records the two-key request boundary, deadzones, unsupported combinations and
    regenerated physical-button discrepancy. This is not learned reconstruction.
-7. Button bookkeeping is implemented as a label-free two-state Viterbi path;
-   joint analog/button proposals and alternative paths remain open. Next:
+7. Button bookkeeping is implemented both as a label-free old-model Viterbi path
+   and as the new held-state architecture; digital shoulder/Z trigger coupling is
+   enforced in the new run. Other joint analog/button proposals and alternative
+   paths remain open. Next:
    build/smoke-test the native engine on the V100, finish the learned-input
    decoder, verify compatible
    setup/codes and signed prefix/tail handling, then run image-only proposals
@@ -459,8 +477,16 @@ to postpone measuring a narrower supported case.
   These are review-sample metrics, not full validation or final-test acceptance.
   All four MP4s fully decode, checkpoint pointers/payloads/contracts are unchanged,
   and workstation copies are in `.docker-state/local/constrained-reviews-v1/`.
-- [ ] Measure a separately versioned transition-aware fine-tune against raw and
-  constrained checkpoint baselines. Keep final-test matches sealed.
+- [x] Implement a separate held-state sequence objective and model, starting
+  fresh at the user's request. Train on contiguous frames with derived edge
+  losses; force digital L/R trigger 1 with Z's verified 0.35 override. Audit all
+  original labels without rewriting them; old models and contracts are preserved.
+- [x] Validate new exact CPU resume and actual CUDA pause at 260, resume/stop at
+  560, plus two real saved-model review videos. Both constraint violation counts
+  are zero; old model pointers/payloads/contracts remain unchanged. Start the
+  detached full-corpus `sequence-v1` run and make it the manual controller default.
+- [ ] Complete/evaluate the new sequence run against the raw and constrained old
+  model baselines; establish useful recognition. Keep final-test matches sealed.
 - [x] Implement server-local detached training controls, atomic checkpoint
   generations, optimizer/sampler/random-state resume and bounded feature loading.
   Exact CPU resumed/uninterrupted equality, save-failure recovery and split/content
@@ -672,14 +698,14 @@ features or prerequisites for the first short-clip reconstruction.
 
 ## Latest validation and retained evidence
 
-The latest Docker run passed **444 Python tests**, including exact Viterbi versus
+The latest Docker run passed **448 Python tests**, including exact Viterbi versus
 exhaustive search, one-frame taps, free initial/terminal states and sequence-key
-guards. On the V100, **11 optional
-legacy/corpus trainer tests** and **eight model tests** also pass. These include
+guards and the new image-seeded shoulder/Z decoder. On the V100, **28 optional
+model/trainer tests** pass (19 existing and nine new sequence cases). These include
 exact CPU optimizer/RNG resume, multiple-clip boundaries, mirror slots, leakage
 guards, explicit roster phase-transfer scope and bulk-HUD rejection rules.
 The last independent parser run passed **17 parser/preparation/export/catalog tests**.
-Native code/math and model training code are unchanged in this decoding milestone; native suites were not
+Native code/math is unchanged in this training milestone; native suites were not
 rerun. The last recorded native
 build passed **10 host/component and 23 game-library tests**. Synthetic protocol/component tests
 establish their tested behavior; the following local ISO runs provide separate
@@ -691,6 +717,7 @@ gameplay, recording and playback evidence.
 | Server corpus preparation validation | Four accepted clips/4,800 frames; full HUD agreement and nine original/official fields exact across 9,600 player-frames; GPU features and physical-port targets; V100 `.docker-state/local/vision-corpus-v3/preview-dataset.json`; initial parallel startup failure retained in `vision-corpus-v3-pilot/` |
 | Completed server corpus/run | 186 accepted 20-second clips/62 minutes, 114 failures excluded; 131 training clips/68 matches and 55 validation clips/29 matches; completed 200k, best at 10k with mean button F1 0.12055; V100 `.docker-state/local/vision-corpus-v3/dataset.json` and `vision-training/corpus-v3/` |
 | Constrained button reviews | Four fixed 20-second clips, 9,360 scored player-frames; inconsistent button/frames 4,554→0; hold F1 improves but press/release worsen; full MP4 decode/checkpoint preservation pass; V100 `vision-training/corpus-v3/reviews/review-1792872411936275955/`; local `.docker-state/local/constrained-reviews-v1/`; [method/results](constrained-decoding.md) |
+| Held-state sequence training | Fresh 905,028-parameter temporal model, derived edges and digital shoulder/Z trigger rules; real CUDA pause 260→resume/stop 560, two fully decoded review MP4s, zero invalid button/trigger frames; V100 `vision-training/sequence-v1-smoke/controller-validation.json`; full run started in `vision-training/sequence-v1/`; [details](sequence-training.md) |
 | New trainer CUDA lifecycle | Detached start, pause at 40, resume and stop at 60; earlier 100k checkpoint pointer unchanged; V100 `.docker-state/local/vision-training/corpus-v3-smoke/controller-validation.json`; smoke model has no useful-recognition acceptance |
 | New saved-model review | Both 1,200-frame validation controller-review MP4s complete with zero worker exit; V100 `vision-training/corpus-v3-smoke/reviews/review-1792805991392523494/`; image-only predictions precede labels; no generated gameplay |
 | Full corpus preparation | Detached 300-clip batch launched with networking disabled and four cached valid shards; V100 `.docker-state/local/vision-corpus-v3/full-launch.json`; production dataset/training remain pending |

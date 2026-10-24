@@ -1,5 +1,10 @@
 # Consistent button sequences from a saved model
 
+A subsequent [held-state sequence run](sequence-training.md) now learns button
+timing with valid edges and digital shoulder/Z trigger coupling from its first
+training step. The Viterbi method and measured old-model comparisons below remain
+preserved as the baseline.
+
 The existing model has independent hold, press and release heads. Its raw
 thresholded answers can disagree. The new decoder uses those same frozen logits
 to find a consistent button sequence, without retraining or opening replay labels.
